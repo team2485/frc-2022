@@ -6,8 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Drivetrain;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import static frc.robot.Constants.OIConstants.*;
@@ -15,6 +14,9 @@ import static frc.robot.Constants.OIConstants.*;
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
+
+  private final Drivetrain m_drivetrain = new Drivetrain();
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
