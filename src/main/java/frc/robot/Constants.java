@@ -20,6 +20,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public final class Constants {
     public static final String kRobotIdFile = "/home/lvuser/id.txt";
     public static final double kNominalVoltage = 12.0;
+    public static final int kFalconCPR = 2048; //pulses per rotation
+    public static final int kCANTimeoutMs = 250;
+
 
     public static final class OIConstants {
         public static final int kDriverPort = 0;
@@ -28,9 +31,9 @@ public final class Constants {
 
     public static final class ModuleConstants{
         //Drive control constants 
-        public static final double kDriveCurrentLimitAmps = 80.0;
+        public static final double kDriveCurrentLimitAmps = 80;
+
         ////Drive mechanism/encoder constants
-        public static final int kFalconCPR = 2048; //pulses per rotation
         public static final double kWheelDiameterMeters = 0.1016;
         public static final double kDriveGearRatio = 8.16; //motor turns per wheel turns
         public static final double kDriveDistMetersPerMotorRev = (kWheelDiameterMeters*Math.PI)/kDriveGearRatio; 
@@ -38,11 +41,32 @@ public final class Constants {
         ////NOTE: CTRE Encoders return velocity in units/100 ms. CTRE velocity readings should be multiplied by 10 to be per second. 
 
         ////Drive feedforward constants
-        public static final double ksVoltsDrive = 0.477;
-        public static final double kvVoltSecondsPerMeterDrive = 2.98;
-        public static final double kaVoltSecondsSquaredPerMeterDrive = 0.147;
+        public static final double ksDriveVolts = 0.477;
+        public static final double kvDriveVoltSecondsPerMeter = 2.98;
+        public static final double kaDriveVoltSecondsSquaredPerMeter = 0.147;
 
         //Turning control constants
+        public static final double kTurningCurrentLimitAmps = 20;
+
+        ////Turning mechanism/encoder constants
+        public static final double kTurningGearRatio = 12.8; //motor turns per shaft turns
+        public static final double kTurningRadiansPerMotorRev = 2*Math.PI/kTurningGearRatio;
+        public static final double kTurningRadiansPerPulse = kTurningRadiansPerMotorRev/kFalconCPR;
+
+        ////Turning feedforward constants
+        public static final double ksTurningVolts = 0.60572;
+        public static final double kvTurningVoltSecondsPerMeter = 0.20717;
+        public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;
+
+        ////Turning PID constants
+        public static final double kPTurning = 0.2;
+        public static final double kDTurning = 0.1;
+
+        ////Turning trapezoidal motion profile/motion magic constants
+        public static final double kModuleMaxSpeedTurningRadiansPerSecond = 4*Math.PI;
+        public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared = 4*Math.PI;
+        public static final double kModuleMaxSpeedTurningPulsesPer100Ms = kModuleMaxSpeedTurningRadiansPerSecond/kTurningRadiansPerPulse * 0.1;
+        public static final double kModuleMaxAccelerationTurningPulsesPer100MsSquared = kModuleMaxAccelerationTurningRadiansPerSecondSquared/kTurningRadiansPerPulse * 0.01;
 
     }
 
