@@ -46,6 +46,7 @@ public class SwerveModule implements Loggable {
         driveMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
         driveMotorConfig.supplyCurrLimit.currentLimit = kDriveCurrentLimitAmps;
         driveMotorConfig.supplyCurrLimit.enable = true;
+        driveMotorConfig.slot0.kP = kPDrive;
         this.m_driveMotor = new WPI_TalonFX(driveMotorID);
         m_driveMotor.configAllSettings(driveMotorConfig);
         m_driveMotor.enableVoltageCompensation(true);
@@ -79,6 +80,13 @@ public class SwerveModule implements Loggable {
         m_driveMotor.setNeutralMode(mode);
     }
 
+    public void setDesiredState(SwerveModuleState desiredState) {
+        SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getTurningPosition());
+        this.setSpeedMetersPerSecond(state.speedMetersPerSecond);
+        this.setTurningPosition(state.angle);
+
+    }
+
     @Log(name = "current rotation")
     public double getTurningPositionDegrees() {
         return getTurningPosition().getDegrees();
@@ -90,13 +98,14 @@ public class SwerveModule implements Loggable {
     //-180 to 180
     @Config(name = "set rotation")
     public void setTurningPositionDegrees(double desiredRotationDegrees) {
-        this.setTurningPosition(Rotation2d.fromDegrees(desiredRotationDegrees));
-    }
-
-    public void setTurningPosition(Rotation2d desiredRotation) {
         Rotation2d currentRotation = this.getTurningPosition();
         //use WPILib's swervemodulestate optimization to minimize change in heading
-        Rotation2d optimizedDesiredRotation = SwerveModuleState.optimize(new SwerveModuleState(0, desiredRotation), currentRotation).angle;
+        Rotation2d optimizedDesiredRotation = SwerveModuleState.optimize(new SwerveModuleState(0, Rotation2d.fromDegrees(desiredRotationDegrees)), currentRotation).angle;
+        this.setTurningPosition(optimizedDesiredRotation);
+    }
+
+    public void setTurningPosition(Rotation2d optimizedDesiredRotation) {
+        Rotation2d currentRotation = this.getTurningPosition();
         double optimizedRotationRadians = optimizedDesiredRotation.getRadians();
         double currentRotationRadians = currentRotation.getRadians();
 
@@ -125,9 +134,8 @@ public class SwerveModule implements Loggable {
 
         SmartDashboard.putNumber("desired speed", desiredSpeed);
 
-        m_driveMotor.set(ControlMode.PercentOutput, m_driveFeedforward.calculate(
-            this.getSpeedMetersPerSecond(), desiredSpeed
-        ) / Constants.kNominalVoltage);
+        m_driveMotor.set(ControlMode.Velocity, desiredSpeed/kDriveDistMetersPerPulse * 0.1, DemandType.ArbitraryFeedForward, m_driveFeedforward.calculate(desiredSpeed) / Constants.kNominalVoltage);
+        //m_driveMotor.set(ControlMode.PercentOutput, m_driveFeedforward.calculate(desiredSpeed) / Constants.kNominalVoltage);
     }
 
     public void resetDriveEncoder() {

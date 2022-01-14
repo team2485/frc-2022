@@ -6,7 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.commands.*;
+import frc.robot.subsystems.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import static frc.robot.Constants.OIConstants.*;
@@ -32,7 +33,11 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    this.configureDrivetrainCommands();
+  }
 
+  private void configureDrivetrainCommands() {
+    m_drivetrain.setDefaultCommand(new DriveWithController(m_driver, m_drivetrain));
   }
 
   /**

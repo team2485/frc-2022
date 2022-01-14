@@ -5,6 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -27,6 +30,9 @@ public final class Constants {
     public static final class OIConstants {
         public static final int kDriverPort = 0;
         public static final int kOperatorPort = 1;
+
+        public static final double kDriveSlewRate = 2; //units per second to limit rate to, inverse of how long it will take from 0 to 1
+
     }
 
     public static final class ModuleConstants{
@@ -45,6 +51,8 @@ public final class Constants {
         public static final double kvDriveVoltSecondsPerMeter = 2.98;
         public static final double kaDriveVoltSecondsSquaredPerMeter = 0.147;
 
+        ////Drive PID constants
+        public static final double kPDrive = 0.05;
         //Turning control constants
         public static final double kTurningCurrentLimitAmps = 20;
 
@@ -72,6 +80,7 @@ public final class Constants {
     }
 
     public static final class DriveConstants {
+        //Ports and zeros
         /**
          * Zeros found with bevel gears facing right. 
          * Applied offset is the negative of the zero. 
@@ -97,6 +106,33 @@ public final class Constants {
         public static final int kBLTurningTalonPort = 8;
         public static final int kBLCANCoderPort = 14;
         public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(139.0);
+
+        //Max speed teleoperated
+        public static final double kTeleopMaxSpeedMetersPerSecond = 2; //meters per second
+        public static final double kTeleopMaxAngularSpeedRadiansPerSecond = Math.PI; //radians per second
+
+        //Drivebase dimensions
+        public static final double kWheelbaseLengthMeters = 0.635; //meters
+        public static final double kWheelbaseWidthMeters = 0.508; //meters
+        
+        public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+            new Translation2d(
+                kWheelbaseLengthMeters/2,
+                kWheelbaseWidthMeters/2
+            ), 
+            new Translation2d(
+                kWheelbaseLengthMeters/2,
+                -kWheelbaseWidthMeters/2
+            ), 
+            new Translation2d(
+                -kWheelbaseLengthMeters/2,
+                kWheelbaseWidthMeters/2
+            ), 
+            new Translation2d(
+                -kWheelbaseLengthMeters/2,
+                -kWheelbaseWidthMeters/2
+            )  
+        );
 
 
 
