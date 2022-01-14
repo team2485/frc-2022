@@ -61,10 +61,11 @@ public final class Constants {
         ////Turning PID constants
         public static final double kPTurning = 0.2;
         public static final double kDTurning = 0.1;
+        public static final double kFTurning = 0.4*1023/8360;
 
         ////Turning trapezoidal motion profile/motion magic constants
-        public static final double kModuleMaxSpeedTurningRadiansPerSecond = 4*Math.PI;
-        public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared = 4*Math.PI;
+        public static final double kModuleMaxSpeedTurningRadiansPerSecond = 16*Math.PI;
+        public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared = 256*Math.PI;
         public static final double kModuleMaxSpeedTurningPulsesPer100Ms = kModuleMaxSpeedTurningRadiansPerSecond/kTurningRadiansPerPulse * 0.1;
         public static final double kModuleMaxAccelerationTurningPulsesPer100MsSquared = kModuleMaxAccelerationTurningRadiansPerSecondSquared/kTurningRadiansPerPulse * 0.01;
 

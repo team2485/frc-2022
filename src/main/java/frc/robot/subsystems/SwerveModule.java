@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderConfiguration;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -57,15 +58,20 @@ public class SwerveModule implements Loggable {
         turningMotorConfig.supplyCurrLimit.enable = true;
         turningMotorConfig.slot0.kP = kPTurning;
         turningMotorConfig.slot0.kD = kDTurning;
+        turningMotorConfig.slot0.kF = kFTurning;
         turningMotorConfig.motionCruiseVelocity = kModuleMaxSpeedTurningPulsesPer100Ms;
         turningMotorConfig.motionAcceleration = kModuleMaxAccelerationTurningPulsesPer100MsSquared;
-        this.m_turningMotor = new WPI_TalonFX(turningMotorID);
+        this.m_turningMotor = new WPI_TalonFX(turningMotorID);        
         m_turningMotor.configAllSettings(turningMotorConfig);
         m_turningMotor.enableVoltageCompensation(true);
         m_turningMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.kCANTimeoutMs);
         m_turningMotor.setNeutralMode(NeutralMode.Brake);
         
-
+        CANCoderConfiguration turningEncoderConfig = new CANCoderConfiguration();
+        turningEncoderConfig.magnetOffsetDegrees = -zero.getDegrees();
+        turningEncoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
+        m_turningEncoder = new CANCoder(turningEncoderID);
+        m_turningEncoder.configAllSettings(turningEncoderConfig);
     
     }
 
@@ -73,14 +79,37 @@ public class SwerveModule implements Loggable {
         m_driveMotor.setNeutralMode(mode);
     }
 
+    @Log(name = "current rotation")
+    public double getTurningPositionDegrees() {
+        return getTurningPosition().getDegrees();
+    }
     private Rotation2d getTurningPosition() {
-
+        return Rotation2d.fromDegrees(m_turningEncoder.getAbsolutePosition());
     }
     
     //-180 to 180
-    public void setTurningPosition(Rotation2d rotation) {
-
+    @Config(name = "set rotation")
+    public void setTurningPositionDegrees(double desiredRotationDegrees) {
+        this.setTurningPosition(Rotation2d.fromDegrees(desiredRotationDegrees));
     }
+
+    public void setTurningPosition(Rotation2d desiredRotation) {
+        Rotation2d currentRotation = this.getTurningPosition();
+        //use WPILib's swervemodulestate optimization to minimize change in heading
+        Rotation2d optimizedDesiredRotation = SwerveModuleState.optimize(new SwerveModuleState(0, desiredRotation), currentRotation).angle;
+        double optimizedRotationRadians = optimizedDesiredRotation.getRadians();
+        double currentRotationRadians = currentRotation.getRadians();
+
+        double deltaRadians = optimizedRotationRadians - currentRotationRadians;
+        double deltaPulses = deltaRadians / kTurningRadiansPerPulse;
+
+        double currentPulses = m_turningMotor.getSelectedSensorPosition();
+        double referencePulses = currentPulses + deltaPulses;
+
+        m_turningMotor.set(ControlMode.MotionMagic, referencePulses);
+    }
+
+    
 
 
     @Log(name = "Speed meters per second")
@@ -114,6 +143,12 @@ public class SwerveModule implements Loggable {
     public LayoutType configureLayoutType() {
         return BuiltInLayouts.kGrid;
     }
+
+    @Override
+    public int[] configureLayoutSize() {
+        int[] size = {3,4};
+        return size;
+      }
 
 
 }
