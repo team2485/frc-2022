@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -31,8 +32,24 @@ public final class Constants {
         public static final int kDriverPort = 0;
         public static final int kOperatorPort = 1;
 
-        public static final double kDriveSlewRate = 2; //units per second to limit rate to, inverse of how long it will take from 0 to 1
+        public static final double kDriveSlewRate = 3; //units per second to limit rate to, inverse of how long it will take from 0 to 1
+    }
 
+    public static final class AutoConstants{
+        public static final double kAutoMaxSpeedMetersPerSecond = 0.6;
+        public static final double kAutoMaxAccelerationMetersPerSecondSquared = 0.5;
+
+        public static final double kAutoMaxAngularSpeedRadiansPerSecond = Math.PI;
+        public static final double kAutoMaxAngularAccelerationRadiansPerSecondSquared = Math.PI;
+    
+        public static final double kPAutoXController = 1;
+        public static final double kPAutoYController = 1;
+        public static final double kPAutoThetaController = 1;
+    
+        // Constraint for the motion profilied robot angle controller
+        public static final TrapezoidProfile.Constraints kAutoThetaControllerConstraints =
+            new TrapezoidProfile.Constraints(
+                kAutoMaxAngularSpeedRadiansPerSecond, kAutoMaxAngularAccelerationRadiansPerSecondSquared); 
     }
 
     public static final class ModuleConstants{

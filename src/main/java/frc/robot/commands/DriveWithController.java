@@ -18,8 +18,8 @@ public class DriveWithController extends CommandBase {
     private final CommandXboxController m_driver;
     private final Drivetrain m_drivetrain;
 
-    private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(OIConstants.kDriveSlewRate);
-    private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(OIConstants.kDriveSlewRate);
+    private final SlewRateLimiter m_xSpeedLimiter = new SlewRateLimiter(OIConstants.kDriveSlewRate);
+    private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(OIConstants.kDriveSlewRate);
     private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(OIConstants.kDriveSlewRate);
 
     public DriveWithController(CommandXboxController driver, Drivetrain drivetrain) {
@@ -32,21 +32,21 @@ public class DriveWithController extends CommandBase {
     @Override
     public void execute() {
         final double xSpeed = 
-            MathUtil.applyDeadband(m_driver.getLeftY(), 0.1)  
+            -m_xSpeedLimiter.calculate(Deadband.squareScaleDeadband(m_driver.getLeftY(), 0.1)) 
             * kTeleopMaxSpeedMetersPerSecond;
         
         final double ySpeed = 
-            MathUtil.applyDeadband(m_driver.getLeftX(), 0.1) 
+            -m_ySpeedLimiter.calculate(Deadband.squareScaleDeadband(m_driver.getLeftX(), 0.1))
             * kTeleopMaxSpeedMetersPerSecond;
         
         final double rot = 
-            MathUtil.applyDeadband(m_driver.getRightX(), 0.1) 
+            -m_rotLimiter.calculate(Deadband.squareScaleDeadband(m_driver.getRightX(), 0.1))
             * kTeleopMaxAngularSpeedRadiansPerSecond;
         
-        final boolean fieldRelative = m_driver.y().get();
+        final boolean fieldRelative = !m_driver.y().get();
         m_drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative);
     }
-
+  
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {

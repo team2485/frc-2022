@@ -81,31 +81,34 @@ public class SwerveModule implements Loggable {
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
-        SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getTurningPosition());
+        SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getHeading());
         this.setSpeedMetersPerSecond(state.speedMetersPerSecond);
         this.setTurningPosition(state.angle);
+    }
 
+    public SwerveModuleState getState() {
+        return new SwerveModuleState(this.getSpeedMetersPerSecond(), this.getHeading());
     }
 
     @Log(name = "current rotation")
-    public double getTurningPositionDegrees() {
-        return getTurningPosition().getDegrees();
+    public double getHeadingDegrees() {
+        return getHeading().getDegrees();
     }
-    private Rotation2d getTurningPosition() {
+    private Rotation2d getHeading() {
         return Rotation2d.fromDegrees(m_turningEncoder.getAbsolutePosition());
     }
     
     //-180 to 180
     @Config(name = "set rotation")
     public void setTurningPositionDegrees(double desiredRotationDegrees) {
-        Rotation2d currentRotation = this.getTurningPosition();
+        Rotation2d currentRotation = this.getHeading();
         //use WPILib's swervemodulestate optimization to minimize change in heading
         Rotation2d optimizedDesiredRotation = SwerveModuleState.optimize(new SwerveModuleState(0, Rotation2d.fromDegrees(desiredRotationDegrees)), currentRotation).angle;
         this.setTurningPosition(optimizedDesiredRotation);
     }
 
     public void setTurningPosition(Rotation2d optimizedDesiredRotation) {
-        Rotation2d currentRotation = this.getTurningPosition();
+        Rotation2d currentRotation = this.getHeading();
         double optimizedRotationRadians = optimizedDesiredRotation.getRadians();
         double currentRotationRadians = currentRotation.getRadians();
 
