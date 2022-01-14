@@ -1,0 +1,62 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.commands;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import static frc.robot.Constants.DriveConstants.*;
+import frc.robot.Constants.OIConstants;
+import frc.robot.subsystems.Drivetrain;
+import frc.team2485.WarlordsLib.oi.CommandXboxController;
+import frc.team2485.WarlordsLib.oi.Deadband;
+
+public class DriveWithController extends CommandBase {
+    private final CommandXboxController m_driver;
+    private final Drivetrain m_drivetrain;
+
+    private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(OIConstants.kDriveSlewRate);
+    private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(OIConstants.kDriveSlewRate);
+    private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(OIConstants.kDriveSlewRate);
+
+    public DriveWithController(CommandXboxController driver, Drivetrain drivetrain) {
+        this.m_driver = driver;
+        this.m_drivetrain = drivetrain;
+        addRequirements(m_drivetrain);
+    }
+
+    // Called every time the scheduler runs while the command is scheduled.
+    @Override
+    public void execute() {
+        final double xSpeed = 
+            MathUtil.applyDeadband(m_driver.getLeftY(), 0.1)  
+            * kTeleopMaxSpeedMetersPerSecond;
+        
+        final double ySpeed = 
+            MathUtil.applyDeadband(m_driver.getLeftX(), 0.1) 
+            * kTeleopMaxSpeedMetersPerSecond;
+        
+        final double rot = 
+            MathUtil.applyDeadband(m_driver.getRightX(), 0.1) 
+            * kTeleopMaxAngularSpeedRadiansPerSecond;
+        
+        final boolean fieldRelative = m_driver.y().get();
+        m_drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative);
+    }
+
+    // Called once the command ends or is interrupted.
+    @Override
+    public void end(boolean interrupted) {
+        m_drivetrain.drive(0, 0, 0, false);
+    }
+
+    // Returns true when the command should end.
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+}
