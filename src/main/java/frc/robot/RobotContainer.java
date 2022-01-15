@@ -13,6 +13,7 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
 import static frc.robot.Constants.OIConstants.*;
@@ -49,6 +50,8 @@ public class RobotContainer {
 
   private void configureDrivetrainCommands() {
     m_drivetrain.setDefaultCommand(new DriveWithController(m_driver, m_drivetrain));
+
+    m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
   }
 
   /**
@@ -69,11 +72,17 @@ public class RobotContainer {
         PathPlanner.loadPath("Test Path", 
                               kAutoMaxSpeedMetersPerSecond, 
                               kAutoMaxAccelerationMetersPerSecondSquared);
+
+    m_drivetrain.getField2d().getObject("traj").setTrajectory(testPath);
                               
     var thetaController =
         new ProfiledPIDController(
               kPAutoThetaController, 0, 0, kAutoThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    InstantCommand resetOdometry = new InstantCommand(
+            ()->{m_drivetrain.resetOdometry(testPath.getInitialPose());}
+    );
 
     HolonomicSwerveControllerCommand testPathCommand = 
       new HolonomicSwerveControllerCommand(
@@ -86,10 +95,14 @@ public class RobotContainer {
         m_drivetrain::setModuleStates,
         m_drivetrain);
             
-    return testPathCommand;
+    return resetOdometry.andThen(testPathCommand);
   }
 
   public void disabledInit() {
     m_drivetrain.drive(0, 0, 0, false);
+  }
+
+  public void disabledPeriodic() {
+    //m_drivetrain.drive(0, 0, 0, false);
   }
 }

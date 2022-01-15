@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.PigeonIMU;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -8,6 +9,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -26,11 +30,19 @@ public class Drivetrain extends SubsystemBase implements Loggable{
     private final SwerveDriveOdometry m_odometry;
 
     @Log
-    private double desiredRotation;
+    private double m_desiredRotation;
     @Log
-    private double desiredXSpeed;
+    private double m_desiredXSpeed;
     @Log
-    private double desiredYSpeed;
+    private double m_desiredYSpeed;
+
+    @Log (name = "Drive Neutral")
+    private SendableChooser<NeutralMode> m_driveNeutralChooser = new SendableChooser<NeutralMode>();
+
+    @Log (name = "Turning Neutral")
+    private SendableChooser<NeutralMode> m_turningNeutralChooser = new SendableChooser<NeutralMode>();
+
+    private final Field2d m_field = new Field2d();
 
     public Drivetrain() {  
         m_frontLeftModule = new SwerveModule(kFLDriveTalonPort, kFLTurningTalonPort, kFLCANCoderPort, kFLCANCoderZero, "FL");
@@ -41,6 +53,18 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         m_pigeon = new PigeonIMU(kPigeonPort);
 
         m_odometry = new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+
+        m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
+        m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);
+        setDriveNeutralMode(m_driveNeutralChooser.getSelected());
+
+        m_turningNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
+        m_turningNeutralChooser.addOption("Coast", NeutralMode.Coast);
+        setDriveNeutralMode(m_turningNeutralChooser.getSelected());
+
+        SmartDashboard.putData("Field", m_field);
+
+    
     }
 
     public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
@@ -56,9 +80,9 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         m_backLeftModule.setDesiredState(states[2]);
         m_backRightModule.setDesiredState(states[3]);
 
-        this.desiredRotation = rot;
-        this.desiredXSpeed = xSpeed;
-        this.desiredYSpeed = ySpeed;
+        this.m_desiredRotation = rot;
+        this.m_desiredXSpeed = xSpeed;
+        this.m_desiredYSpeed = ySpeed;
 
     }
 
@@ -89,6 +113,25 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         m_pigeon.setFusedHeading(0);
     }
 
+    public void setDriveNeutralMode(NeutralMode mode) {
+        m_frontLeftModule.setDriveNeutralMode(mode);
+        m_frontRightModule.setDriveNeutralMode(mode);
+        m_backLeftModule.setDriveNeutralMode(mode);
+        m_backRightModule.setDriveNeutralMode(mode);
+    }
+
+    public void setTurningNeutralMode(NeutralMode mode) {
+        m_frontLeftModule.setTurningNeutralMode(mode);
+        m_frontRightModule.setTurningNeutralMode(mode);
+        m_backLeftModule.setTurningNeutralMode(mode);
+        m_backRightModule.setTurningNeutralMode(mode);
+    }
+
+    public Field2d getField2d() {
+        return m_field;
+    }
+
+
     @Override
     public void periodic() {
         m_odometry.update(
@@ -97,6 +140,12 @@ public class Drivetrain extends SubsystemBase implements Loggable{
             m_backRightModule.getState(),
             m_frontRightModule.getState(),
             m_backRightModule.getState());
+        
+        m_field.setRobotPose(getPoseMeters());
+
+        setDriveNeutralMode(m_driveNeutralChooser.getSelected());
+        setTurningNeutralMode(m_turningNeutralChooser.getSelected());
+
     }
 
     

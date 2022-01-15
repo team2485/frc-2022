@@ -76,10 +76,6 @@ public class SwerveModule implements Loggable {
     
     }
 
-    public void setDriveNeutralMode(NeutralMode mode) {
-        m_driveMotor.setNeutralMode(mode);
-    }
-
     public void setDesiredState(SwerveModuleState desiredState) {
         SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getHeading());
         this.setSpeedMetersPerSecond(state.speedMetersPerSecond);
@@ -144,6 +140,15 @@ public class SwerveModule implements Loggable {
     public void resetDriveEncoder() {
         m_driveMotor.setSelectedSensorPosition(0);
     }
+
+    public void setDriveNeutralMode(NeutralMode mode) {
+        m_driveMotor.setNeutralMode(mode);
+    }
+
+    public void setTurningNeutralMode(NeutralMode mode) {
+        m_turningMotor.setNeutralMode(mode);
+    }
+
 
     @Override
     public String configureLogName() {
