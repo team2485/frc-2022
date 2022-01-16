@@ -82,7 +82,7 @@ public final class Constants {
         public static final double kTurningRadiansPerMotorRev = 2*Math.PI/kTurningGearRatio;
         public static final double kTurningRadiansPerPulse = kTurningRadiansPerMotorRev/kFalconCPR;
 
-        ////Turning feedforward constants
+        ////Turning feedforward constants (unused in current implementation)
         public static final double ksTurningVolts = 0.60572;
         public static final double kvTurningVoltSecondsPerMeter = 0.20717;
         public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;

@@ -14,7 +14,6 @@ import frc.robot.subsystems.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
 import static frc.robot.Constants.OIConstants.*;
 
@@ -58,14 +57,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Create config for trajectory (max speed/acceleration)
-    TrajectoryConfig config =
-        new TrajectoryConfig(
-                kAutoMaxSpeedMetersPerSecond,
-                kAutoMaxAccelerationMetersPerSecondSquared)
-            // Add kinematics to ensure max speed is actually obeyed
-            .setKinematics(kDriveKinematics);
-
     //load path from deploy/pathplanner folder
     PathPlannerTrajectory testPath = 
         PathPlanner.loadPath("Test Path", 

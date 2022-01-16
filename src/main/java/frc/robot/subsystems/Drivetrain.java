@@ -63,10 +63,15 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         setDriveNeutralMode(m_turningNeutralChooser.getSelected());
 
         SmartDashboard.putData("Field", m_field);
-
-    
     }
 
+    /**
+     * Drives the robot at given speeds and rotation. (Used in teleop)
+     * @param xSpeed desired forward velocity in meters per second
+     * @param ySpeed desired sideways (strafe) velocity in meters per second
+     * @param rot desired angular velocity in radians per second
+     * @param fieldRelative whether the robot should drive field-relative or not
+     */
     public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
         SwerveModuleState[] states =
         kDriveKinematics.toSwerveModuleStates(
@@ -83,10 +88,12 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         this.m_desiredRotation = rot;
         this.m_desiredXSpeed = xSpeed;
         this.m_desiredYSpeed = ySpeed;
-
     }
 
-    //used in autonomous
+    /**
+     * Directly sets module states. Used for autonomous driving. 
+     * @param desiredStates array of swerve module states. 
+     */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, kAutoMaxSpeedMetersPerSecond);
         m_frontLeftModule.setDesiredState(desiredStates[0]);
@@ -94,25 +101,43 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         m_backLeftModule.setDesiredState(desiredStates[2]);
         m_backRightModule.setDesiredState(desiredStates[3]);
     }
-    
+
+    /**
+     * The current pose of the robot. 
+     * @return the pose as a Pose2d. 
+     */
     public Pose2d getPoseMeters(){
         return m_odometry.getPoseMeters();
     }
         
+    /**
+     * Resets odometry to the specified pose. 
+     * @param pose the pose to reset to
+     */
     public void resetOdometry(Pose2d pose){
         m_odometry.resetPosition(pose, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
     }
 
+    /**
+     * Returns the current heading reading from the Pigeon. 
+     * @return
+     */
     @Log
     public double getHeading() {
         return m_pigeon.getFusedHeading();
     }
 
-    // Zeroes the heading of the robot
+    /**
+     * Sets the pigeon's current heading to zero. 
+     */
     public void zeroHeading() {
         m_pigeon.setFusedHeading(0);
     }
 
+    /**
+     * Configures neutral modes for each drive motor. 
+     * @param mode NeutralMode.Coast or NeutralMode.Brake
+     */
     public void setDriveNeutralMode(NeutralMode mode) {
         m_frontLeftModule.setDriveNeutralMode(mode);
         m_frontRightModule.setDriveNeutralMode(mode);
@@ -120,6 +145,10 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         m_backRightModule.setDriveNeutralMode(mode);
     }
 
+    /**
+     * Configures neutral modes for each turning motor. 
+     * @param mode NeutralMode.Coast or NeutralMode.Brake
+     */
     public void setTurningNeutralMode(NeutralMode mode) {
         m_frontLeftModule.setTurningNeutralMode(mode);
         m_frontRightModule.setTurningNeutralMode(mode);
@@ -127,11 +156,18 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         m_backRightModule.setTurningNeutralMode(mode);
     }
 
+    /**
+     * Returns the Field2d object. 
+     */
     public Field2d getField2d() {
         return m_field;
     }
 
-
+    /**
+     * Runs every 20 ms. Updates odometry based on encoder and gyro readings. 
+     * Updates Field object (Glass widget) based on odometry. 
+     * Sets neutral modes to selected. 
+     */
     @Override
     public void periodic() {
         m_odometry.update(
@@ -145,7 +181,6 @@ public class Drivetrain extends SubsystemBase implements Loggable{
 
         setDriveNeutralMode(m_driveNeutralChooser.getSelected());
         setTurningNeutralMode(m_turningNeutralChooser.getSelected());
-
     }
 
     
