@@ -41,7 +41,8 @@ public class SwerveModule implements Loggable {
     public SwerveModule(int driveMotorID, int turningMotorID, int turningEncoderID, Rotation2d zero, String moduleID) {
         this.m_moduleID = moduleID;
 
-        //Drive motor configuration
+        //Drive motor configuration 
+        //-- voltage compensation, current limiting, P term, brake mode
         TalonFXConfiguration driveMotorConfig = new TalonFXConfiguration();
         driveMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
         driveMotorConfig.supplyCurrLimit.currentLimit = kDriveCurrentLimitAmps;
@@ -53,6 +54,7 @@ public class SwerveModule implements Loggable {
         m_driveMotor.setNeutralMode(NeutralMode.Brake);
         
         //Turning motor configuration
+        //-- voltage compensation, current limiting, P D F terms, motion magic, brake mode
         TalonFXConfiguration turningMotorConfig = new TalonFXConfiguration();
         turningMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
         turningMotorConfig.supplyCurrLimit.currentLimit = kTurningCurrentLimitAmps;
@@ -68,6 +70,8 @@ public class SwerveModule implements Loggable {
         m_turningMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.kCANTimeoutMs);
         m_turningMotor.setNeutralMode(NeutralMode.Brake);
         
+        //Turning encoder configuration
+        //-- configures offset and sensor range to +-180
         CANCoderConfiguration turningEncoderConfig = new CANCoderConfiguration();
         turningEncoderConfig.magnetOffsetDegrees = -zero.getDegrees();
         turningEncoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
@@ -76,34 +80,58 @@ public class SwerveModule implements Loggable {
     
     }
 
+    /**
+     * Optimizes swerve module state, then sets motors to it.
+     * @param desiredState
+     */
     public void setDesiredState(SwerveModuleState desiredState) {
         SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getHeading());
         this.setSpeedMetersPerSecond(state.speedMetersPerSecond);
-        this.setTurningPosition(state.angle);
+        this.setHeading(state.angle);
     }
 
+    /**
+     * Returns current swerve module state.
+     * @return current state
+     */
     public SwerveModuleState getState() {
         return new SwerveModuleState(this.getSpeedMetersPerSecond(), this.getHeading());
     }
 
+    /**
+     * Returns current heading.
+     * @return current heading in degrees
+     */
     @Log(name = "current rotation")
-    public double getHeadingDegrees() {
+    private double getHeadingDegrees() {
         return getHeading().getDegrees();
     }
+
+    /**
+     * Returns current heading.
+     * @return heading as Rotation2d
+     */
     private Rotation2d getHeading() {
         return Rotation2d.fromDegrees(m_turningEncoder.getAbsolutePosition());
     }
     
-    //-180 to 180
+    /**
+     * Optimizes and then sets heading, intended for Shuffleboard use.
+     * @param desiredRotationDegrees desired heading in degrees
+     */
     @Config(name = "set rotation")
-    public void setTurningPositionDegrees(double desiredRotationDegrees) {
+    public void setHeadingDegrees(double desiredRotationDegrees) {
         Rotation2d currentRotation = this.getHeading();
         //use WPILib's swervemodulestate optimization to minimize change in heading
         Rotation2d optimizedDesiredRotation = SwerveModuleState.optimize(new SwerveModuleState(0, Rotation2d.fromDegrees(desiredRotationDegrees)), currentRotation).angle;
-        this.setTurningPosition(optimizedDesiredRotation);
+        this.setHeading(optimizedDesiredRotation);
     }
 
-    public void setTurningPosition(Rotation2d optimizedDesiredRotation) {
+    /**
+     * Sets already-optimized heading, using motion-profiled on-motor PID control
+     * @param optimizedDesiredRotation desired headiing as Rotation2d
+     */
+    public void setHeading(Rotation2d optimizedDesiredRotation) {
         Rotation2d currentRotation = this.getHeading();
         double optimizedRotationRadians = optimizedDesiredRotation.getRadians();
         double currentRotationRadians = currentRotation.getRadians();
@@ -117,38 +145,46 @@ public class SwerveModule implements Loggable {
         m_turningMotor.set(ControlMode.MotionMagic, referencePulses);
     }
 
-    
-
-
+    /**
+     * Returns current speed.
+     * @return speed in meters per second
+     */
     @Log(name = "Speed meters per second")
     private double getSpeedMetersPerSecond() {
         return m_driveMotor.getSelectedSensorVelocity() * kDriveDistMetersPerPulse * 10;
     }
 
+    /**
+     * Sets drive motor, using on-motor velocity PID and on-RIO feedforward
+     * @param desiredSpeed desired speed in meters per second
+     */
     @Config(name = "Set speed meters per second")
     public void setSpeedMetersPerSecond(double desiredSpeed) {
-        SmartDashboard.putNumber("feedforward output",  m_driveFeedforward.calculate(
-            this.getSpeedMetersPerSecond(), desiredSpeed
-        ));
-
-        SmartDashboard.putNumber("desired speed", desiredSpeed);
-
         m_driveMotor.set(ControlMode.Velocity, desiredSpeed/kDriveDistMetersPerPulse * 0.1, DemandType.ArbitraryFeedForward, m_driveFeedforward.calculate(desiredSpeed) / Constants.kNominalVoltage);
-        //m_driveMotor.set(ControlMode.PercentOutput, m_driveFeedforward.calculate(desiredSpeed) / Constants.kNominalVoltage);
     }
 
+    /**
+     * Resets drive encoder. 
+     */
     public void resetDriveEncoder() {
         m_driveMotor.setSelectedSensorPosition(0);
     }
-
+    
+    /**
+     * Configures behavior of drive motor on 0 input. 
+     * @param mode NeutralMode.Brake or NeutralMode.Coast
+     */
     public void setDriveNeutralMode(NeutralMode mode) {
         m_driveMotor.setNeutralMode(mode);
     }
 
+    /**
+     * Configures behavior of turning motor on 0 input. 
+     * @param mode NeutralMode.Brake or NeutralMode.Coast
+     */
     public void setTurningNeutralMode(NeutralMode mode) {
         m_turningMotor.setNeutralMode(mode);
     }
-
 
     @Override
     public String configureLogName() {
@@ -165,6 +201,4 @@ public class SwerveModule implements Loggable {
         int[] size = {3,4};
         return size;
       }
-
-
 }

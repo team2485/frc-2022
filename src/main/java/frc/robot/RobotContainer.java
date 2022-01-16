@@ -30,10 +30,8 @@ public class RobotContainer {
 
   private final Drivetrain m_drivetrain = new Drivetrain();
 
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -60,7 +58,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Create config for trajectory
+    // Create config for trajectory (max speed/acceleration)
     TrajectoryConfig config =
         new TrajectoryConfig(
                 kAutoMaxSpeedMetersPerSecond,
@@ -68,22 +66,27 @@ public class RobotContainer {
             // Add kinematics to ensure max speed is actually obeyed
             .setKinematics(kDriveKinematics);
 
+    //load path from deploy/pathplanner folder
     PathPlannerTrajectory testPath = 
         PathPlanner.loadPath("Test Path", 
                               kAutoMaxSpeedMetersPerSecond, 
                               kAutoMaxAccelerationMetersPerSecondSquared);
 
+    //put trajectory on Glass's Field2d widget
     m_drivetrain.getField2d().getObject("traj").setTrajectory(testPath);
-                              
+                 
+    //create controller for robot angle
     var thetaController =
         new ProfiledPIDController(
               kPAutoThetaController, 0, 0, kAutoThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
+    //create reset odometry command (at start of path)
     InstantCommand resetOdometry = new InstantCommand(
             ()->{m_drivetrain.resetOdometry(testPath.getInitialPose());}
     );
 
+    //create command to follow path
     HolonomicSwerveControllerCommand testPathCommand = 
       new HolonomicSwerveControllerCommand(
         testPath, 
@@ -98,11 +101,8 @@ public class RobotContainer {
     return resetOdometry.andThen(testPathCommand);
   }
 
+  //whenever the robot is disabled, drive should be turned off
   public void disabledInit() {
     m_drivetrain.drive(0, 0, 0, false);
-  }
-
-  public void disabledPeriodic() {
-    //m_drivetrain.drive(0, 0, 0, false);
   }
 }
