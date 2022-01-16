@@ -19,4 +19,23 @@ public final class Constants {
         public static final int kDriverPort = 0;
         public static final int kOperatorPort = 1;
     }
+
+    public static final class FlywheelConstants {
+        public static final int kLeftTalonPort = 11;
+        public static final int kRightTalonPort = 3;
+
+        public static final int kFlywheeEncoderPort1 = 0;
+        public static final int kFlywheelEncoderPort2 = 1;
+
+        public static final int kRevEncoderPulsesPerRevolution = 2048;
+
+        public static final double kMaxVelocity = 50;
+
+        public static final double kS = 0;
+        public static final double kV = 0;
+        public static final double kA = 0;
+
+        public static final double kP = 0;
+        public static final double kD = 0;
+    }
 }
