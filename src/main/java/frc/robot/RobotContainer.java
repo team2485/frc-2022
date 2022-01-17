@@ -6,16 +6,15 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Flywheel;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import static frc.robot.Constants.OIConstants.*;
+import static frc.robot.Constants.FlywheelConstants.*;
 
 public class RobotContainer {
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
-  Shooter shooter = new Shooter();
+  Flywheel m_flywheel = new Flywheel();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -31,7 +30,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    shooter.speedControl(m_operator.getX(GenericHID.Hand kRight) / 5);
+    m_flywheel.setVelocityRotationsPerSecond(m_operator.getLeftY() * kFlywheelMaxSpeedRotationsPerSecond);
   }
 
   /**
