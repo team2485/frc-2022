@@ -111,19 +111,15 @@ public class Flywheel extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
-    // SmartDashboard.putNumber("Feedforward app voltage",m_flywheelFeedforward.calculate(m_desiredVelocityRPS));
-    // SmartDashboard.putNumber("PID output voltage",m_flywheelController.calculate(getRevVelocity(), m_desiredVelocityRPS));
-
     // double voltage = m_flywheelFeedforward.calculate(m_desiredVelocityRPS) + m_flywheelController.calculate(getRevVelocity(), m_desiredVelocityRPS);
     // m_leftTalon.setVoltage(voltage);
-
     
     m_loop.setNextR(VecBuilder.fill(m_desiredVelocityRPS));
 
     // Correct our Kalman filter's state vector estimate with encoder data.
     m_loop.correct(VecBuilder.fill(m_encoder.getRate()));
 
-        // Update our LQR to generate new voltage commands and use the voltages to predict the next
+    // Update our LQR to generate new voltage commands and use the voltages to predict the next
     // state with out Kalman filter.
     m_loop.predict(0.020);
 
