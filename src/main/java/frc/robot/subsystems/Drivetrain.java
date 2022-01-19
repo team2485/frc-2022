@@ -3,12 +3,20 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.PigeonIMU;
 
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
+
+import edu.wpi.first.math.MatBuilder;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,6 +26,9 @@ import io.github.oblarg.oblog.annotations.Log;
 
 import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.AutoConstants.*;
+import static frc.robot.Constants.VisionConstants.*;
+
+import static frc.robot.Constants.FieldConstants.*;
 
 public class Drivetrain extends SubsystemBase implements Loggable{
     private final SwerveModule m_frontLeftModule;
@@ -27,7 +38,7 @@ public class Drivetrain extends SubsystemBase implements Loggable{
 
     private final PigeonIMU m_pigeon; 
 
-    private final SwerveDriveOdometry m_odometry;
+    private final SwerveDrivePoseEstimator m_poseEstimator;
 
     @Log
     private double m_desiredRotation;
@@ -44,7 +55,9 @@ public class Drivetrain extends SubsystemBase implements Loggable{
 
     private final Field2d m_field = new Field2d();
 
-    public Drivetrain() {  
+    private PhotonCamera m_camera;
+
+    public Drivetrain(PhotonCamera camera) {  
         m_frontLeftModule = new SwerveModule(kFLDriveTalonPort, kFLTurningTalonPort, kFLCANCoderPort, kFLCANCoderZero, "FL");
         m_frontRightModule = new SwerveModule(kFRDriveTalonPort, kFRTurningTalonPort, kFRCANCoderPort, kFRCANCoderZero, "FR");
         m_backLeftModule = new SwerveModule(kBLDriveTalonPort, kBLTurningTalonPort, kBLCANCoderPort, kBLCANCoderZero, "BL");
@@ -52,7 +65,17 @@ public class Drivetrain extends SubsystemBase implements Loggable{
         
         m_pigeon = new PigeonIMU(kPigeonPort);
 
-        m_odometry = new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+         Pose2d initialPoseMeters = new Pose2d(
+            new Translation2d(0, 0), 
+            new Rotation2d()
+        );
+
+        m_poseEstimator = new SwerveDrivePoseEstimator(this.getHeading(), initialPoseMeters, kDriveKinematics, 
+            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01), // State measurement standard deviations. X, Y, theta.
+            new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.005), // Local measurement standard deviations. encoder and gyro
+            new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)); // Global measurement standard deviations. X, Y, and theta.
+
+        m_camera = camera;
 
         m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
         m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);
@@ -107,24 +130,27 @@ public class Drivetrain extends SubsystemBase implements Loggable{
      * @return the pose as a Pose2d. 
      */
     public Pose2d getPoseMeters(){
-        return m_odometry.getPoseMeters();
+        return m_poseEstimator.getEstimatedPosition();
     }
         
     /**
      * Resets odometry to the specified pose. 
      * @param pose the pose to reset to
      */
-    public void resetOdometry(Pose2d pose){
-        m_odometry.resetPosition(pose, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+    public void resetPoseEstimator(Pose2d pose){
+        m_poseEstimator.resetPosition(pose, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
     }
 
+    @Log
+    public double getHeadingDegrees() {
+        return m_pigeon.getFusedHeading();
+    }
     /**
      * Returns the current heading reading from the Pigeon. 
      * @return
      */
-    @Log
-    public double getHeading() {
-        return m_pigeon.getFusedHeading();
+    public Rotation2d getHeading() {
+        return Rotation2d.fromDegrees(m_pigeon.getFusedHeading());
     }
 
     /**
@@ -170,13 +196,35 @@ public class Drivetrain extends SubsystemBase implements Loggable{
      */
     @Override
     public void periodic() {
-        m_odometry.update(
+        m_poseEstimator.update(
             Rotation2d.fromDegrees(m_pigeon.getFusedHeading()),
             m_frontLeftModule.getState(),
             m_backRightModule.getState(),
             m_frontRightModule.getState(),
             m_backRightModule.getState());
         
+        var result = m_camera.getLatestResult();
+
+        SmartDashboard.putBoolean("Camera Has Target", result.hasTargets());
+
+        if(result.hasTargets()) {
+            Pose2d cameraEstimatedPose = PhotonUtils.estimateFieldToRobot(
+                                                kCameraHeightMeters, 
+                                                kTargetHeightMeters, 
+                                                kCameraPitchRadians, 
+                                                Math.toRadians(result.getBestTarget().getPitch()), 
+                                                Rotation2d.fromDegrees(result.getBestTarget().getYaw()), 
+                                                this.getHeading(), 
+                                                kFieldToTargetMeters, 
+                                                kCameraToRobotMeters);
+            
+            double imageCaptureTime = Timer.getFPGATimestamp() - result.getLatencyMillis();
+
+            //System.out.println("cam estimated: " + cameraEstimatedPose.toString());
+            m_poseEstimator.addVisionMeasurement(cameraEstimatedPose, imageCaptureTime);
+        }
+
+       // System.out.println("pose: " + getPoseMeters().toString());
         m_field.setRobotPose(getPoseMeters());
 
         setDriveNeutralMode(m_driveNeutralChooser.getSelected());

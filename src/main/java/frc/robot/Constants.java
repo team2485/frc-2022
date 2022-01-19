@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -136,7 +138,6 @@ public final class Constants {
         //Drivebase dimensions
         public static final double kWheelbaseLengthMeters = 0.635; //meters
         public static final double kWheelbaseWidthMeters = 0.508; //meters
-        public static final double blah = 0.6*Math.PI; 
         
         public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
             new Translation2d(
@@ -157,7 +158,33 @@ public final class Constants {
             )  
         );
 
+     
+    }
+
+    public static final class FieldConstants {
+        //ALL CONSTANTS IN METERS
+        //THIS IS FOR A RECYCLING BIN -- CHANGE FOR REAL FIELD!
+        public static final double kTargetHeightMeters = 0.58;
+
+        //All coordinates start at blue terminal corner (0,0)
+        //Driver station to driver station is x
+
+        public static final Translation2d kHubCenterPositionMeters = new Translation2d(8.2296, 4.1148);
+        public static final Pose2d kFieldToTargetMeters = new Pose2d(kHubCenterPositionMeters, new Rotation2d(0));
+
+    }
 
 
+    public static final class VisionConstants {
+        public static final double kPAngle = 0.05;
+        public static final double kDAngle = 0.01;
+
+        public static final double kCameraHeightMeters = 0.11;
+        public static final double kCameraPitchRadians = Math.toRadians(27);
+        
+        public static final Transform2d kCameraToRobotMeters = new Transform2d(
+                                                                new Translation2d(-0.45, 0), // in meters
+                                                                new Rotation2d());
+        
     }
 }

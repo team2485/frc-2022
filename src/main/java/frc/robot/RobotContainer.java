@@ -20,6 +20,10 @@ import static frc.robot.Constants.OIConstants.*;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
+import org.photonvision.common.hardware.VisionLEDMode;
+
 import static frc.robot.Constants.AutoConstants.*;
 import static frc.robot.Constants.DriveConstants.*;
 
@@ -27,10 +31,11 @@ public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
 
-  private final Drivetrain m_drivetrain = new Drivetrain();
-
+  private final PhotonCamera m_camera = new PhotonCamera("gloworm");
+  private final Drivetrain m_drivetrain = new Drivetrain(m_camera);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+     m_camera.setLED(VisionLEDMode.kOn);
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -49,6 +54,8 @@ public class RobotContainer {
     m_drivetrain.setDefaultCommand(new DriveWithController(m_driver, m_drivetrain));
 
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
+
+    m_driver.a().whenHeld(new AlignToTarget(m_drivetrain, m_camera));
   }
 
   /**
@@ -74,7 +81,7 @@ public class RobotContainer {
 
     //create reset odometry command (at start of path)
     InstantCommand resetOdometry = new InstantCommand(
-            ()->{m_drivetrain.resetOdometry(testPath.getInitialPose());}
+            ()->{m_drivetrain.resetPoseEstimator(testPath.getInitialPose());}
     );
 
     //create command to follow path
