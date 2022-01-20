@@ -42,9 +42,10 @@ public final class Constants {
         public static final double kV = 0.56738;
         public static final double kA = 0.28161;
 
-
-
         public static final double kP = 1;
         public static final double kD = 0;
+
+        public static final double kVelocityToleranceRotationsPerSecond = 0.5; 
+        public static final double kFeedforwardShrink = 0.9;
     }
 }
