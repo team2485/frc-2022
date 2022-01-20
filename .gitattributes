@@ -1,0 +1,4 @@
+*.gradle text eol=crlf
+*.java text eol=crlf
+*.md text eol=crlf
+*.xml text eol=crlf
