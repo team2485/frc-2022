@@ -134,5 +134,6 @@ public class Flywheel extends SubsystemBase implements Loggable {
     SmartDashboard.putNumber("loop applied voltage", nextVoltage);
     m_leftTalon.setVoltage(nextVoltage);
 
+    SmartDashboard.putNumber("current", m_leftTalon.getSupplyCurrent());
   }
 }
