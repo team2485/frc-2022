@@ -32,7 +32,7 @@ public class Flywheel extends SubsystemBase implements Loggable {
   private final WPI_TalonFX m_leftTalon = new WPI_TalonFX(kLeftTalonPort);
  // private final WPI_TalonFX m_rightTalon = new WPI_TalonFX(kRightTalonPort);
   
-  private final Encoder m_encoder = new Encoder(kFlywheeEncoderPort1, kFlywheelEncoderPort2);
+  private final Encoder m_encoder = new Encoder(kFlywheelEncoderPort1, kFlywheelEncoderPort2);
 
   private final SimpleMotorFeedforward m_flywheelFeedforward = new SimpleMotorFeedforward(kS, kV, kA);
 

@@ -28,7 +28,7 @@ public final class Constants {
         public static final int kLeftTalonPort = 11;
         public static final int kRightTalonPort = 3;
 
-        public static final int kFlywheeEncoderPort1 = 0;
+        public static final int kFlywheelEncoderPort1 = 0;
         public static final int kFlywheelEncoderPort2 = 1;
 
         public static final int kRevEncoderPulsesPerRevolution = 8192;
@@ -37,7 +37,7 @@ public final class Constants {
         
         public static final double kFlywheelRotationsPerPulse = 1.0/4*kFalconPulsesPerRevolution;
 
-        public static final double kFlywheelMaxSpeedRotationsPerSecond = 30;;
+        public static final double kFlywheelMaxSpeedRotationsPerSecond = 30;
         public static final double kS = 0.59475;
         public static final double kV = 0.56738;
         public static final double kA = 0.28161;
