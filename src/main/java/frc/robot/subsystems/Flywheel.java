@@ -117,7 +117,7 @@ public class Flywheel extends SubsystemBase implements Loggable {
     m_loop.setNextR(VecBuilder.fill(m_desiredVelocityRPS));
 
     // Correct our Kalman filter's state vector estimate with encoder data.
-    m_loop.correct(VecBuilder.fill(m_encoder.getRate()));
+    m_loop.correct(VecBuilder.fill(getRevVelocity()));
 
     // Update our LQR to generate new voltage commands and use the voltages to predict the next
     // state with out Kalman filter.
