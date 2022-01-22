@@ -16,7 +16,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
 
 public class Drivetrain extends SubsystemBase implements Loggable {
   private final SwerveModule m_frontLeftModule;
@@ -212,27 +210,27 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         m_frontRightModule.getState(),
         m_backRightModule.getState());
 
-    var result = m_camera.getLatestResult();
+    // var result = m_camera.getLatestResult();
 
-    SmartDashboard.putBoolean("Camera Has Target", result.hasTargets());
+    // SmartDashboard.putBoolean("Camera Has Target", result.hasTargets());
 
-    if (result.hasTargets()) {
-      Pose2d cameraEstimatedPose =
-          PhotonUtils.estimateFieldToRobot(
-              kCameraHeightMeters,
-              kTargetHeightMeters,
-              kCameraPitchRadians,
-              Math.toRadians(result.getBestTarget().getPitch()),
-              Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-              this.getHeading(),
-              kFieldToTargetMeters,
-              kCameraToRobotMeters);
+    // if (result.hasTargets()) {
+    //   Pose2d cameraEstimatedPose =
+    //       PhotonUtils.estimateFieldToRobot(
+    //           kCameraHeightMeters,
+    //           kTargetHeightMeters,
+    //           kCameraPitchRadians,
+    //           Math.toRadians(result.getBestTarget().getPitch()),
+    //           Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
+    //           this.getHeading(),
+    //           kFieldToTargetMeters,
+    //           kCameraToRobotMeters);
 
-      double imageCaptureTime = Timer.getFPGATimestamp() - result.getLatencyMillis();
+    //   double imageCaptureTime = Timer.getFPGATimestamp() - result.getLatencyMillis();
 
-      // System.out.println("cam estimated: " + cameraEstimatedPose.toString());
-      m_poseEstimator.addVisionMeasurement(cameraEstimatedPose, imageCaptureTime);
-    }
+    //   // System.out.println("cam estimated: " + cameraEstimatedPose.toString());
+    //   m_poseEstimator.addVisionMeasurement(cameraEstimatedPose, imageCaptureTime);
+    // }
 
     // System.out.println("pose: " + getPoseMeters().toString());
     m_field.setRobotPose(getPoseMeters());

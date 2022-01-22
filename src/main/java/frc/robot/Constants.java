@@ -152,7 +152,7 @@ public final class Constants {
         Math.sqrt(Math.pow(kWheelbaseLengthMeters / 2, 2) + Math.pow(kWheelbaseWidthMeters / 2, 2));
 
     // Max speed teleoperated
-    public static final double kTeleopMaxSpeedMetersPerSecond = 2; // meters per second
+    public static final double kTeleopMaxSpeedMetersPerSecond = 4; // meters per second
     public static final double kTeleopMaxAngularSpeedRadiansPerSecond =
         kTeleopMaxSpeedMetersPerSecond / kTurningRadiusMeters; // radians per second
 
@@ -188,5 +188,9 @@ public final class Constants {
         new Transform2d(
             new Translation2d(-0.45, 0), // in meters
             new Rotation2d());
+  }
+
+  public static final class IntakeConstants {
+    public static final int kIntakePort = 15;
   }
 }

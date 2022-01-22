@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.*;
 import static frc.robot.Constants.AutoConstants.*;
 import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
@@ -20,7 +21,6 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import org.photonvision.PhotonCamera;
-import org.photonvision.common.hardware.VisionLEDMode;
 
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
@@ -28,9 +28,10 @@ public class RobotContainer {
 
   private final PhotonCamera m_camera = new PhotonCamera("gloworm");
   private final Drivetrain m_drivetrain = new Drivetrain(m_camera);
+  private final Intake m_intake = new Intake();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    m_camera.setLED(VisionLEDMode.kOn);
+    // m_camera.setLED(VisionLEDMode.kOn);
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -51,6 +52,44 @@ public class RobotContainer {
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
 
     m_driver.a().whenHeld(new AlignToTarget(m_drivetrain, m_camera));
+
+    m_driver
+        .b()
+        .whileHeld(
+            new InstantCommand(
+                () -> {
+                  m_intake.setVoltage(-m_driver.getRightTriggerAxis() * kNominalVoltage);
+                }))
+        .whenReleased(
+            new InstantCommand(
+                () -> {
+                  m_intake.setVoltage(0);
+                }));
+
+    m_driver
+        .start()
+        .whileHeld(
+            new InstantCommand(
+                () -> {
+                  m_intake.setVoltage(-6.5);
+                }))
+        .whenReleased(
+            new InstantCommand(
+                () -> {
+                  m_intake.setVoltage(0);
+                }));
+    m_driver
+        .back()
+        .whileHeld(
+            new InstantCommand(
+                () -> {
+                  m_intake.setVoltage(4);
+                }))
+        .whenReleased(
+            new InstantCommand(
+                () -> {
+                  m_intake.setVoltage(0);
+                }));
   }
 
   /**

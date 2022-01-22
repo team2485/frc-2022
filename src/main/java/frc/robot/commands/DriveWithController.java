@@ -52,6 +52,8 @@ public class DriveWithController extends CommandBase {
 
     final boolean fieldRelative = !m_driver.y().get();
     m_drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative);
+
+    System.out.println(m_driver.getRightTriggerAxis());
   }
 
   // Called once the command ends or is interrupted.
