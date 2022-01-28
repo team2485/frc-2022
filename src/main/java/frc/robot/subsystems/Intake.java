@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.IntakeConstants.*;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
@@ -28,12 +29,12 @@ public class Intake extends SubsystemBase implements Loggable{
   @Log(name = "Detected Color")
   public String getDetectedColorString() {
     String colorString;
-    if(this.getDetectedColor().color == kBlueBallColor) {
+    if(this.getDetectedColor() == kBlueBallColor) {
       colorString = "Blue";
-    } else if (this.getDetectedColor().color == kRedBallColor) {
+    } else if (this.getDetectedColor() == kRedBallColor) {
       colorString = "Red";
     } else {
-      colorString = "Unknown, RGB:" + this.getDetectedColor().color.red + ", " + this.getDetectedColor().color.green + ", " + this.getDetectedColor().color.green  ;
+      colorString = "Unknown, RGB:" + this.getDetectedColor().red + ", " + this.getDetectedColor().green + ", " + this.getDetectedColor().green  ;
     }
 
     return colorString;
@@ -41,14 +42,26 @@ public class Intake extends SubsystemBase implements Loggable{
 
   @Log(name = "Detected Color Confidence")
   public double getDetectedColorConfidence() {
-    return this.getDetectedColor().confidence;
+    return this.getDetectedColorResult().confidence;
   }
 
-  public ColorMatchResult getDetectedColor() {
+  @Log(name = "Detected Proximity")
+  public double getProximity() {
+    return m_colorSensor.getProximity();
+  }
+
+  public Color getDetectedColor() {
+    return getDetectedColorResult().color;
+  }
+  public ColorMatchResult getDetectedColorResult() {
     return m_colorMatcher.matchClosestColor(m_colorSensor.getColor());
   }
 
   public void setVoltage(double voltage) {
     m_talon.setVoltage(voltage);
+  }
+
+  public void setPWM (double pwm) {
+    m_talon.set(ControlMode.PercentOutput, pwm);
   }
 }

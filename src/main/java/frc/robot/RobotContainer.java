@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
@@ -53,18 +54,7 @@ public class RobotContainer {
 
     m_driver.a().whenHeld(new AlignToTarget(m_drivetrain, m_camera));
 
-    m_driver
-        .b()
-        .whileHeld(
-            new InstantCommand(
-                () -> {
-                  m_intake.setVoltage(-m_driver.getRightTriggerAxis() * kNominalVoltage);
-                }))
-        .whenReleased(
-            new InstantCommand(
-                () -> {
-                  m_intake.setVoltage(0);
-                }));
+    m_driver.b().whileHeld(new IntakeColorSpecific(m_intake, Color.kBlue));
 
     m_driver
         .start()
