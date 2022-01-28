@@ -10,6 +10,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.util.Color;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -192,5 +194,11 @@ public final class Constants {
 
   public static final class IntakeConstants {
     public static final int kIntakePort = 15;
+
+    public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
+
+    public static final Color kBlueBallColor = new Color(0, 0, 1);
+    public static final Color kRedBallColor = new Color(1, 0, 0);
+
   }
 }
