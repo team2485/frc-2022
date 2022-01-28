@@ -51,6 +51,7 @@ public class RobotContainer {
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
 
     m_driver.a().whenHeld(new AlignToTarget(m_drivetrain, m_camera));
+
   }
 
   /**
@@ -62,7 +63,9 @@ public class RobotContainer {
     // load path from deploy/pathplanner folder
     PathPlannerTrajectory testPath =
         PathPlanner.loadPath(
-            "Test Path", kAutoMaxSpeedMetersPerSecond, kAutoMaxAccelerationMetersPerSecondSquared);
+            "Blue 4 Ball Bottom Side (NOH)",
+            kAutoMaxSpeedMetersPerSecond,
+            kAutoMaxAccelerationMetersPerSecondSquared);
 
     // put trajectory on Glass's Field2d widget
     m_drivetrain.getField2d().getObject("traj").setTrajectory(testPath);
@@ -91,7 +94,8 @@ public class RobotContainer {
             m_drivetrain::setModuleStates,
             m_drivetrain);
 
-    return resetOdometry.andThen(testPathCommand);
+    return resetOdometry
+        .andThen(testPathCommand);
   }
 
   // whenever the robot is disabled, drive should be turned off

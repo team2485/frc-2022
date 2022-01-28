@@ -102,8 +102,8 @@ public final class Constants {
     public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;
 
     //// Turning PID constants
-    public static final double kPTurning = 0.2;
-    public static final double kDTurning = 0.05;
+    public static final double kPTurning = 0.1;
+    public static final double kDTurning = 0.02;
     public static final double kFTurning = 0.4 * 1023 / 8360;
 
     //// Turning trapezoidal motion profile/motion magic constants

@@ -66,8 +66,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     m_pigeon = new PigeonIMU(kPigeonPort);
 
-    Pose2d initialPoseMeters = new Pose2d(new Translation2d(0, 0), new Rotation2d());
-
+    Pose2d initialPoseMeters =
+        new Pose2d(new Translation2d(7.48, 1.74), Rotation2d.fromDegrees(-90));
     m_poseEstimator =
         new SwerveDrivePoseEstimator(
             this.getHeading(),

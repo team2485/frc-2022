@@ -1,5 +1,11 @@
 {
   "NetworkTables": {
+    "LiveWindow": {
+      "open": true
+    },
+    "SmartDashboard": {
+      "open": true
+    },
     "types": {
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/Drivetrain": "Subsystem",
@@ -16,6 +22,7 @@
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[20]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[21]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[22]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
@@ -40,6 +47,7 @@
           "weight": 2.0
         },
         "window": {
+          "name": "Field",
           "visible": true
         }
       }
@@ -47,10 +55,6 @@
   },
   "NetworkTables Settings": {
     "mode": "Client",
-    "serverTeam": "2485",
-    "visible": false
-  },
-  "NetworkTables View": {
-    "visible": false
+    "serverTeam": "2485"
   }
 }

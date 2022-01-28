@@ -37,17 +37,17 @@ public class DriveWithController extends CommandBase {
 
     final double xSpeed =
         -m_xSpeedLimiter.calculate(
-                Deadband.squareScaleDeadband(m_driver.getLeftY(), kDriverLeftYDeadband))
+                Deadband.cubicScaledDeadband(m_driver.getLeftY(), kDriverLeftYDeadband))
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double ySpeed =
         -m_ySpeedLimiter.calculate(
-                Deadband.squareScaleDeadband(m_driver.getLeftX(), kDriverLeftXDeadband))
+                Deadband.cubicScaledDeadband(m_driver.getLeftX(), kDriverLeftXDeadband))
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double rot =
         -m_rotLimiter.calculate(
-                Deadband.squareScaleDeadband(m_driver.getRightX(), kDriverRightXDeadband))
+                Deadband.cubicScaledDeadband(m_driver.getRightX(), kDriverRightXDeadband))
             * kTeleopMaxAngularSpeedRadiansPerSecond;
 
     final boolean fieldRelative = !m_driver.y().get();
