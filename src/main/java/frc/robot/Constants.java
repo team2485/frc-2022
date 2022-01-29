@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -148,6 +149,13 @@ public final class Constants {
     public static final double kWheelbaseLengthMeters = 0.635; // meters
     public static final double kWheelbaseWidthMeters = 0.508; // meters
 
+    public static final SwerveDriveKinematics kDriveKinematics =
+        new SwerveDriveKinematics(
+            new Translation2d(kWheelbaseLengthMeters / 2, kWheelbaseWidthMeters / 2),
+            new Translation2d(kWheelbaseLengthMeters / 2, -kWheelbaseWidthMeters / 2),
+            new Translation2d(-kWheelbaseLengthMeters / 2, kWheelbaseWidthMeters / 2),
+            new Translation2d(-kWheelbaseLengthMeters / 2, -kWheelbaseWidthMeters / 2));
+
     public static final double kTurningRadiusMeters =
         Math.sqrt(Math.pow(kWheelbaseLengthMeters / 2, 2) + Math.pow(kWheelbaseWidthMeters / 2, 2));
 
@@ -156,37 +164,73 @@ public final class Constants {
     public static final double kTeleopMaxAngularSpeedRadiansPerSecond =
         kTeleopMaxSpeedMetersPerSecond / kTurningRadiusMeters; // radians per second
 
-    public static final SwerveDriveKinematics kDriveKinematics =
-        new SwerveDriveKinematics(
-            new Translation2d(kWheelbaseLengthMeters / 2, kWheelbaseWidthMeters / 2),
-            new Translation2d(kWheelbaseLengthMeters / 2, -kWheelbaseWidthMeters / 2),
-            new Translation2d(-kWheelbaseLengthMeters / 2, kWheelbaseWidthMeters / 2),
-            new Translation2d(-kWheelbaseLengthMeters / 2, -kWheelbaseWidthMeters / 2));
+    // Vision pose estimation constants
+    public static final double kVisionShiftPerSec =
+        0.85; // After one second, what % of pose average should be vision (4% in weighted avg)
+
+    public static final double kVisionMaxAngularVelocityRadians =
+        Units.degreesToRadians(8.0); // Max angular velocity before vision data is rejected
+
+    public static final int kPoseHistoryCapacity = 500;
   }
 
   public static final class FieldConstants {
     // ALL CONSTANTS IN METERS
-    // THIS IS FOR A RECYCLING BIN -- CHANGE FOR REAL FIELD!
-    public static final double kTargetHeightMeters = 0.58;
 
+    public static final double kVisionTargetHeightLower =
+        Units.inchesToMeters(8 * 12 + 5.625); // Bottom of tape
+
+    public static final double kVisionTargetHeightUpper =
+        kVisionTargetHeightLower + Units.inchesToMeters(2);
+
+    public static final double kVisionTargetRadius = Units.inchesToMeters(4.0 * 12.0 + 5.375) / 2;
     // All coordinates start at blue terminal corner (0,0)
     // Driver station to driver station is x
 
-    public static final Translation2d kHubCenterPositionMeters = new Translation2d(8.2296, 4.1148);
-    public static final Pose2d kFieldToTargetMeters =
-        new Pose2d(kHubCenterPositionMeters, new Rotation2d(0));
+    public static final Translation2d kHubCenterTranslation = new Translation2d(8.2296, 4.1148);
+    public static final Pose2d kHubCenterPosition =
+        new Pose2d(kHubCenterTranslation, new Rotation2d(0));
   }
 
   public static final class VisionConstants {
+    public static final String kCameraName = "gloworm";
     public static final double kPAngle = 0.05;
     public static final double kDAngle = 0.01;
 
-    public static final double kCameraHeightMeters = 0.11;
-    public static final double kCameraPitchRadians = Math.toRadians(27);
+    public static final double kVisionNominalFramerate = 45;
 
-    public static final Transform2d kCameraToRobotMeters =
+    public static final double kLensHeightMeters = 0.11;
+    public static final double kLensPitchRadians = Math.toRadians(27);
+    public static final Rotation2d kCameraPitch = new Rotation2d(kLensPitchRadians);
+
+    // width of camera FOV (angle)
+    public static final Rotation2d kCameraFOVW = Rotation2d.fromDegrees(59.6);
+
+    // height of camera FOV (angle)
+    public static final Rotation2d kCameraFOVH = Rotation2d.fromDegrees(49.7);
+
+    // How much do the height and width of the camera vieport change for every meter out from the
+    // camera?
+    public static final double kCameraViewportRatioW = 2 * kCameraFOVW.times(0.5).getTan();
+    public static final double kCameraViewportRatioH = 2 * kCameraFOVH.times(0.5).getTan();
+
+    public static final int kCameraPixelsX = 960;
+    public static final int kCameraPixelsY = 720;
+
+    public static final int kMinTargetCount = 2;
+    public static final double kCircleFitPrecision = 0.01;
+
+    public static final double kExtraLatencySecs = 0.06;
+
+    // idle behavior
+    public static final double kTargetGraceSecs =
+        0.5; // how long after target loss to wait for reaquire
+    public static final double kBlinkPeriodSecs = 3.0;
+    public static final double kBlinkLengthSecs = 0.5;
+
+    public static final Transform2d kRobotToCameraMeters =
         new Transform2d(
-            new Translation2d(-0.45, 0), // in meters
+            new Translation2d(0.45, 0), // in meters
             new Rotation2d());
   }
 }

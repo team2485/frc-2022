@@ -19,18 +19,16 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
-import org.photonvision.PhotonCamera;
-import org.photonvision.common.hardware.VisionLEDMode;
 
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
 
-  private final PhotonCamera m_camera = new PhotonCamera("gloworm");
-  private final Drivetrain m_drivetrain = new Drivetrain(m_camera);
+  private final Drivetrain m_drivetrain = new Drivetrain();
+  private final Vision m_vision = new Vision();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    m_camera.setLED(VisionLEDMode.kOn);
+    m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -50,8 +48,7 @@ public class RobotContainer {
 
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
 
-    m_driver.a().whenHeld(new AlignToTarget(m_drivetrain, m_camera));
-
+    // m_driver.a().whenHeld(new AlignToTarget(m_drivetrain));
   }
 
   /**
@@ -79,7 +76,7 @@ public class RobotContainer {
     InstantCommand resetOdometry =
         new InstantCommand(
             () -> {
-              m_drivetrain.resetPoseEstimator(testPath.getInitialPose());
+              m_drivetrain.resetOdometry(testPath.getInitialPose(), false);
             });
 
     // create command to follow path
@@ -94,8 +91,7 @@ public class RobotContainer {
             m_drivetrain::setModuleStates,
             m_drivetrain);
 
-    return resetOdometry
-        .andThen(testPathCommand);
+    return resetOdometry.andThen(testPathCommand);
   }
 
   // whenever the robot is disabled, drive should be turned off
