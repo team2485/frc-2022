@@ -195,10 +195,14 @@ public final class Constants {
   public static final class IntakeConstants {
     public static final int kIntakePort = 15;
 
+    public static final double kIntakePWM = -0.5;
+    public static final double kOuttakePWM = 0.5;
+
     public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
 
-    public static final Color kBlueBallColor = new Color(0, 0, 1);
-    public static final Color kRedBallColor = new Color(1, 0, 0);
+    public static final Color kBlueBallColor = new Color(0.26, 0.42, 0.32);
+    public static final Color kRedBallColor = new Color(0.35, 0.40, 0.25);
 
+    public static final double kColorConfidenceLevel = 0.97;
   }
 }

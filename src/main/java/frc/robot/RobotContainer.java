@@ -13,14 +13,17 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
+import io.github.oblarg.oblog.annotations.*;
 import org.photonvision.PhotonCamera;
 
 public class RobotContainer {
@@ -30,6 +33,8 @@ public class RobotContainer {
   private final PhotonCamera m_camera = new PhotonCamera("gloworm");
   private final Drivetrain m_drivetrain = new Drivetrain(m_camera);
   private final Intake m_intake = new Intake();
+
+  private Alliance m_currentAlliance = DriverStation.getAlliance();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // m_camera.setLED(VisionLEDMode.kOn);
@@ -54,7 +59,10 @@ public class RobotContainer {
 
     m_driver.a().whenHeld(new AlignToTarget(m_drivetrain, m_camera));
 
-    m_driver.b().whileHeld(new IntakeColorSpecific(m_intake, Color.kBlue));
+    m_driver
+        .b()
+        .whileHeld(new IntakeColorSpecific(m_intake, DriverStation.getAlliance()))
+        .whenReleased(new InstantCommand(() -> m_intake.setVoltage(0)));
 
     m_driver
         .start()
@@ -123,8 +131,13 @@ public class RobotContainer {
     return resetOdometry.andThen(testPathCommand);
   }
 
+  public void robotPeriodic() {
+    SmartDashboard.putString("Current Alliance", DriverStation.getAlliance().toString());
+  }
+
   // whenever the robot is disabled, drive should be turned off
   public void disabledInit() {
     m_drivetrain.drive(0, 0, 0, false);
+    m_intake.setVoltage(0);
   }
 }
