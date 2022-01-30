@@ -16,7 +16,6 @@ import io.github.oblarg.oblog.annotations.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.photonvision.PhotonCamera;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -38,7 +37,7 @@ public class Vision extends SubsystemBase implements Loggable {
 
   @Log private boolean m_LEDsOn = false;
 
-  private Supplier<LEDSetMode> m_LEDModeSupplier;
+  private LEDSetMode m_LEDSetMode;
   private boolean m_forceLEDs = false;
 
   private Consumer<TimestampedTranslation2d> m_translationConsumer;
@@ -76,8 +75,34 @@ public class Vision extends SubsystemBase implements Loggable {
             EntryListenerFlags.kUpdate);
   }
 
-  public void setLEDMode(Supplier<LEDSetMode> supplier) {
-    this.m_LEDModeSupplier = supplier;
+  public void setLEDMode(LEDSetMode mode) {
+    this.m_LEDSetMode = mode;
+  }
+
+  @Log(name = "LED Set Mode", tabName = "RobotContainer")
+  public String getLEDSetModeString() {
+    return this.getLEDSetMode().toString();
+  }
+
+  public LEDSetMode getLEDSetMode() {
+    return m_LEDSetMode;
+  }
+
+  /**
+   * If current LED mode is Auto, turn to AlwaysOff. If current LED mode is AlwaysOff, turn to
+   * AlwaysOn. If current LED mode is AlwaysOn, turn to Auto.
+   */
+  public void cycleLEDMode() {
+    switch (m_LEDSetMode) {
+      case kAuto:
+        this.setLEDMode(LEDSetMode.kAlwaysOff);
+      case kAlwaysOff:
+        this.setLEDMode(LEDSetMode.kAlwaysOn);
+      case kAlwaysOn:
+        this.setLEDMode(LEDSetMode.kAuto);
+      default:
+        this.setLEDMode(LEDSetMode.kAuto);
+    }
   }
 
   /** Use to enable LEDs continuously while override is "Auto" */
@@ -110,7 +135,7 @@ public class Vision extends SubsystemBase implements Loggable {
             || Timer.getFPGATimestamp() % kBlinkPeriodSecs < kBlinkLengthSecs;
 
     // Update LED mode based on supplier/idle state/DS state
-    switch (m_LEDModeSupplier.get()) {
+    switch (m_LEDSetMode) {
       case kAlwaysOn:
         m_LEDsOn = true;
       case kAlwaysOff:

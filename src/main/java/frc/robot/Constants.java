@@ -85,8 +85,6 @@ public final class Constants {
     public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
     public static final double kaMaxAcceleration = 12 / kaDriveVoltSecondsSquaredPerMeter;
 
-    public static final double mah = 1;
-
     //// Drive PID constants
     public static final double kPDrive = 0.05;
     // Turning control constants
@@ -224,7 +222,7 @@ public final class Constants {
 
     // idle behavior
     public static final double kTargetGraceSecs =
-        0.5; // how long after target loss to wait for reaquire
+        0.5; // how long after target loss to wait for reaquire before turning to blink mode
     public static final double kBlinkPeriodSecs = 3.0;
     public static final double kBlinkLengthSecs = 0.5;
 

@@ -51,6 +51,11 @@ public class RobotContainer {
     // m_driver.a().whenHeld(new AlignToTarget(m_drivetrain));
   }
 
+  private void configureVisionCommands() {
+    // cycle LED Mode when start button pressed
+    m_driver.start().whenPressed(new InstantCommand(m_vision::cycleLEDMode));
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
