@@ -18,6 +18,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
  */
 public final class Constants {
     public static final String kRobotIdFile = "/home/lvuser/id.txt";
+    public static final double kNominalVoltage = 12.0;
 
     public static final class OIConstants {
         public static final int kDriverPort = 0;
@@ -35,16 +36,16 @@ public final class Constants {
         public static final int kRevEncoderSamplesToAverage = 5;
         public static final int kFalconPulsesPerRevolution = 2048;
         
-        public static final double kFlywheelRotationsPerPulse = 1.0/4*kFalconPulsesPerRevolution;
+        public static final double kFlywheelRotationsPerPulse = 1.0/kFalconPulsesPerRevolution;
 
         public static final double kFlywheelMaxSpeedRotationsPerSecond = 30;
-        public static final double kS = 0.24859;
-        public static final double kV = 0.47227;
-        public static final double kA = 0.57748;
-
-
+        public static final double kS = 0.65884;
+        public static final double kV = 0.11065;
+        public static final double kA = 0.023167;
 
         public static final double kP = 1;
         public static final double kD = 0;
+
+        public static final double kVelocityTolerance = 0.5;
     }
 }
