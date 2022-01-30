@@ -165,7 +165,7 @@ public final class Constants {
         kTeleopMaxSpeedMetersPerSecond / kTurningRadiusMeters; // radians per second
 
     // Vision pose estimation constants
-    public static final double kVisionShiftPerSec =
+    public static final double kVisionWeightPerSec =
         0.85; // After one second, what % of pose average should be vision (4% in weighted avg)
 
     public static final double kVisionMaxAngularVelocityRadians =

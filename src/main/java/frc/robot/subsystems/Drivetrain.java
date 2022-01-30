@@ -6,7 +6,8 @@ import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.Constants.VisionConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.sensors.PigeonIMU;
+import com.ctre.phoenix.sensors.WPI_PigeonIMU;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -31,7 +32,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   private final SwerveModule m_backLeftModule;
   private final SwerveModule m_backRightModule;
 
-  private final PigeonIMU m_pigeon;
+  private final WPI_PigeonIMU m_pigeon;
 
   private final SwerveDriveOdometry m_odometry;
 
@@ -64,7 +65,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         new SwerveModule(
             kBRDriveTalonPort, kBRTurningTalonPort, kBRCANCoderPort, kBRCANCoderZero, "BR");
 
-    m_pigeon = new PigeonIMU(kPigeonPort);
+    m_pigeon = new WPI_PigeonIMU(kPigeonPort);
 
     m_odometry =
         new SwerveDriveOdometry(
@@ -147,11 +148,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     return m_pigeon.getFusedHeading();
   }
 
-  /**
-   * Returns the current heading reading from the Pigeon.
-   *
-   * @return
-   */
+  /** Returns the current heading reading from the Pigeon. */
   public Rotation2d getHeading() {
     return Rotation2d.fromDegrees(m_pigeon.getFusedHeading());
   }
@@ -159,6 +156,11 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   /** Sets the pigeon's current heading to zero. */
   public void zeroHeading() {
     m_pigeon.setFusedHeading(0);
+  }
+
+  /** Returns the current angular velocity in radians per second */
+  public double getAngularVelocityRadiansPerSecond() {
+    return Math.toRadians(-m_pigeon.getRate());
   }
 
   /**
@@ -211,7 +213,19 @@ public class Drivetrain extends SubsystemBase implements Loggable {
               visionFieldToTargetTransform.getRotation());
 
       // Calculate percent weight to give to vision
-      double visionShift = 1 - Math.pow(1 - kVisionShiftPerSec, 1 / kVisionNominalFramerate);
+      // Calculate current percentage of max angular velocity
+      double angularErrorScale =
+          MathUtil.clamp(
+              Math.abs(this.getAngularVelocityRadiansPerSecond())
+                  / kVisionMaxAngularVelocityRadians,
+              0,
+              1);
+
+      // find weight to give vision
+      double visionWeight = 1 - Math.pow(1 - kVisionWeightPerSec, 1 / kVisionNominalFramerate);
+
+      // Scale weight to be 0 when angular velocity is at max
+      visionWeight *= 1 - angularErrorScale;
 
       // Reset pose
       Pose2d currentFieldToTarget = getPoseMeters();
@@ -238,10 +252,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
       } else {
         resetOdometry(
             new Pose2d(
-                currentFieldToTarget.getX() * (1 - visionShift)
-                    + visionLatencyCompFieldToTarget.getX() * visionShift,
-                currentFieldToTarget.getY() * (1 - visionShift)
-                    + visionLatencyCompFieldToTarget.getY() * visionShift,
+                currentFieldToTarget.getX() * (1 - visionWeight)
+                    + visionLatencyCompFieldToTarget.getX() * visionWeight,
+                currentFieldToTarget.getY() * (1 - visionWeight)
+                    + visionLatencyCompFieldToTarget.getY() * visionWeight,
                 currentFieldToTarget.getRotation()),
             false);
       }
