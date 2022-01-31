@@ -67,7 +67,7 @@ public final class Constants {
 
   public static final class ModuleConstants {
     // Drive control constants
-    public static final double kDriveCurrentLimitAmps = 80;
+    public static final double kDriveCurrentLimitAmps = 60;
 
     //// Drive mechanism/encoder constants
     public static final double kWheelDiameterMeters = 0.1016;
@@ -88,7 +88,7 @@ public final class Constants {
     //// Drive PID constants
     public static final double kPDrive = 0.05;
     // Turning control constants
-    public static final double kTurningCurrentLimitAmps = 20;
+    public static final double kTurningCurrentLimitAmps = 60;
 
     //// Turning mechanism/encoder constants
     public static final double kTurningGearRatio = 12.8; // motor turns per shaft turns
