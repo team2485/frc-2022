@@ -170,6 +170,8 @@ public final class Constants {
         Units.degreesToRadians(8.0); // Max angular velocity before vision data is rejected
 
     public static final int kPoseHistoryCapacity = 500;
+
+    public static final double kPAngleHubTracking = 2;
   }
 
   public static final class FieldConstants {

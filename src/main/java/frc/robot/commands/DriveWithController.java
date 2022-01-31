@@ -11,46 +11,63 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
-import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import frc.team2485.WarlordsLib.oi.Deadband;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 public class DriveWithController extends CommandBase {
-  private final CommandXboxController m_driver;
+  private final DoubleSupplier m_xSpeedSupplier;
+  private final DoubleSupplier m_ySpeedSupplier;
+  private final DoubleSupplier m_rotSpeedSupplier;
+  private final BooleanSupplier m_fieldRelative;
+
   private final Drivetrain m_drivetrain;
 
   private final SlewRateLimiter m_xSpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
   private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(kDriveSlewRate);
 
-  public DriveWithController(CommandXboxController driver, Drivetrain drivetrain) {
-    this.m_driver = driver;
+  public DriveWithController(
+      DoubleSupplier xSpeedSupplier,
+      DoubleSupplier ySpeedSupplier,
+      DoubleSupplier rotSpeedSupplier,
+      BooleanSupplier fieldRelative,
+      Drivetrain drivetrain) {
+
+    this.m_xSpeedSupplier = xSpeedSupplier;
+    this.m_ySpeedSupplier = ySpeedSupplier;
+    this.m_rotSpeedSupplier = rotSpeedSupplier;
+    this.m_fieldRelative = fieldRelative;
+
     this.m_drivetrain = drivetrain;
+
     addRequirements(m_drivetrain);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    SmartDashboard.putNumber("xbox right x", m_driver.getRightX());
-    SmartDashboard.putNumber("xbox left x", m_driver.getLeftX());
-    SmartDashboard.putNumber("xbox left y", m_driver.getLeftY());
+    SmartDashboard.putNumber("xbox right x", m_xSpeedSupplier.getAsDouble());
+    SmartDashboard.putNumber("xbox left x", m_ySpeedSupplier.getAsDouble());
+    SmartDashboard.putNumber("xbox left y", m_rotSpeedSupplier.getAsDouble());
 
     final double xSpeed =
         -m_xSpeedLimiter.calculate(
-                Deadband.cubicScaledDeadband(m_driver.getLeftY(), kDriverLeftYDeadband))
+                Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband))
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double ySpeed =
         -m_ySpeedLimiter.calculate(
-                Deadband.cubicScaledDeadband(m_driver.getLeftX(), kDriverLeftXDeadband))
+                Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband))
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double rot =
         -m_rotLimiter.calculate(
-                Deadband.cubicScaledDeadband(m_driver.getRightX(), kDriverRightXDeadband))
+                Deadband.cubicScaledDeadband(
+                    m_rotSpeedSupplier.getAsDouble(), kDriverRightXDeadband))
             * kTeleopMaxAngularSpeedRadiansPerSecond;
 
-    final boolean fieldRelative = !m_driver.y().get();
+    final boolean fieldRelative = m_fieldRelative.getAsBoolean();
     m_drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative);
   }
 

@@ -44,7 +44,15 @@ public class RobotContainer {
   }
 
   private void configureDrivetrainCommands() {
-    m_drivetrain.setDefaultCommand(new DriveWithController(m_driver, m_drivetrain));
+    m_drivetrain.setDefaultCommand(
+        new DriveWithController(
+            m_driver::getLeftY,
+            m_driver::getLeftX,
+            m_driver::getRightX,
+            () -> {
+              return !m_driver.y().get();
+            },
+            m_drivetrain));
 
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
 
@@ -52,7 +60,7 @@ public class RobotContainer {
   }
 
   private void configureVisionCommands() {
-    // cycle LED Mode when start button pressed
+    // Cycle LED Mode when start button pressed
     m_driver.start().whenPressed(new InstantCommand(m_vision::cycleLEDMode));
   }
 
