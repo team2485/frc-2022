@@ -4,13 +4,14 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.FlywheelConstants.*;
+import static frc.robot.Constants.OIConstants.*;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Flywheel;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import static frc.robot.Constants.OIConstants.*;
-import static frc.robot.Constants.FlywheelConstants.*;
 
 public class RobotContainer {
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
@@ -24,13 +25,14 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your utton->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * Use this method to define your utton->command mappings. Buttons can be created by instantiating
+   * a {@link GenericHID} or one of its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or {@link
+   * XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    m_flywheel.setVelocityRotationsPerSecond(m_operator.getLeftY() * kFlywheelMaxSpeedRotationsPerSecond);
+    m_flywheel.setVelocityRotationsPerSecond(
+        m_operator.getLeftY() * kFlywheelMaxSpeedRotationsPerSecond);
   }
 
   /**
