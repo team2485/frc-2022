@@ -19,7 +19,7 @@ import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Flywheel extends SubsystemBase implements Loggable {
-  private final WPI_TalonFX m_talon = new WPI_TalonFX(kTalonPort);
+  private final WPI_TalonFX m_talon = new WPI_TalonFX(kFlywheelTalonPort);
 
   private final SimpleMotorFeedforward m_flywheelFeedforward =
       new SimpleMotorFeedforward(kS, kV, kA);
@@ -31,6 +31,9 @@ public class Flywheel extends SubsystemBase implements Loggable {
   /** Creates a new Flywheel. Controlled with a feedforward and a bang bang controlller. */
   public Flywheel() {
     TalonFXConfiguration flywheelTalonConfig = new TalonFXConfiguration();
+    flywheelTalonConfig.supplyCurrLimit.currentLimit = kFlywheelTalonCurrentLimit;
+    flywheelTalonConfig.supplyCurrLimit.enable = true;
+    driveMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
     m_talon.configAllSettings(flywheelTalonConfig);
 
     m_talon.setNeutralMode(NeutralMode.Coast);
