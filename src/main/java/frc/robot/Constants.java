@@ -23,10 +23,8 @@ public final class Constants {
 
   public static final class FlywheelConstants {
     public static final int kTalonPort = 11;
-    public static final int kRightTalonPort = 3;
 
-    public static final int kFlywheelEncoderPort1 = 0;
-    public static final int kFlywheelEncoderPort2 = 1;
+    public static final kFlywheelTalonCurrentLimit = 50;
 
     public static final int kRevEncoderPulsesPerRevolution = 2048;
     public static final int kRevEncoderSamplesToAverage = 5;
@@ -46,5 +44,9 @@ public final class Constants {
     public static final double kD = 0;
 
     public static final double kVelocityTolerance = 0.5;
+  }
+
+  public static final class HoodConstants {
+    public static final int kSparkPort = 0;
   }
 }
