@@ -9,12 +9,9 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
@@ -30,27 +27,13 @@ public class DriveFacingHub extends CommandBase {
   private final SlewRateLimiter m_xSpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
   private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
 
-  private NetworkTableEntry kP = Shuffleboard.getTab("Drivetrain").add("kP", 0).getEntry();
-  private NetworkTableEntry kD = Shuffleboard.getTab("Drivetrain").add("kD", 0).getEntry();
-
-  private final PIDController m_anglePIDController =
-      new PIDController(kP.getDouble(0.2), 0, kD.getDouble(0.1));
-
-  // private final ProfiledPIDController m_anglePIDController =
-  //   new ProfiledPIDController(kPAutoThetaController, 0, 0, kAutoThetaControllerConstraints);
-
   public DriveFacingHub(
       DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier, Drivetrain drivetrain) {
-
-    m_anglePIDController.enableContinuousInput(-Math.PI, Math.PI);
-    m_anglePIDController.setTolerance(0.2);
 
     this.m_xSpeedSupplier = xSpeedSupplier;
     this.m_ySpeedSupplier = ySpeedSupplier;
 
     this.m_drivetrain = drivetrain;
-
-    // Shuffleboard.getTab("Drivetrain").add(m_anglePIDController);
 
     addRequirements(m_drivetrain);
   }
@@ -58,8 +41,6 @@ public class DriveFacingHub extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_anglePIDController.setP(kP.getDouble(0.2));
-    m_anglePIDController.setD(kD.getDouble(0.1));
 
     SmartDashboard.putNumber("xbox right x", m_xSpeedSupplier.getAsDouble());
     SmartDashboard.putNumber("xbox left x", m_ySpeedSupplier.getAsDouble());
@@ -100,7 +81,6 @@ public class DriveFacingHub extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-
-    return m_anglePIDController.atSetpoint();
+    return false;
   }
 }

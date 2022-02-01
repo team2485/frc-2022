@@ -97,6 +97,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     setDriveNeutralMode(m_turningNeutralChooser.getSelected());
 
     m_rotationController.setTolerance(kRotationToleranceHubTracking);
+    m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
     SmartDashboard.putData("Field", m_field);
   }

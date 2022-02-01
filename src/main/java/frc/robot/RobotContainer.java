@@ -14,11 +14,13 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
+import io.github.oblarg.oblog.annotations.Log;
 
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
@@ -26,6 +28,13 @@ public class RobotContainer {
 
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Vision m_vision = new Vision();
+
+  @Log(name = "Field Relative")
+  private boolean m_fieldRelativeToggle = true;
+
+  @Log(name = "Facing Hub")
+  private boolean m_hubFacingToggle = false;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
@@ -51,17 +60,15 @@ public class RobotContainer {
             m_driver::getLeftX,
             m_driver::getRightX,
             () -> {
-              return !m_driver.y().get();
+              return !m_driver.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).get();
             },
             m_drivetrain));
 
     m_driver
-        .a()
+        .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         .whileHeld(new DriveFacingHub(m_driver::getLeftY, m_driver::getLeftX, m_drivetrain));
 
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
-
-    // m_driver.a().whenHeld(new AlignToTarget(m_drivetrain));
   }
 
   private void configureVisionCommands() {

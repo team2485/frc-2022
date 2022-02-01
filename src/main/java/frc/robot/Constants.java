@@ -39,6 +39,8 @@ public final class Constants {
     public static final double kDriverRightXDeadband = 0.15;
     public static final double kDriverLeftXDeadband = 0.08;
     public static final double kDriverLeftYDeadband = 0.05;
+
+    public static final double kTriggerThreshold = 0.1;
   }
 
   public static final class AutoConstants {
@@ -171,8 +173,8 @@ public final class Constants {
 
     public static final int kPoseHistoryCapacity = 500;
 
-    public static final double kPAngleHubTracking = 2;
-    public static final double kAngleToleranceHubTracking = 0.1;
+    public static final double kPRotationHubTracking = 2;
+    public static final double kRotationToleranceHubTracking = 0.1;
   }
 
   public static final class FieldConstants {
