@@ -37,7 +37,7 @@ public class Vision extends SubsystemBase implements Loggable {
 
   @Log private boolean m_LEDsOn = false;
 
-  private LEDSetMode m_LEDSetMode;
+  private LEDSetMode m_LEDSetMode = LEDSetMode.kAuto;
   private boolean m_forceLEDs = false;
 
   private Consumer<TimestampedTranslation2d> m_translationConsumer;
@@ -50,6 +50,8 @@ public class Vision extends SubsystemBase implements Loggable {
   private Timer m_targetGraceTimer = new Timer(); // times amount of time since target loss
 
   public Vision() {
+    m_targetGraceTimer.start();
+
     NetworkTableInstance.getDefault()
         .getEntry("/photonvision/" + kCameraName + "/latencyMillis")
         .addListener(
@@ -96,12 +98,16 @@ public class Vision extends SubsystemBase implements Loggable {
     switch (m_LEDSetMode) {
       case kAuto:
         this.setLEDMode(LEDSetMode.kAlwaysOff);
+        break;
       case kAlwaysOff:
         this.setLEDMode(LEDSetMode.kAlwaysOn);
+        break;
       case kAlwaysOn:
         this.setLEDMode(LEDSetMode.kAuto);
+        break;
       default:
         this.setLEDMode(LEDSetMode.kAuto);
+        break;
     }
   }
 
@@ -122,6 +128,7 @@ public class Vision extends SubsystemBase implements Loggable {
   public void periodic() {
     // count targets if LEDs on
     int targetCount = m_LEDsOn ? m_cornerX.length / 4 : 0;
+    // System.out.println("Target Count: " + targetCount);
 
     // Update LED idle state
     // Reset grace timer if targets found
@@ -138,8 +145,10 @@ public class Vision extends SubsystemBase implements Loggable {
     switch (m_LEDSetMode) {
       case kAlwaysOn:
         m_LEDsOn = true;
+        break;
       case kAlwaysOff:
         m_LEDsOn = false;
+        break;
       case kAuto:
         if (m_forceLEDs) {
           m_LEDsOn = true;
@@ -150,8 +159,10 @@ public class Vision extends SubsystemBase implements Loggable {
         } else {
           m_LEDsOn = idleOn;
         }
+        break;
       default:
         m_LEDsOn = false;
+        break;
     }
 
     this.setLEDs(m_LEDsOn);
@@ -212,33 +223,45 @@ public class Vision extends SubsystemBase implements Loggable {
   private static List<Translation2d> sortCorners(
       List<Translation2d> corners, Translation2d average) {
     // Find top corners
-    int topLeftIndex = -1, topRightIndex = -1;
-
-    double minPosRadians = Math.PI;
-    double minNegRadians = Math.PI;
-
+    Integer topLeftIndex = null;
+    Integer topRightIndex = null;
+    double minPosRads = Math.PI;
+    double minNegRads = Math.PI;
     for (int i = 0; i < corners.size(); i++) {
       Translation2d corner = corners.get(i);
-      // Find angle from straight up
-      double angleRadians =
-          new Rotation2d(corner.getX(), corner.getY())
+      double angleRad =
+          new Rotation2d(corner.getX() - average.getX(), average.getY() - corner.getY())
               .minus(Rotation2d.fromDegrees(90))
               .getRadians();
-
-      if (angleRadians > 0 && angleRadians < minPosRadians) {
-        topLeftIndex = i;
-        minPosRadians = angleRadians;
-      } else if (Math.abs(angleRadians) < minNegRadians) {
-        topRightIndex = i;
-        minNegRadians = Math.abs(angleRadians);
+      if (angleRad > 0) {
+        if (angleRad < minPosRads) {
+          minPosRads = angleRad;
+          topLeftIndex = i;
+        }
+      } else {
+        if (Math.abs(angleRad) < minNegRads) {
+          minNegRads = Math.abs(angleRad);
+          topRightIndex = i;
+        }
       }
     }
 
-    int lowerIndex1 = -1, lowerIndex2 = -1;
+    Integer lowerIndex1 = null, lowerIndex2 = null;
     // Find lower corners (don't need left or right)
     for (int i = 0; i < corners.size(); i++) {
-      if (!(topLeftIndex == i || topRightIndex == i)) {
-        if (lowerIndex1 == -1) {
+      boolean alreadySaved = false;
+      if (topLeftIndex != null) {
+        if (topLeftIndex.equals(i)) {
+          alreadySaved = true;
+        }
+      }
+      if (topRightIndex != null) {
+        if (topRightIndex.equals(i)) {
+          alreadySaved = true;
+        }
+      }
+      if (!alreadySaved) {
+        if (lowerIndex1 == null) {
           lowerIndex1 = i;
         } else {
           lowerIndex2 = i;
@@ -248,10 +271,21 @@ public class Vision extends SubsystemBase implements Loggable {
 
     // Produce final list
     List<Translation2d> sortedCorners = new ArrayList();
-    sortedCorners.add(corners.get(topLeftIndex));
-    sortedCorners.add(corners.get(topRightIndex));
-    sortedCorners.add(corners.get(lowerIndex1));
-    sortedCorners.add(corners.get(lowerIndex2));
+    if (topLeftIndex != null) {
+      sortedCorners.add(corners.get(topLeftIndex));
+    }
+
+    if (topRightIndex != null) {
+      sortedCorners.add(corners.get(topRightIndex));
+    }
+
+    if (lowerIndex1 != null) {
+      sortedCorners.add(corners.get(lowerIndex1));
+    }
+
+    if (lowerIndex2 != null) {
+      sortedCorners.add(corners.get(lowerIndex2));
+    }
 
     return sortedCorners;
   }

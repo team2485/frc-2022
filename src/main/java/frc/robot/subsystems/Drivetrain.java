@@ -8,6 +8,7 @@ import static frc.robot.Constants.VisionConstants.*;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -16,6 +17,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,6 +37,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   private final WPI_PigeonIMU m_pigeon;
 
   private final SwerveDriveOdometry m_odometry;
+  private final SwerveDriveOdometry m_odometryWithoutVision;
 
   private PoseHistory poseHistory = new PoseHistory(kPoseHistoryCapacity);
   private Pose2d lastVisionPose = new Pose2d();
@@ -49,7 +52,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Log(name = "Turning Neutral")
   private SendableChooser<NeutralMode> m_turningNeutralChooser = new SendableChooser<NeutralMode>();
 
-  private final Field2d m_field = new Field2d();
+  public final Field2d m_field = new Field2d();
+
+  @Log(name = "Angle PID (hub tracking)")
+  private final PIDController m_rotationController = new PIDController(kPRotationHubTracking, 0, 0);
 
   public Drivetrain() {
     m_frontLeftModule =
@@ -71,6 +77,17 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         new SwerveDriveOdometry(
             kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
 
+    m_odometryWithoutVision =
+        new SwerveDriveOdometry(
+            kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+
+    m_odometry.resetPosition(
+        new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
+        Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+    m_odometryWithoutVision.resetPosition(
+        new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
+        Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+
     m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
     m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);
     setDriveNeutralMode(m_driveNeutralChooser.getSelected());
@@ -78,6 +95,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_turningNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
     m_turningNeutralChooser.addOption("Coast", NeutralMode.Coast);
     setDriveNeutralMode(m_turningNeutralChooser.getSelected());
+
+    m_rotationController.setTolerance(kRotationToleranceHubTracking);
 
     SmartDashboard.putData("Field", m_field);
   }
@@ -87,16 +106,16 @@ public class Drivetrain extends SubsystemBase implements Loggable {
    *
    * @param xSpeed desired forward velocity in meters per second
    * @param ySpeed desired sideways (strafe) velocity in meters per second
-   * @param rot desired angular velocity in radians per second
+   * @param rotSpeed desired angular velocity in radians per second
    * @param fieldRelative whether the robot should drive field-relative or not
    */
-  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+  public void drive(double xSpeed, double ySpeed, double rotSpeed, boolean fieldRelative) {
     SwerveModuleState[] states =
         kDriveKinematics.toSwerveModuleStates(
             fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xSpeed, ySpeed, rot, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
-                : new ChassisSpeeds(xSpeed, ySpeed, rot));
+                    xSpeed, ySpeed, rotSpeed, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
+                : new ChassisSpeeds(xSpeed, ySpeed, rotSpeed));
     SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
 
     m_frontLeftModule.setDesiredState(states[0]);
@@ -104,7 +123,42 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_backLeftModule.setDesiredState(states[2]);
     m_backRightModule.setDesiredState(states[3]);
 
-    this.m_desiredRotation = rot;
+    this.m_desiredRotation = rotSpeed;
+    this.m_desiredXSpeed = xSpeed;
+    this.m_desiredYSpeed = ySpeed;
+  }
+
+  /**
+   * Drives the robot at given speed and rotation position (used for hub facing drive).
+   *
+   * @param xSpeed desired forward velocity in meters per second
+   * @param ySpeed desired sideways (strafe) velocity in meters per second
+   * @param rotation desired rotation
+   * @param fieldRelative whether the robot should drive field-relative or not
+   */
+  public void driveWithRotationPosition(
+      double xSpeed, double ySpeed, double desiredRotation, boolean fieldRelative) {
+
+    double angularVelocity =
+        m_rotationController.calculate(this.getPoseMeters().getRotation().getRadians());
+
+    SwerveModuleState[] states =
+        kDriveKinematics.toSwerveModuleStates(
+            fieldRelative
+                ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                    xSpeed,
+                    ySpeed,
+                    angularVelocity,
+                    Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
+                : new ChassisSpeeds(xSpeed, ySpeed, angularVelocity));
+    SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
+
+    m_frontLeftModule.setDesiredState(states[0]);
+    m_frontRightModule.setDesiredState(states[1]);
+    m_backLeftModule.setDesiredState(states[2]);
+    m_backRightModule.setDesiredState(states[3]);
+
+    this.m_desiredRotation = angularVelocity;
     this.m_desiredXSpeed = xSpeed;
     this.m_desiredYSpeed = ySpeed;
   }
@@ -240,6 +294,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
               currentFieldToTarget.getY() + fieldToVisionField.getY(),
               currentFieldToTarget.getRotation());
 
+      m_field.getObject("Vision").setPose(visionLatencyCompFieldToTarget);
+
       if (m_resetOnVision) {
         resetOdometry(
             new Pose2d(
@@ -283,6 +339,18 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         m_backRightModule.getState(),
         m_frontRightModule.getState(),
         m_backRightModule.getState());
+
+    m_odometryWithoutVision.update(
+        Rotation2d.fromDegrees(m_pigeon.getFusedHeading()),
+        m_frontLeftModule.getState(),
+        m_backRightModule.getState(),
+        m_frontRightModule.getState(),
+        m_backRightModule.getState());
+
+    m_field.getObject("Pure Odometry").setPose(m_odometryWithoutVision.getPoseMeters());
+
+    Pose2d robotPose = m_odometry.getPoseMeters();
+    poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
 
     // System.out.println("pose: " + getPoseMeters().toString());
     m_field.setRobotPose(getPoseMeters());

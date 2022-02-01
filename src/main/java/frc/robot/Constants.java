@@ -172,6 +172,7 @@ public final class Constants {
     public static final int kPoseHistoryCapacity = 500;
 
     public static final double kPAngleHubTracking = 2;
+    public static final double kAngleToleranceHubTracking = 0.1;
   }
 
   public static final class FieldConstants {
@@ -200,7 +201,7 @@ public final class Constants {
     public static final double kVisionNominalFramerate = 45;
 
     public static final double kLensHeightMeters = 0.11;
-    public static final double kLensPitchRadians = Math.toRadians(27);
+    public static final double kLensPitchRadians = Math.toRadians(16.9);
     public static final Rotation2d kCameraPitch = new Rotation2d(kLensPitchRadians);
 
     // width of camera FOV (angle)
@@ -230,7 +231,7 @@ public final class Constants {
 
     public static final Transform2d kRobotToCameraMeters =
         new Transform2d(
-            new Translation2d(0.45, 0), // in meters
+            new Translation2d(0.4, 0), // in meters
             new Rotation2d());
   }
 }

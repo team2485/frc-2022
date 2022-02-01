@@ -41,6 +41,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     this.configureDrivetrainCommands();
+    this.configureVisionCommands();
   }
 
   private void configureDrivetrainCommands() {
@@ -53,6 +54,10 @@ public class RobotContainer {
               return !m_driver.y().get();
             },
             m_drivetrain));
+
+    m_driver
+        .a()
+        .whileHeld(new DriveFacingHub(m_driver::getLeftY, m_driver::getLeftX, m_drivetrain));
 
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
 
