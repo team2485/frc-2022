@@ -23,7 +23,10 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import static frc.robot.Constants.AutoConstants.*;
 import static frc.robot.Constants.DriveConstants.*;
 
+
+
 public class RobotContainer {
+  private IntakeArm m_intakeArm;
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
 
@@ -31,6 +34,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    m_intakeArm = new IntakeArm();
+     m_camera.setLED(VisionLEDMode.kOn);
     // Configure the button bindings
     configureButtonBindings();
   }
