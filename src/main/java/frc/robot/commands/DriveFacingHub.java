@@ -16,11 +16,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 import frc.team2485.WarlordsLib.oi.Deadband;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class DriveFacingHub extends CommandBase {
   private final DoubleSupplier m_xSpeedSupplier;
   private final DoubleSupplier m_ySpeedSupplier;
+  private final BooleanSupplier m_fieldRelative;
 
   private final Drivetrain m_drivetrain;
 
@@ -28,10 +30,14 @@ public class DriveFacingHub extends CommandBase {
   private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
 
   public DriveFacingHub(
-      DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier, Drivetrain drivetrain) {
+      DoubleSupplier xSpeedSupplier,
+      DoubleSupplier ySpeedSupplier,
+      BooleanSupplier fieldRelative,
+      Drivetrain drivetrain) {
 
     this.m_xSpeedSupplier = xSpeedSupplier;
     this.m_ySpeedSupplier = ySpeedSupplier;
+    this.m_fieldRelative = fieldRelative;
 
     this.m_drivetrain = drivetrain;
 
@@ -69,7 +75,8 @@ public class DriveFacingHub extends CommandBase {
 
     SmartDashboard.putNumber("alpha", desiredRotation);
 
-    m_drivetrain.driveWithRotationPosition(xSpeed, ySpeed, desiredRotation, false);
+    m_drivetrain.driveWithRotationPosition(
+        xSpeed, ySpeed, desiredRotation, m_fieldRelative.getAsBoolean());
   }
 
   // Called once the command ends or is interrupted.

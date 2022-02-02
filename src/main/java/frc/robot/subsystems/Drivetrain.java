@@ -140,8 +140,11 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   public void driveWithRotationPosition(
       double xSpeed, double ySpeed, double desiredRotation, boolean fieldRelative) {
 
-    double angularVelocity =
-        m_rotationController.calculate(this.getPoseMeters().getRotation().getRadians());
+    double angularVelocity = 0;
+    if (Math.abs(desiredRotation % (2 * Math.PI) - this.getHeadingRadians() % (2 * Math.PI))
+        > kRotationToleranceHubTracking) {
+      angularVelocity = m_rotationController.calculate(this.getHeadingRadians(), desiredRotation);
+    }
 
     SwerveModuleState[] states =
         kDriveKinematics.toSwerveModuleStates(
@@ -199,13 +202,18 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   }
 
   @Log(name = "Pigeon Heading")
-  public double getHeadingDegrees() {
+  public double getPigeonHeadingDegrees() {
     return m_pigeon.getFusedHeading();
   }
 
   /** Returns the current heading reading from the Pigeon. */
   public Rotation2d getHeading() {
-    return Rotation2d.fromDegrees(m_pigeon.getFusedHeading());
+    return m_odometry.getPoseMeters().getRotation();
+  }
+
+  @Log(name = "Heading Radians")
+  public double getHeadingRadians() {
+    return this.getHeading().getRadians();
   }
 
   /** Sets the pigeon's current heading to zero. */

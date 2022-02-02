@@ -66,7 +66,16 @@ public class RobotContainer {
 
     m_driver
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
-        .whileHeld(new DriveFacingHub(m_driver::getLeftY, m_driver::getLeftX, m_drivetrain));
+        .whileHeld(
+            new DriveFacingHub(
+                m_driver::getLeftY,
+                m_driver::getLeftX,
+                () -> {
+                  return !m_driver
+                      .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+                      .get();
+                },
+                m_drivetrain));
 
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
   }
