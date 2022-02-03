@@ -79,12 +79,18 @@ public final class Constants {
     public static final double kDriveDistMetersPerPulse = kDriveDistMetersPerMotorRev / kFalconCPR;
     //// NOTE: CTRE Encoders return velocity in units/100 ms. CTRE velocity readings should be
     // multiplied by 10 to be per second.
-
     //// Drive feedforward constants
-    public static final double ksDriveVolts = 0.66707;
-    public static final double kvDriveVoltSecondsPerMeter = 2.7887;
+    // Field Carpet characterization constants
+    // public static final double ksDriveVolts = 0.66707;
+    // public static final double kvDriveVoltSecondsPerMeter = 2.7887;
+    // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
+
+    // Practice carpet characterization constants
+    public static final double ksDriveVolts = 0.667;
+    public static final double kvDriveVoltSecondsPerMeter = 2.7695;
+    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
+
     public static final double kvMaxVelocity = 12 / kvDriveVoltSecondsPerMeter;
-    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
     public static final double kaMaxAcceleration = 12 / kaDriveVoltSecondsSquaredPerMeter;
 
     //// Drive PID constants
