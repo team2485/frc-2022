@@ -242,4 +242,29 @@ public final class Constants {
             new Translation2d(0.4, 0), // in meters
             new Rotation2d());
   }
+
+  public static final class FlywheelConstants {
+    public static final int kFlywheelTalonPort = 11;
+
+    public static final double kFlywheelTalonCurrentLimit = 50;
+
+    public static final int kRevEncoderPulsesPerRevolution = 2048;
+    public static final int kRevEncoderSamplesToAverage = 5;
+    public static final int kFalconPulsesPerRevolution = 2048;
+
+    public static final double kFlywheelRotationsPerPulse = 1.0 / kFalconPulsesPerRevolution;
+
+    public static final double kFlywheelMaxSpeedRotationsPerSecond = 30;
+
+    // shooter wood prototype gains
+    public static final double kS = 0.65884;
+    public static final double kV = 0.11065;
+    public static final double kA = 0.023167;
+
+    // currently unused
+    public static final double kP = 1;
+    public static final double kD = 0;
+
+    public static final double kVelocityTolerance = 0.5;
+  }
 }
