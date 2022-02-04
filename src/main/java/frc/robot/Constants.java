@@ -42,6 +42,14 @@ public final class Constants {
         static public int TURRET_MOTOR_PORT = 0;
 
         static public int TURRET_VOLTAGE = 12;
+
+        static public double MIN_OUTPUT = 0;
+        static public double MAX_OUTPUT = 0;
+
+        static public double MIN_POSITION = 0;
+        static public double MAX_POSITION = 0;
+        
+        static public double BUFFER_SIZE = 0;
     }
 
     public static final class OIConstants {

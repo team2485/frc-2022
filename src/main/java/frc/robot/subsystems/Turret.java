@@ -7,6 +7,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import WarlordsLib.BufferZone;
 //import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import frc.robot.Constants.TurretConstants;
 public class Turret extends SubsystemBase {
@@ -16,6 +17,8 @@ public class Turret extends SubsystemBase {
     TurretConstants.KD,
     new TrapezoidProfile.Constraints(TurretConstants.MAX_VELOCITY, TurretConstants.MAX_ACCELERATION)
   );
+
+  private BufferZone m_bufferZone = new BufferZone(TurretConstants.MIN_OUTPUT, TurretConstants.MAX_OUTPUT, TurretConstants.MIN_POSITION, TurretConstants.MAX_POSITION, TurretConstants.BUFFER_SIZE);
 
   private SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(TurretConstants.KS, TurretConstants.KV, TurretConstants.KA);
   private WPI_TalonSRX m_motor = new WPI_TalonSRX(TurretConstants.TURRET_MOTOR_PORT);
@@ -35,9 +38,9 @@ public class Turret extends SubsystemBase {
   {
     m_prevVelocity = m_currentVelocity;
     m_currentVelocity = m_controller.calculate(m_currentRotation, newRotation);
-    m_motor.set(m_feedforward.calculate(m_currentVelocity, m_currentVelocity - m_prevVelocity) / TurretConstants.TURRET_VOLTAGE);
+    m_motor.set(m_bufferZone.get(m_feedforward.calculate(m_currentVelocity, m_currentVelocity - m_prevVelocity) / TurretConstants.TURRET_VOLTAGE), m_currentRotation);
   }
-  
+
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
