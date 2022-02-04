@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeArmConstants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
+import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
+
 import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -17,7 +20,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 //import sensorPorts;
 import com.revrobotics.SparkMaxLimitSwitch;
 
-public class IntakeArm extends SubsystemBase {
+public class IntakeArm extends SubsystemBase implements Loggable {
 
   private CANSparkMax m_armSparkMax; //pushin p
   private SparkMaxLimitSwitch m_topSwitch;
@@ -31,13 +34,10 @@ public class IntakeArm extends SubsystemBase {
 
     m_armSparkMax = new CANSparkMax(IntakeArmConstants.ARM_SPARKMAX_PORT, MotorType.kBrushless);
     m_topSwitch = m_armSparkMax.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
-    m_bottomSwitch = m_armSparkMax.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+    m_bottomSwitch = m_armSparkMax.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
 
-    /* limit switches enabled by defualt
-       to disable...
-
-       m_topSwitch.enableLimitSwitch(false);
-       m_bottomSwitch.enableLimitSwitch(false); */
+    m_topSwitch.enableLimitSwitch(true);
+    m_bottomSwitch.enableLimitSwitch(true);
   }
 
 
@@ -50,16 +50,24 @@ public class IntakeArm extends SubsystemBase {
 
     if (pos == IntakePositionEnum.up){
       //PWM.UP;
-      m_armSparkMax.set(m_topSwitch.isPressed()?0:IntakeArmConstants.PWM_UP);
+      m_armSparkMax.set(IntakeArmConstants.kPWMUp);
     }
     else {
-      m_armSparkMax.set(m_bottomSwitch.isPressed() ? 0 : IntakeArmConstants.PWM_DOWN);
+      m_armSparkMax.set(IntakeArmConstants.kPWMDown);
     }
+  }
+
+  @Log (name = "Top Limit Switch")
+  public boolean getTopLimitSwitch() {
+    return m_topSwitch.isPressed();
+  }
+
+  @Log (name = "Bottom Limit Switch")
+  public boolean getBottomLimitSwitch() {
+    return m_bottomSwitch.isPressed();
   }
   
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("Top Limit Switch", m_topSwitch.isPressed());
-    SmartDashboard.putBoolean("Bottom Limit Switch", m_bottomSwitch.isPressed());
   }
 }

@@ -60,8 +60,8 @@ public final class Constants {
         // public static final int TOP_SWITCH_PORT = 1;
         // public static final int BOTTOM_SWITCH_PORT = 2;
         public static final int ARM_SPARKMAX_PORT = 0;
-        public static final double PWM_UP = 0.5;
-        public static final double PWM_DOWN = -0.5;
+        public static final double kPWMUp = 0.5;
+        public static final double kPWMDown = -0.5;
     }
 
     public static final class ModuleConstants{
