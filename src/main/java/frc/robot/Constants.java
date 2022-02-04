@@ -56,10 +56,12 @@ public final class Constants {
                 kAutoMaxAngularSpeedRadiansPerSecond, kAutoMaxAngularAccelerationRadiansPerSecondSquared); 
     }
 
-    public static final class IntakeArmConstants{ //currently only for new subsystem intake arm, not entirely sure where to put it ~Yuvi
-        public static final int TOP_SWTICH_PORT = 1;
-        public static final int BOTTOM_SWITCH_PORT = 2;
-        public static final int ARM_SPARKMAX_PORT = 3;
+    public static final class IntakeArmConstants { //currently only for new subsystem intake arm, not entirely sure where to put it ~Yuvi
+        // public static final int TOP_SWITCH_PORT = 1;
+        // public static final int BOTTOM_SWITCH_PORT = 2;
+        public static final int ARM_SPARKMAX_PORT = 0;
+        public static final double PWM_UP = 0.5;
+        public static final double PWM_DOWN = -0.5;
     }
 
     public static final class ModuleConstants{

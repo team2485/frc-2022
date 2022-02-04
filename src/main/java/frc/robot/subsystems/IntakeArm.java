@@ -5,44 +5,61 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.IntakeArmConstants;
+import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
+import com.revrobotics.SparkMaxLimitSwitch;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 //import sensorPorts;
+import com.revrobotics.SparkMaxLimitSwitch;
 
 public class IntakeArm extends SubsystemBase {
 
-  private WL_Sparkmax armSparkMax; //pushin p
-  private DigitalInput topSwitch;
-  private DigitalInput bottomSwitch; 
-  private double pwm;                   //constant to run the intake arm motors up or down ~Yuvi
+  private CANSparkMax m_armSparkMax; //pushin p
+  private SparkMaxLimitSwitch m_topSwitch;
+  private SparkMaxLimitSwitch m_bottomSwitch;
+  
+
   /** Creates a new intakeArm. */
   public IntakeArm() {
-    topSwitch = new DigitalInput(TOP_SWITCH_PORT); //we put in random ports for now
-    bottomSwitch = new DigitalInput(BOTTOM_SWITCH_PORT);
-    armSparkMax = new WL_SparkMax(ARM_SPARKMAX_PORT); //pushin p pushin p
-    pwm = 0.5;
+
+    //pushin p
+
+    m_armSparkMax = new CANSparkMax(IntakeArmConstants.ARM_SPARKMAX_PORT, MotorType.kBrushless);
+    m_topSwitch = m_armSparkMax.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+    m_bottomSwitch = m_armSparkMax.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+
+    /* limit switches enabled by defualt
+       to disable...
+
+       m_topSwitch.enableLimitSwitch(false);
+       m_bottomSwitch.enableLimitSwitch(false); */
   }
 
-  public void setUp(){
-    if (topSwitch.get()){
-      m_armSparkMax.set(0);
+
+  public enum IntakePositionEnum{
+    up, 
+    down;
+  }
+
+  public void set(IntakePositionEnum pos){
+
+    if (pos == IntakePositionEnum.up){
+      //PWM.UP;
+      m_armSparkMax.set(m_topSwitch.isPressed()?0:IntakeArmConstants.PWM_UP);
     }
     else {
-      m_armSparkMax.set(pwm);
+      m_armSparkMax.set(m_bottomSwitch.isPressed() ? 0 : IntakeArmConstants.PWM_DOWN);
     }
   }
-
-  public void setDown(){
-    if (bottomSwitch.get()){
-      m_armSparkMax.set(0);
-    }
-    else {
-      m_armSparkMax.set(-pwm);
-    }
-  }
-
+  
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    SmartDashboard.putBoolean("Top Limit Switch", m_topSwitch.isPressed());
+    SmartDashboard.putBoolean("Bottom Limit Switch", m_bottomSwitch.isPressed());
   }
 }
