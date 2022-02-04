@@ -38,7 +38,11 @@ public class Turret extends SubsystemBase {
   {
     m_prevVelocity = m_currentVelocity;
     m_currentVelocity = m_controller.calculate(m_currentRotation, newRotation);
-    m_motor.set(m_bufferZone.get(m_feedforward.calculate(m_currentVelocity, m_currentVelocity - m_prevVelocity) / TurretConstants.TURRET_VOLTAGE), m_currentRotation);
+
+    double bufferedVelocity = m_bufferZone.get(m_currentVelocity, m_currentRotation);
+    double voltage = m_feedforward.calculate(bufferedVelocity, m_currentVelocity - m_prevVelocity) / TurretConstants.TURRET_VOLTAGE;
+    
+    m_motor.set(voltage);
   }
 
   @Override
