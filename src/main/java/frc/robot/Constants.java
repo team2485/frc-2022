@@ -27,6 +27,22 @@ public final class Constants {
     public static final int kFalconCPR = 2048; //pulses per rotation
     public static final int kCANTimeoutMs = 250;
 
+    public static final class TurretConstants {
+        static public final double KP = 0;
+        static public final double KI = 0;
+        static public final double KD = 0;
+
+        static public final double KV = 0;
+        static public final double KA = 0;
+        static public final double KS = 0;
+
+        static public final double MAX_VELOCITY = 0;
+        static public final double MAX_ACCELERATION = 0;
+
+        static public int TURRET_MOTOR_PORT = 0;
+
+        static public int TURRET_VOLTAGE = 12;
+    }
 
     public static final class OIConstants {
         public static final int kDriverPort = 0;
