@@ -6,8 +6,10 @@ package frc.robot;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Drivetrain;
 import frc.team2485.WarlordsLib.IDManager;
 import io.github.oblarg.oblog.Logger;
 
@@ -21,6 +23,10 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+
+  private Drivetrain m_drive;
+
+  boolean seesBlack;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -65,7 +71,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
+    m_drive = new Drivetrain();
+    seesBlack = false;
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -74,7 +81,24 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+
+    if (m_drive.getDetectedColorString().equals("Black")) {
+      seesBlack = true;
+    }
+
+    if(!seesBlack){
+     m_drive.drive(0.25,0,0,false);
+    }
+
+    SmartDashboard.putString("Color", m_drive.getDetectedColorString());
+    SmartDashboard.putNumber("Red", m_drive.getDetectedRed());
+    SmartDashboard.putNumber("Green", m_drive.getDetectedGreen());
+    SmartDashboard.putNumber("Blue", m_drive.getDetectedBlue());
+
+    SmartDashboard.putBoolean("is there black", seesBlack);
+
+  }
 
   @Override
   public void teleopInit() {
@@ -93,6 +117,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // m_robotContainer.teleopPeriodic();
+   
+
   }
 
   @Override

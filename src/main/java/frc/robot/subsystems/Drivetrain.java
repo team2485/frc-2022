@@ -7,6 +7,9 @@ import static frc.robot.Constants.VisionConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
+import com.revrobotics.ColorMatch;
+import com.revrobotics.ColorMatchResult;
+import com.revrobotics.ColorSensorV3;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,6 +24,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Vision.TimestampedTranslation2d;
 import frc.team2485.WarlordsLib.PoseHistory;
@@ -35,6 +39,9 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   private final SwerveModule m_backRightModule;
 
   private final WPI_PigeonIMU m_pigeon;
+
+  private final ColorSensorV3 m_colorSensor = new ColorSensorV3(kI2CPort);
+  private final ColorMatch m_colorMatcher = new ColorMatch();
 
   private final SwerveDriveOdometry m_odometry;
   private final SwerveDriveOdometry m_odometryWithoutVision;
@@ -100,6 +107,40 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
     SmartDashboard.putData("Field", m_field);
+
+    m_colorMatcher.addColorMatch(kGrayCarpetColor);
+    m_colorMatcher.addColorMatch(kBlackTapeColor);
+  }
+
+  @Log(name = "Detected Color")
+  public String getDetectedColorString() {
+    String colorString;
+    if (this.getDetectedColor() == kGrayCarpetColor) {
+      colorString = "Gray";
+    } else if (this.getDetectedColor() == kBlackTapeColor) {
+      colorString = "Black";
+    } else {
+      colorString = "Unknown";
+    }
+    return colorString;
+  }
+
+  public double  getDetectedRed() {
+    return m_colorSensor.getColor().red;
+  }
+  public double  getDetectedGreen() {
+    return m_colorSensor.getColor().green;
+  }
+  public double  getDetectedBlue() {
+    return m_colorSensor.getColor().blue;
+  }
+
+  public Color getDetectedColor() {
+    return getDetectedColorResult().color;
+  }
+
+  public ColorMatchResult getDetectedColorResult() {
+    return m_colorMatcher.matchClosestColor(m_colorSensor.getColor());
   }
 
   /**

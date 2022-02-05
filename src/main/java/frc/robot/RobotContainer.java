@@ -16,6 +16,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
@@ -95,6 +96,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // load path from deploy/pathplanner folder
+    boolean seesBlack = false;
     PathPlannerTrajectory testPath =
         PathPlanner.loadPath(
             "Blue 4 Ball Bottom Side (NOH)",
@@ -128,8 +130,49 @@ public class RobotContainer {
             m_drivetrain::setModuleStates,
             m_drivetrain);
 
-    return resetOdometry.andThen(testPathCommand);
+    // if (m_drivetrain.getDetectedColorString().equals("Black")) {
+    //   seesBlack = true;
+    // }
+
+    // SmartDashboard.putBoolean("is there black", seesBlack);
+
+    // if (!seesBlack) {
+    //   // return resetOdometry.andThen(testPathCommand);
+    //   return new DriveWithController(
+    //       () -> {
+    //         return -0.25;
+    //       },
+    //       () -> {
+    //         return 0;
+    //       },
+    //       () -> {
+    //         return 0;
+    //       },
+    //       () -> {
+    //         return false;
+    //       },
+    //       m_drivetrain);
+    // }else{ 
+    //   return new DriveWithController(
+    //     () -> {
+    //       return 0;
+    //     },
+    //     () -> {
+    //       return 0;
+    //     },
+    //     () -> {
+    //       return 0;
+    //     },
+    //     () -> {
+    //       return false;
+    //     },
+    //     m_drivetrain);
+    // }
+    return null;
+    
   }
+
+  
 
   // whenever the robot is disabled, drive should be turned off
   public void disabledInit() {

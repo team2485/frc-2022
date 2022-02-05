@@ -11,6 +11,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.util.Color;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -86,7 +88,7 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
 
     // Practice carpet characterization constants
-    public static final double ksDriveVolts = 0.667;
+    public static final double ksDriveVolts = 0.65;
     public static final double kvDriveVoltSecondsPerMeter = 2.7695;
     public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
@@ -133,22 +135,22 @@ public final class Constants {
 
     public static final int kFLDriveTalonPort = 1;
     public static final int kFLTurningTalonPort = 2;
-    public static final int kFLCANCoderPort = 11;
+    public static final int kFLCANCoderPort = 10;
     public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(-3.6 - 5.18);
 
     public static final int kFRDriveTalonPort = 3;
     public static final int kFRTurningTalonPort = 4;
-    public static final int kFRCANCoderPort = 12;
+    public static final int kFRCANCoderPort = 11;
     public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33);
 
     public static final int kBRDriveTalonPort = 5;
     public static final int kBRTurningTalonPort = 6;
-    public static final int kBRCANCoderPort = 13;
+    public static final int kBRCANCoderPort = 12;
     public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(56.0 - 1.66);
 
     public static final int kBLDriveTalonPort = 7;
     public static final int kBLTurningTalonPort = 8;
-    public static final int kBLCANCoderPort = 14;
+    public static final int kBLCANCoderPort = 13;
     public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(139.0 + 0.52);
 
     // Drivebase dimensions
@@ -181,6 +183,10 @@ public final class Constants {
 
     public static final double kPRotationHubTracking = 2;
     public static final double kRotationToleranceHubTracking = 0.05;
+
+    public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
+    public static final Color kGrayCarpetColor = new Color(0.250, 0.487, 0.263);
+    public static final Color kBlackTapeColor = new Color(0.247, 0.489, 0.265);
   }
 
   public static final class FieldConstants {
