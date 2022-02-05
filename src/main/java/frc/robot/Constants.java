@@ -133,22 +133,22 @@ public final class Constants {
 
     public static final int kFLDriveTalonPort = 1;
     public static final int kFLTurningTalonPort = 2;
-    public static final int kFLCANCoderPort = 11;
+    public static final int kFLCANCoderPort = 10;
     public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(-3.6 - 5.18);
 
     public static final int kFRDriveTalonPort = 3;
     public static final int kFRTurningTalonPort = 4;
-    public static final int kFRCANCoderPort = 12;
+    public static final int kFRCANCoderPort = 11;
     public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33);
 
     public static final int kBRDriveTalonPort = 5;
     public static final int kBRTurningTalonPort = 6;
-    public static final int kBRCANCoderPort = 13;
+    public static final int kBRCANCoderPort = 12;
     public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(56.0 - 1.66);
 
     public static final int kBLDriveTalonPort = 7;
     public static final int kBLTurningTalonPort = 8;
-    public static final int kBLCANCoderPort = 14;
+    public static final int kBLCANCoderPort = 13;
     public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(139.0 + 0.52);
 
     // Drivebase dimensions
@@ -244,7 +244,7 @@ public final class Constants {
   }
 
   public static final class FlywheelConstants {
-    public static final int kFlywheelTalonPort = 11;
+    public static final int kFlywheelTalonPort = 30;
 
     public static final double kFlywheelTalonCurrentLimit = 50;
 
