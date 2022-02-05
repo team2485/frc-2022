@@ -11,6 +11,7 @@ import static frc.robot.Constants.OIConstants.*;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -51,7 +52,6 @@ public class DriveFacingHub extends CommandBase {
     SmartDashboard.putNumber("xbox right x", m_xSpeedSupplier.getAsDouble());
     SmartDashboard.putNumber("xbox left x", m_ySpeedSupplier.getAsDouble());
 
-
     final double xSpeed =
         -m_xSpeedLimiter.calculate(
                 Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband))
@@ -72,9 +72,11 @@ public class DriveFacingHub extends CommandBase {
     Translation2d hubMinusRobot =
         kHubCenterTranslation.minus(m_drivetrain.getPoseMeters().getTranslation());
 
-    double desiredRotation = Math.atan(hubMinusRobot.getY() / hubMinusRobot.getX());
+    double desiredRotationRadians = Math.atan(hubMinusRobot.getY() / hubMinusRobot.getX());
 
-    SmartDashboard.putNumber("alpha", desiredRotation);
+    Rotation2d desiredRotation = new Rotation2d(desiredRotationRadians);
+
+    SmartDashboard.putNumber("alpha", desiredRotationRadians);
 
     m_drivetrain.driveWithRotationPosition(
         xSpeed, ySpeed, desiredRotation, m_fieldRelative.getAsBoolean());

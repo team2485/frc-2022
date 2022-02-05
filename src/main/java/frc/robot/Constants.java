@@ -88,7 +88,7 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
 
     // Practice carpet characterization constants
-    public static final double ksDriveVolts = 0.65;
+    public static final double ksDriveVolts = 0.4;
     public static final double kvDriveVoltSecondsPerMeter = 2.7695;
     public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
@@ -111,7 +111,7 @@ public final class Constants {
     public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;
 
     //// Turning PID constants
-    public static final double kPTurning = 0.1;
+    public static final double kPTurning = 0.05;
     public static final double kDTurning = 0.02;
     public static final double kFTurning = 0.4 * 1023 / 8360;
 
@@ -181,12 +181,12 @@ public final class Constants {
 
     public static final int kPoseHistoryCapacity = 500;
 
-    public static final double kPRotationHubTracking = 2;
-    public static final double kRotationToleranceHubTracking = 0.05;
+    public static final double kPRotationHubTracking = 5;
+    public static final Rotation2d kRotationToleranceHubTracking = new Rotation2d(0.05);
 
     public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
-    public static final Color kGrayCarpetColor = new Color(0.250, 0.487, 0.263);
-    public static final Color kBlackTapeColor = new Color(0.247, 0.489, 0.265);
+    public static final Color kGrayCarpetColor = new Color(0.254, 0.248, 0.501);
+    public static final Color kBlackTapeColor = new Color(0.245, 0.249, 0.504);
   }
 
   public static final class FieldConstants {
@@ -209,8 +209,8 @@ public final class Constants {
 
   public static final class VisionConstants {
     public static final String kCameraName = "gloworm";
-    public static final double kPAngle = 0.05;
-    public static final double kDAngle = 0.01;
+    public static final double kPAngleHubTracking = 0.05;
+    public static final double kDAngleHubTracking = 0.01;
 
     public static final double kVisionNominalFramerate = 45;
 

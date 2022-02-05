@@ -9,7 +9,7 @@ import frc.robot.subsystems.Drivetrain;
 import org.photonvision.PhotonCamera;
 
 public class AlignToTarget extends CommandBase {
-  private PIDController m_angleController = new PIDController(kPAngle, 0, kDAngle);
+  private PIDController m_angleController = new PIDController(kPAngleHubTracking, 0, kDAngleHubTracking);
   private Drivetrain m_drivetrain;
   private PhotonCamera m_camera;
 

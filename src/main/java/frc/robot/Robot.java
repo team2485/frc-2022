@@ -87,8 +87,8 @@ public class Robot extends TimedRobot {
       seesBlack = true;
     }
 
-    if(!seesBlack){
-     m_drive.drive(0.25,0,0,false);
+    if (!seesBlack) {
+      m_drive.drive(0.25, 0, 0, false);
     }
 
     SmartDashboard.putString("Color", m_drive.getDetectedColorString());
@@ -97,7 +97,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Blue", m_drive.getDetectedBlue());
 
     SmartDashboard.putBoolean("is there black", seesBlack);
-
   }
 
   @Override
@@ -117,7 +116,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // m_robotContainer.teleopPeriodic();
-   
 
   }
 

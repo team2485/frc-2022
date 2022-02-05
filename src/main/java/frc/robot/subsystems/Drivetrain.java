@@ -103,7 +103,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_turningNeutralChooser.addOption("Coast", NeutralMode.Coast);
     setDriveNeutralMode(m_turningNeutralChooser.getSelected());
 
-    m_rotationController.setTolerance(kRotationToleranceHubTracking);
+    m_rotationController.setTolerance(kRotationToleranceHubTracking.getRadians());
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
     SmartDashboard.putData("Field", m_field);
@@ -112,7 +112,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_colorMatcher.addColorMatch(kBlackTapeColor);
   }
 
-  @Log(name = "Detected Color")
+  @Log(tabName = "Climber", name = "Detected Color")
   public String getDetectedColorString() {
     String colorString;
     if (this.getDetectedColor() == kGrayCarpetColor) {
@@ -125,18 +125,28 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     return colorString;
   }
 
-  public double  getDetectedRed() {
+  @Log(tabName = "Climber", name = "Green")
+  public double getDetectedRed() {
     return m_colorSensor.getColor().red;
   }
-  public double  getDetectedGreen() {
+
+  @Log(tabName = "Climber", name = "Red")
+  public double getDetectedGreen() {
     return m_colorSensor.getColor().green;
   }
-  public double  getDetectedBlue() {
+
+  @Log(tabName = "Climber", name = "Blue")
+  public double getDetectedBlue() {
     return m_colorSensor.getColor().blue;
   }
 
   public Color getDetectedColor() {
     return getDetectedColorResult().color;
+  }
+
+  @Log(tabName = "Climber", name = "Confidence")
+  public double getDetectedColorConfidence() {
+    return getDetectedColorResult().confidence;
   }
 
   public ColorMatchResult getDetectedColorResult() {
@@ -175,16 +185,18 @@ public class Drivetrain extends SubsystemBase implements Loggable {
    *
    * @param xSpeed desired forward velocity in meters per second
    * @param ySpeed desired sideways (strafe) velocity in meters per second
-   * @param rotation desired rotation
+   * @param rotation desired rotation in radians
    * @param fieldRelative whether the robot should drive field-relative or not
    */
   public void driveWithRotationPosition(
-      double xSpeed, double ySpeed, double desiredRotation, boolean fieldRelative) {
+      double xSpeed, double ySpeed, Rotation2d desiredRotation, boolean fieldRelative) {
 
     double angularVelocity = 0;
-    if (Math.abs(desiredRotation % (2 * Math.PI) - this.getHeadingRadians() % (2 * Math.PI))
-        > kRotationToleranceHubTracking) {
-      angularVelocity = m_rotationController.calculate(this.getHeadingRadians(), desiredRotation);
+    if (Math.abs(
+            desiredRotation.getRadians() % (2 * Math.PI) - this.getHeadingRadians() % (2 * Math.PI))
+        > kRotationToleranceHubTracking.getRadians()) {
+      angularVelocity =
+          m_rotationController.calculate(this.getHeadingRadians(), desiredRotation.getRadians());
     }
 
     SwerveModuleState[] states =
