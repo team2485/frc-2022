@@ -18,7 +18,8 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
  */
 public final class Constants {
     public static final String kRobotIdFile = "/home/lvuser/id.txt";
-
+    
+    public static final double NOMINAL_VOLTAGE = 0;
     public static final class OIConstants {
         public static final int kDriverPort = 0;
         public static final int kOperatorPort = 1;
@@ -47,5 +48,10 @@ public final class Constants {
 
         public static final double kVelocityToleranceRotationsPerSecond = 0.5; 
         public static final double kFeedforwardShrink = 0.9;
+    }
+
+    public static final class HoodConstants {
+        public static final int SPARK_PORT = 0;
+        public static final int HOOD_GEARING = 10;
     }
 }
