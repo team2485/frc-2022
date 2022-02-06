@@ -11,6 +11,7 @@ import static frc.robot.Constants.OIConstants.*;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -117,8 +118,8 @@ public class RobotContainer {
             });
 
     // create command to follow path
-    HolonomicSwerveControllerCommand testPathCommand =
-        new HolonomicSwerveControllerCommand(
+    PPSwerveControllerCommand testPathCommand =
+        new PPSwerveControllerCommand(
             testPath,
             m_drivetrain::getPoseMeters,
             kDriveKinematics,

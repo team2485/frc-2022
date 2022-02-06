@@ -81,12 +81,12 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         new SwerveDriveOdometry(
             kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
 
-    m_odometry.resetPosition(
-        new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
-        Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
-    m_odometryWithoutVision.resetPosition(
-        new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
-        Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+    // m_odometry.resetPosition(
+    //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
+    //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+    // m_odometryWithoutVision.resetPosition(
+    //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
+    //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
 
     m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
     m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);

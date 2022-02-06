@@ -44,7 +44,7 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kAutoMaxSpeedMetersPerSecond = 3;
+    public static final double kAutoMaxSpeedMetersPerSecond = 0.5;
     public static final double kAutoMaxAccelerationMetersPerSecondSquared =
         (kNominalVoltage
                 - ModuleConstants.ksDriveVolts
