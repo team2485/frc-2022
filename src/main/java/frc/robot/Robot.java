@@ -20,7 +20,11 @@ import io.github.oblarg.oblog.Logger;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  private final RobotContainer m_robotContainer = new RobotContainer();
+
+  public Robot() {
+    addPeriodic(() -> m_robotContainer.m_flywheel.fastPeriodic(), 0.01);
+  }
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -30,9 +34,6 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate IDManager -- will read ID File
     IDManager.getInstance(Constants.kRobotIdFile);
-
-    // Create RobotContainer (the place where commands are bound to buttons)
-    m_robotContainer = new RobotContainer();
 
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);

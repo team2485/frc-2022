@@ -28,8 +28,8 @@ import io.github.oblarg.oblog.annotations.Log;
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
-  Flywheel m_flywheel = new Flywheel();
 
+  public final Flywheel m_flywheel = new Flywheel();
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Vision m_vision = new Vision();
 

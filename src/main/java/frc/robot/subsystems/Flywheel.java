@@ -67,8 +67,8 @@ public class Flywheel extends SubsystemBase implements Loggable {
     m_talon.setVoltage(voltage);
   }
 
-  @Override
-  public void periodic() {
+  // runs every 10 ms (run by Robot)
+  public void fastPeriodic() {
     // Calculates voltage to apply.
     // Feedforward is scaled down to prevent overshoot since bang-bang can't correct for overshoot.
     double voltage =
