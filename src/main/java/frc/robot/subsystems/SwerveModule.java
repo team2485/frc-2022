@@ -11,12 +11,12 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.LayoutType;
 import frc.robot.Constants;
+import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
@@ -24,8 +24,9 @@ import io.github.oblarg.oblog.annotations.Log;
 public class SwerveModule implements Loggable {
 
   private final WPI_TalonFX m_driveMotor;
-  private final SimpleMotorFeedforward m_driveFeedforward =
-      new SimpleMotorFeedforward(
+
+  private final SR_SimpleMotorFeedforward m_driveFeedforward =
+      new SR_SimpleMotorFeedforward(
           ksDriveVolts, kvDriveVoltSecondsPerMeter, kaDriveVoltSecondsSquaredPerMeter);
 
   private final WPI_TalonFX m_turningMotor;

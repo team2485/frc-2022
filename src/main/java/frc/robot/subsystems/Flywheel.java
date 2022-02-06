@@ -11,10 +11,10 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.controller.BangBangController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
@@ -22,8 +22,10 @@ import io.github.oblarg.oblog.annotations.Log;
 public class Flywheel extends SubsystemBase implements Loggable {
   private final WPI_TalonFX m_talon = new WPI_TalonFX(kFlywheelTalonPort);
 
-  private final SimpleMotorFeedforward m_flywheelFeedforward =
-      new SimpleMotorFeedforward(kS, kV, kA);
+  @Config(name = "Flywheel feedforward")
+  private final SR_SimpleMotorFeedforward m_flywheelFeedforward =
+      new SR_SimpleMotorFeedforward(kS, kV, kA);
+
   private final BangBangController m_bangBangController =
       new BangBangController(kVelocityTolerance);
 

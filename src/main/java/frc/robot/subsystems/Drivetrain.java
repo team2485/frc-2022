@@ -8,7 +8,6 @@ import static frc.robot.Constants.VisionConstants.*;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -24,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Vision.TimestampedTranslation2d;
 import frc.team2485.WarlordsLib.PoseHistory;
+import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   public final Field2d m_field = new Field2d();
 
   @Log(name = "Angle PID (hub tracking)")
-  private final PIDController m_rotationController = new PIDController(kPRotationHubTracking, 0, 0);
+  private final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
 
   public Drivetrain() {
     m_frontLeftModule =
@@ -96,7 +96,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_turningNeutralChooser.addOption("Coast", NeutralMode.Coast);
     setDriveNeutralMode(m_turningNeutralChooser.getSelected());
 
-    m_rotationController.setTolerance(kRotationToleranceHubTracking);
+    m_rotationController.setTolerance(kRotationTolerance);
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
     SmartDashboard.putData("Field", m_field);
@@ -142,7 +142,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     double angularVelocity = 0;
     if (Math.abs(desiredRotation % (2 * Math.PI) - this.getHeadingRadians() % (2 * Math.PI))
-        > kRotationToleranceHubTracking) {
+        > kRotationTolerance) {
       angularVelocity = m_rotationController.calculate(this.getHeadingRadians(), desiredRotation);
     }
 
