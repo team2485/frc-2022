@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.*;
 import static frc.robot.Constants.FlywheelConstants.*;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -40,6 +41,7 @@ public class Flywheel extends SubsystemBase implements Loggable {
     m_talon.configAllSettings(flywheelTalonConfig);
 
     m_talon.setNeutralMode(NeutralMode.Coast);
+    m_talon.enableVoltageCompensation(true);
   }
 
   /** @return the current talon-reported velocity in rotations per second. */
@@ -75,7 +77,7 @@ public class Flywheel extends SubsystemBase implements Loggable {
         0.95 * m_flywheelFeedforward.calculate(m_desiredVelocityRPS)
             + m_bangBangController.calculate(getTalonVelocity(), m_desiredVelocityRPS)
                 * kNominalVoltage;
-    m_talon.setVoltage(voltage);
+    m_talon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
 
     SmartDashboard.putNumber("ff applied voltage", voltage);
     SmartDashboard.putNumber("talon applied voltage", m_talon.getBusVoltage());
