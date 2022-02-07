@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import frc.team2485.WarlordsLib.sendableRichness.SR_TrapezoidProfile;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -28,6 +29,7 @@ public final class Constants {
   public static final double kNominalVoltage = 12.0;
   public static final int kFalconCPR = 2048; // pulses per rotation
   public static final int kCANTimeoutMs = 250;
+  public static final double kTimestepSeconds = 0.02;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -105,8 +107,8 @@ public final class Constants {
 
     //// Turning feedforward constants (unused in current implementation but useful for max speed)
     public static final double ksTurningVolts = 0.60572;
-    public static final double kvTurningVoltSecondsPerMeter = 0.20717;
-    public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;
+    public static final double kvTurningVoltSecondsPerRadian = 0.20717;
+    public static final double kaTurningVoltSecondsSquaredPerRadian = 0.0068542;
 
     //// Turning PID constants
     public static final double kPTurning = 0.1;
@@ -118,8 +120,8 @@ public final class Constants {
     public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared =
         (kNominalVoltage
                 - ksTurningVolts
-                - kModuleMaxSpeedTurningRadiansPerSecond * kvTurningVoltSecondsPerMeter)
-            / kaTurningVoltSecondsSquaredPerMeter;
+                - kModuleMaxSpeedTurningRadiansPerSecond * kvTurningVoltSecondsPerRadian)
+            / kaTurningVoltSecondsSquaredPerRadian;
     public static final double kModuleMaxSpeedTurningPulsesPer100Ms =
         kModuleMaxSpeedTurningRadiansPerSecond / kTurningRadiansPerPulse * 0.1;
     public static final double kModuleMaxAccelerationTurningPulsesPer100MsSquared =
@@ -266,5 +268,31 @@ public final class Constants {
     public static final double kD = 0;
 
     public static final double kVelocityTolerance = 0.5;
+  }
+
+  public static final class HoodConstants {
+    public static final int kHoodSparkPort = 31;
+    public static final double kHoodGearRatio = 225; // motor turns : output/full hood turns
+    public static final double kHoodRadiansPerMotorRev = 2 * Math.PI / kHoodGearRatio;
+
+    public static final double kHoodBottomPositionRadians = 0.4363323; // from horizontal
+
+    // Hood characterization constants
+    public static final double kSHoodVolts = 0;
+    public static final double kGHoodVolts = 0.07;
+    public static final double kVHoodVoltSecondsPerRadian = 2.20;
+    public static final double kAHoodVoltSecondsSquaredPerRadian = 0;
+
+    public static final double kHoodMaxSpeedRadiansPerSecond = 2 * Math.PI;
+    public static final double kHoodMaxAccelerationRadiansPerSecondSquared =
+        Double.MAX_VALUE; // kA is essentially 0 here, so the maximum acceleration is basically
+    // infinite. The limit on motion profiling is not acceleration but velocity.
+
+    public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
+        new SR_TrapezoidProfile.Constraints(
+            kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
+    // Hood PID constants
+    public static final double kPHood = 0;
+    public static final double kDHood = 0;
   }
 }
