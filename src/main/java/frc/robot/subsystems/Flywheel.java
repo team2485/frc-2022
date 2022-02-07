@@ -23,7 +23,7 @@ public class Flywheel extends SubsystemBase implements Loggable {
   private final WPI_TalonFX m_talon = new WPI_TalonFX(kFlywheelTalonPort);
 
   private final SimpleMotorFeedforward m_flywheelFeedforward =
-      new SimpleMotorFeedforward(kS, kV, kA);
+      new SimpleMotorFeedforward(kSVolts, kVVoltSecondsPerMeter, kAVoltSecondsPerMeterSquared);
   private final BangBangController m_bangBangController =
       new BangBangController(kVelocityTolerance);
 
