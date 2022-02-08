@@ -16,7 +16,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
@@ -64,20 +63,18 @@ public class RobotContainer {
             m_driver::getLeftX,
             m_driver::getRightX,
             () -> {
-              return !m_driver.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).get();
+              return !m_driver.rightBumper().get();
             },
             m_drivetrain));
 
     m_driver
-        .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
+        .leftBumper()
         .whileHeld(
             new DriveFacingHub(
                 m_driver::getLeftY,
                 m_driver::getLeftX,
                 () -> {
-                  return !m_driver
-                      .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-                      .get();
+                  return !m_driver.rightBumper().get();
                 },
                 m_drivetrain));
 
