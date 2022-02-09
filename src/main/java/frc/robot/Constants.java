@@ -38,7 +38,7 @@ public final class Constants {
 
     public static final double kDriverRightXDeadband = 0.15;
     public static final double kDriverLeftXDeadband = 0.08;
-    public static final double kDriverLeftYDeadband = 0.05;
+    public static final double kDriverLeftYDeadband = 0.08;
 
     public static final double kTriggerThreshold = 0.1;
   }
@@ -69,13 +69,14 @@ public final class Constants {
 
   public static final class ModuleConstants {
     // Drive control constants
-    public static final double kDriveCurrentLimitAmps = 60;
+    public static final double kDriveCurrentLimitAmps = 35;
 
     //// Drive mechanism/encoder constants
     public static final double kWheelDiameterMeters = 0.1016;
+    public static final double kWheelCircumferenceMeters = 0.1016 * Math.PI;
     public static final double kDriveGearRatio = 8.16; // motor turns per wheel turns
     public static final double kDriveDistMetersPerMotorRev =
-        (kWheelDiameterMeters * Math.PI) / kDriveGearRatio;
+        kWheelCircumferenceMeters / kDriveGearRatio;
     public static final double kDriveDistMetersPerPulse = kDriveDistMetersPerMotorRev / kFalconCPR;
     //// NOTE: CTRE Encoders return velocity in units/100 ms. CTRE velocity readings should be
     // multiplied by 10 to be per second.
@@ -86,9 +87,13 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
 
     // Practice carpet characterization constants
-    public static final double ksDriveVolts = 0.667;
-    public static final double kvDriveVoltSecondsPerMeter = 2.7695;
-    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
+    // public static final double ksDriveVolts = 0.667;
+    // public static final double kvDriveVoltSecondsPerMeter = 2.7695;
+    // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
+
+    public static final double ksDriveVolts = 0.54;
+    public static final double kvDriveVoltSecondsPerMeter = 2.5856;
+    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.31789;
 
     public static final double kvMaxVelocity = 12 / kvDriveVoltSecondsPerMeter;
     public static final double kaMaxAcceleration = 12 / kaDriveVoltSecondsSquaredPerMeter;
@@ -96,7 +101,7 @@ public final class Constants {
     //// Drive PID constants
     public static final double kPDrive = 0.05;
     // Turning control constants
-    public static final double kTurningCurrentLimitAmps = 60;
+    public static final double kTurningCurrentLimitAmps = 5;
 
     //// Turning mechanism/encoder constants
     public static final double kTurningGearRatio = 12.8; // motor turns per shaft turns
@@ -109,8 +114,8 @@ public final class Constants {
     public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;
 
     //// Turning PID constants
-    public static final double kPTurning = 0.1;
-    public static final double kDTurning = 0.02;
+    public static final double kPTurning = 0.07;
+    public static final double kDTurning = 0.01;
     public static final double kFTurning = 0.4 * 1023 / 8360;
 
     //// Turning trapezoidal motion profile/motion magic constants
@@ -166,7 +171,7 @@ public final class Constants {
         Math.sqrt(Math.pow(kWheelbaseLengthMeters / 2, 2) + Math.pow(kWheelbaseWidthMeters / 2, 2));
 
     // Max speed teleoperated
-    public static final double kTeleopMaxSpeedMetersPerSecond = 2; // meters per second
+    public static final double kTeleopMaxSpeedMetersPerSecond = 3; // meters per second
     public static final double kTeleopMaxAngularSpeedRadiansPerSecond =
         kTeleopMaxSpeedMetersPerSecond / kTurningRadiusMeters; // radians per second
 

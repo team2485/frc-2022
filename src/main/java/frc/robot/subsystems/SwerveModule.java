@@ -218,4 +218,12 @@ public class SwerveModule implements Loggable {
     int[] size = {3, 4};
     return size;
   }
+
+  public double getSupplyCurrentDrive() {
+    return m_driveMotor.getSupplyCurrent();
+  }
+
+  public double getSupplyCurrentTurning() {
+    return m_turningMotor.getSupplyCurrent();
+  }
 }
