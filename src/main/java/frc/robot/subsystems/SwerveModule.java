@@ -7,7 +7,6 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
@@ -16,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.LayoutType;
 import frc.robot.Constants;
+import frc.team2485.WarlordsLib.motorcontrol.WL_TalonFX;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
@@ -23,13 +23,13 @@ import io.github.oblarg.oblog.annotations.Log;
 
 public class SwerveModule implements Loggable {
 
-  private final WPI_TalonFX m_driveMotor;
+  public final WL_TalonFX m_driveMotor;
 
   private final SR_SimpleMotorFeedforward m_driveFeedforward =
       new SR_SimpleMotorFeedforward(
           ksDriveVolts, kvDriveVoltSecondsPerMeter, kaDriveVoltSecondsSquaredPerMeter);
 
-  private final WPI_TalonFX m_turningMotor;
+  public final WL_TalonFX m_turningMotor;
   private final CANCoder m_turningEncoder;
 
   private final String m_moduleID;
@@ -49,7 +49,7 @@ public class SwerveModule implements Loggable {
     driveMotorConfig.supplyCurrLimit.currentLimit = kDriveCurrentLimitAmps;
     driveMotorConfig.supplyCurrLimit.enable = true;
     driveMotorConfig.slot0.kP = kPDrive;
-    this.m_driveMotor = new WPI_TalonFX(driveMotorID);
+    this.m_driveMotor = new WL_TalonFX(driveMotorID);
     m_driveMotor.configAllSettings(driveMotorConfig);
     m_driveMotor.enableVoltageCompensation(true);
     m_driveMotor.setNeutralMode(NeutralMode.Brake);
@@ -65,7 +65,7 @@ public class SwerveModule implements Loggable {
     turningMotorConfig.slot0.kF = kFTurning;
     turningMotorConfig.motionCruiseVelocity = kModuleMaxSpeedTurningPulsesPer100Ms;
     turningMotorConfig.motionAcceleration = kModuleMaxAccelerationTurningPulsesPer100MsSquared;
-    this.m_turningMotor = new WPI_TalonFX(turningMotorID);
+    this.m_turningMotor = new WL_TalonFX(turningMotorID);
     m_turningMotor.configAllSettings(turningMotorConfig);
     m_turningMotor.enableVoltageCompensation(true);
     m_turningMotor.configSelectedFeedbackSensor(
@@ -217,13 +217,5 @@ public class SwerveModule implements Loggable {
   public int[] configureLayoutSize() {
     int[] size = {3, 4};
     return size;
-  }
-
-  public double getSupplyCurrentDrive() {
-    return m_driveMotor.getSupplyCurrent();
-  }
-
-  public double getSupplyCurrentTurning() {
-    return m_turningMotor.getSupplyCurrent();
   }
 }

@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Vision.TimestampedTranslation2d;
+import frc.team2485.WarlordsLib.CurrentLogger;
 import frc.team2485.WarlordsLib.PoseHistory;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import io.github.oblarg.oblog.Loggable;
@@ -61,6 +62,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_frontLeftModule =
         new SwerveModule(
             kFLDriveTalonPort, kFLTurningTalonPort, kFLCANCoderPort, kFLCANCoderZero, "FL");
+
+    CurrentLogger.getInstance().register(m_frontLeftModule.m_driveMotor, "FL drive");
+    CurrentLogger.getInstance().register(m_frontLeftModule.m_turningMotor, "FR turning");
+
     m_frontRightModule =
         new SwerveModule(
             kFRDriveTalonPort, kFRTurningTalonPort, kFRCANCoderPort, kFRCANCoderZero, "FR");

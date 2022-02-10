@@ -10,18 +10,19 @@ import static frc.robot.Constants.FlywheelConstants.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.team2485.WarlordsLib.CurrentLogger;
+import frc.team2485.WarlordsLib.motorcontrol.WL_TalonFX;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Flywheel extends SubsystemBase implements Loggable {
-  private final WPI_TalonFX m_talon = new WPI_TalonFX(kFlywheelTalonPort);
+  private final WL_TalonFX m_talon = new WL_TalonFX(kFlywheelTalonPort);
 
   @Config(name = "Flywheel feedforward")
   private final SR_SimpleMotorFeedforward m_flywheelFeedforward =
@@ -34,6 +35,7 @@ public class Flywheel extends SubsystemBase implements Loggable {
 
   /** Creates a new Flywheel. Controlled with a feedforward and a bang bang controlller. */
   public Flywheel() {
+    CurrentLogger.getInstance().register(m_talon, "Flywheel");
     TalonFXConfiguration flywheelTalonConfig = new TalonFXConfiguration();
     flywheelTalonConfig.supplyCurrLimit.currentLimit = kFlywheelTalonCurrentLimit;
     flywheelTalonConfig.supplyCurrLimit.enable = true;

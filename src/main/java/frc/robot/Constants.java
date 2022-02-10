@@ -25,6 +25,8 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
   public static final String kRobotIdFile = "/home/lvuser/id.txt";
+  public static final String kCurrentLogFolder = "/home/lvuser/currentLogs";
+
   public static final double kNominalVoltage = 12.0;
   public static final int kFalconCPR = 2048; // pulses per rotation
   public static final int kCANTimeoutMs = 250;
