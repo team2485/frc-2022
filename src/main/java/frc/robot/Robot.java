@@ -21,9 +21,11 @@ import io.github.oblarg.oblog.Logger;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer = new RobotContainer();
+  private final RobotContainer m_robotContainer;
 
   public Robot() {
+    CurrentLogger.getInstance().registerLogFolder(Constants.kCurrentLogFolder);
+    m_robotContainer = new RobotContainer();
     addPeriodic(() -> m_robotContainer.m_flywheel.fastPeriodic(), 0.01);
   }
 
@@ -35,8 +37,6 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate IDManager -- will read ID File
     IDManager.getInstance(Constants.kRobotIdFile);
-    CurrentLogger.getInstance().registerLogFolder(Constants.kCurrentLogFolder);
-
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);
   }
