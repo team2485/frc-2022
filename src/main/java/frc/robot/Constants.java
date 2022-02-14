@@ -269,63 +269,114 @@ public final class Constants {
     public static final double kVelocityTolerance = 0.5;
   }
 
-  public static final class ClimberConstants {
-    public static final int kSlideTalonPort = 12;
-    public static final double kSlideCurrentLimitAmps = 60;
+  public static final class ClimbElevatorConstants {
+    // SLIDE CONSTANTS
+    public static final int kElevatorTalonPort = 12;
+    public static final double kElevatorCurrentLimitAmps = 20;
 
-    public static final int kSlideSlotSensorPort1 = 0;
-    public static final int kSlideSlotSensorPort2 = 0;
+    public static final int kElevatorSlotSensorPort = 0;
+    public static final double kElevatorSlotSensorTopPosition = 0;
+    public static final double kElevatorSlotSensorBottomPosition = 0;
+    public static final double kSlotSensorDebounceTime = 0.1;
 
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
 
-    public static final double kSlideGearRatio = 32.67; // motor turns/pulley turns
-    public static final double kSlideDistancePerMotorRevMeters =
-        kSprocketCircumferenceMeters / kSlideGearRatio;
+    public static final double kElevatorGearRatio = 32.67; // motor turns/pulley turns
+    public static final double kElevatorDistancePerMotorRevMeters =
+        kSprocketCircumferenceMeters / kElevatorGearRatio;
 
-    public static final int kArmTalonPort = 13;
-    public static final double kArmCurrentLimitAmps = 60;
-
-    public static final double kArmGearRatio = 57.6; // motor turns/pinion turns
-    public static final double kArmRadiansPerMotorRev = 2 * Math.PI / kArmGearRatio;
-    public static final double kArmRadiansPerPulse = kArmRadiansPerMotorRev / kFalconCPR;
-
-    public static final double kArmMomentOfIntertia = 5;
-    public static final double kArmLengthMeters = 2;
-    public static final double kFalconTorquePerAmp = 4.69 / 257;
-    public static final double kGravityMetersPerSecondSquared = 9.81;
+    public static final double kSlideDistancePerPulseMeters =
+        kElevatorDistancePerMotorRevMeters / kFalconCPR;
 
     // Slide characterization constants
-    public static final double ksSlideVolts = 0;
-    public static final double kvSlideVoltSecondsPerMeter = 0;
-    public static final double kaSlideVoltSecondsSquaredPerMeter = 0;
+    public static final double ksElevatorVolts = 0;
+    public static final double kvElevatorVoltSecondsPerMeter = 0;
+    public static final double kaElevatorVoltSecondsSquaredPerMeter = 0;
 
-    public static final double kPSlide = 0;
-    public static final double kDSlide = 0;
+    public static final double kPElevator = 0;
+    public static final double kDElevator = 0;
 
     public static final double kSlideMaxSpeedMetersPerSecond = 1;
     // Find maximum simultaneously achievable acceleration
     public static final double kSlideMaxAccelerationMetersPerSecondSquared =
         (kNominalVoltage
-                - ksSlideVolts
-                - kSlideMaxSpeedMetersPerSecond * kvSlideVoltSecondsPerMeter)
-            / kaSlideVoltSecondsSquaredPerMeter;
+                - ksElevatorVolts
+                - kSlideMaxSpeedMetersPerSecond * kvElevatorVoltSecondsPerMeter)
+            / kaElevatorVoltSecondsSquaredPerMeter;
 
     // Constraint for the motion profilied robot angle controller
-    public static final TrapezoidProfile.Constraints kSlideControllerConstraints =
+    public static final TrapezoidProfile.Constraints kElevatorControllerConstraints =
         new TrapezoidProfile.Constraints(
             kSlideMaxSpeedMetersPerSecond, kSlideMaxAccelerationMetersPerSecondSquared);
+  }
 
+  public static final class ClimbArmConstants {
+    // ARM CONSTANTS
+    public static final int kArmTalonPort = 13;
+    public static final double kArmCurrentLimitAmps = 30;
+
+    public static final double kArmGearRatio = 57.6; // motor turns/pinion turns
+    public static final double kArmRotationsPerMotorRev = 1 / kArmGearRatio;
+    public static final double kArmRotationsPerPulse = kArmRotationsPerMotorRev / kFalconCPR;
+
+    public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
+
+    public static final double kPArmCurrent = 0;
+    public static final double kDArmCurrent = 0;
+
+    // arm characteristics used in angular mode
+    public static final double kArmMomentOfIntertia = 5;
+    public static final double kArmLengthMeters = 2;
+    public static final double kFalconTorquePerAmp = 4.69 / 257;
+    public static final double kGravityMetersPerSecondSquared = 9.81;
+
+    // arm characteristics used in translation mode
+    public static final double kArmDistancePerMotorRevMeters =
+        kSprocketCircumferenceMeters / kArmGearRatio;
+
+    // Arm rotation characterization constants -- not used for control but for finding simulaneously
+    // achievable acceleration
+    public static final double ksArmRotationVolts = 0;
+    public static final double kvArmRotationVoltSecondsPerRadian = 0;
+    public static final double kaArmRotationVoltSecondsSquaredPerRadian = 0;
+
+    // ARM ROTATION CONSTANTS
     // Arm motion profile constraints (rotation)
-    public static final double kArmMaxSpeedRadiansPerSecondRotation = 3;
-    public static final double kArmMaxAccelerationRadiansPerSecondSquaredRotation = 1;
+    public static final double kArmMaxSpeedRotationRadiansPerSecond = 3;
+    public static final double kArmMaxAccelerationRotationRadiansPerSecondSquared =
+        (kNominalVoltage
+                - ksArmRotationVolts
+                - kArmMaxSpeedRotationRadiansPerSecond * kvArmRotationVoltSecondsPerRadian)
+            / kaArmRotationVoltSecondsSquaredPerRadian;
 
     // Constraint for the motion profilied arm rotation controller
     public static final TrapezoidProfile.Constraints kArmControllerConstraintsRotation =
         new TrapezoidProfile.Constraints(
-            kArmMaxSpeedRadiansPerSecondRotation,
-            kArmMaxAccelerationRadiansPerSecondSquaredRotation);
+            kArmMaxSpeedRotationRadiansPerSecond,
+            kArmMaxAccelerationRotationRadiansPerSecondSquared);
 
     public static final double kPArmRotation = 0;
     public static final double kDArmRotation = 0;
+
+    // ARM TRANSLATION CONSTANTS
+    public static final double ksArmTranslationVolts = 0;
+    public static final double kvArmTranslationVoltSecondsPerMeter = 0;
+    public static final double kaArmTranslationVoltSecondsSquaredPerMeter = 0;
+
+    public static final double kArmMaxSpeedTranslationMetersPerSecond = 3;
+    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared =
+        (kNominalVoltage
+                - ksArmTranslationVolts
+                - kArmMaxSpeedTranslationMetersPerSecond * kvArmTranslationVoltSecondsPerMeter)
+            / kaArmTranslationVoltSecondsSquaredPerMeter;
+
+    // Constraint for the motion profilied arm rotation controller
+    public static final TrapezoidProfile.Constraints kArmControllerConstraintsTranslation =
+        new TrapezoidProfile.Constraints(
+            kArmMaxSpeedRotationRadiansPerSecond,
+            kArmMaxAccelerationRotationRadiansPerSecondSquared);
+
+    public static final double kPArmTranslation = 0;
+    public static final double kDArmTranslation = 0;
   }
 }
