@@ -33,6 +33,7 @@ public class Hood extends SubsystemBase implements Loggable {
 
   public Hood() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
+    m_spark.setSmartCurrentLimit(kHoodCurrentLimitAmps);
 
     m_spark.setInverted(true);
 
