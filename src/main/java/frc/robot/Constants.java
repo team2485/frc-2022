@@ -278,21 +278,21 @@ public final class Constants {
     public static final double kHoodBottomPositionRadians = 0.4363323; // from horizontal
 
     // Hood characterization constants
-    public static final double kSHoodVolts = 0;
-    public static final double kGHoodVolts = 0.07;
-    public static final double kVHoodVoltSecondsPerRadian = 2.20;
-    public static final double kAHoodVoltSecondsSquaredPerRadian = 0;
+    public static final double kSHoodVolts = 0.13428;
+    public static final double kGHoodVolts = 0.061339;
+    public static final double kVHoodVoltSecondsPerRadian = 0.99111;
+    public static final double kAHoodVoltSecondsSquaredPerRadian = 0.12369;
 
     public static final double kHoodMaxSpeedRadiansPerSecond = 2 * Math.PI;
     public static final double kHoodMaxAccelerationRadiansPerSecondSquared =
-        Double.MAX_VALUE; // kA is essentially 0 here, so the maximum acceleration is basically
-    // infinite. The limit on motion profiling is not acceleration but velocity.
+        (kNominalVoltage - kSHoodVolts - kHoodMaxSpeedRadiansPerSecond * kVHoodVoltSecondsPerRadian)
+            / kAHoodVoltSecondsSquaredPerRadian;
 
     public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
             kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
     // Hood PID constants
-    public static final double kPHood = 0;
+    public static final double kPHood = 20;
     public static final double kDHood = 0;
   }
 }
