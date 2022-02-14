@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import frc.team2485.WarlordsLib.IDManager;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -76,7 +77,8 @@ public final class Constants {
     //// Drive mechanism/encoder constants
     public static final double kWheelDiameterMeters = 0.1016;
     public static final double kWheelCircumferenceMeters = 0.1016 * Math.PI;
-    public static final double kDriveGearRatio = 8.16; // motor turns per wheel turns
+    public static final double kDriveGearRatio =
+        IDManager.getInstance().select(6.75, 8.16); // motor turns per wheel turns
     public static final double kDriveDistMetersPerMotorRev =
         kWheelCircumferenceMeters / kDriveGearRatio;
     public static final double kDriveDistMetersPerPulse = kDriveDistMetersPerMotorRev / kFalconCPR;
@@ -93,9 +95,12 @@ public final class Constants {
     // public static final double kvDriveVoltSecondsPerMeter = 2.7695;
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
-    public static final double ksDriveVolts = 0.54;
-    public static final double kvDriveVoltSecondsPerMeter = 2.5856;
-    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.31789;
+    // practice carpet
+    public static final double ksDriveVolts = IDManager.getInstance().select(0.0, 0.54);
+    public static final double kvDriveVoltSecondsPerMeter =
+        IDManager.getInstance().select(0.0, 2.5856);
+    public static final double kaDriveVoltSecondsSquaredPerMeter =
+        IDManager.getInstance().select(0.0, 0.31789);
 
     public static final double kvMaxVelocity = 12 / kvDriveVoltSecondsPerMeter;
     public static final double kaMaxAcceleration = 12 / kaDriveVoltSecondsSquaredPerMeter;
@@ -250,18 +255,18 @@ public final class Constants {
             new Rotation2d());
   }
 
-  public static final class FlywheelConstants {
-    public static final int kFlywheelTalonPort = 30;
+  public static final class ShooterConstants {
+    public static final int kShooterTalonPort = 30;
 
-    public static final double kFlywheelTalonCurrentLimit = 50;
+    public static final double kShooterTalonCurrentLimit = 50;
 
     public static final int kRevEncoderPulsesPerRevolution = 2048;
     public static final int kRevEncoderSamplesToAverage = 5;
     public static final int kFalconPulsesPerRevolution = 2048;
 
-    public static final double kFlywheelRotationsPerPulse = 1.0 / kFalconPulsesPerRevolution;
+    public static final double kShooterRotationsPerPulse = 1.0 / kFalconPulsesPerRevolution;
 
-    public static final double kFlywheelMaxSpeedRotationsPerSecond = 30;
+    public static final double kShooterMaxSpeedRotationsPerSecond = 30;
 
     // shooter wood prototype gains
     public static final double kS = 0.65884;

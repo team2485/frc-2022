@@ -5,10 +5,11 @@
 package frc.robot.subsystems;
 
 import static frc.robot.Constants.*;
-import static frc.robot.Constants.FlywheelConstants.*;
+import static frc.robot.Constants.ShooterConstants.*;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,11 +22,11 @@ import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
-public class Flywheel extends SubsystemBase implements Loggable {
-  private final WL_TalonFX m_talon = new WL_TalonFX(kFlywheelTalonPort);
+public class Shooter extends SubsystemBase implements Loggable {
+  private final WL_TalonFX m_talon = new WL_TalonFX(kShooterTalonPort);
 
   @Config(name = "Flywheel feedforward")
-  private final SR_SimpleMotorFeedforward m_flywheelFeedforward =
+  private final SR_SimpleMotorFeedforward m_shooterFeedforward =
       new SR_SimpleMotorFeedforward(kS, kV, kA);
 
   private final BangBangController m_bangBangController =
@@ -33,15 +34,16 @@ public class Flywheel extends SubsystemBase implements Loggable {
 
   private double m_desiredVelocityRPS;
 
-  /** Creates a new Flywheel. Controlled with a feedforward and a bang bang controlller. */
-  public Flywheel() {
-    CurrentLogger.getInstance().register(m_talon, "Flywheel");
-    TalonFXConfiguration flywheelTalonConfig = new TalonFXConfiguration();
-    flywheelTalonConfig.supplyCurrLimit.currentLimit = kFlywheelTalonCurrentLimit;
-    flywheelTalonConfig.supplyCurrLimit.enable = true;
-    flywheelTalonConfig.voltageCompSaturation = Constants.kNominalVoltage;
-    m_talon.configAllSettings(flywheelTalonConfig);
+  /** Creates a new Shooter. Controlled with a feedforward and a bang bang controlller. */
+  public Shooter() {
+    CurrentLogger.getInstance().register(m_talon, "Shooter");
+    TalonFXConfiguration shooterTalonConfig = new TalonFXConfiguration();
+    shooterTalonConfig.supplyCurrLimit.currentLimit = kShooterTalonCurrentLimit;
+    shooterTalonConfig.supplyCurrLimit.enable = true;
+    shooterTalonConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    m_talon.configAllSettings(shooterTalonConfig);
 
+    m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 10);
     m_talon.setNeutralMode(NeutralMode.Coast);
     m_talon.enableVoltageCompensation(true);
   }
@@ -49,7 +51,7 @@ public class Flywheel extends SubsystemBase implements Loggable {
   /** @return the current talon-reported velocity in rotations per second. */
   @Log(name = "Current Talon-reported Velocity (RPS)")
   public double getTalonVelocity() {
-    return m_talon.getSelectedSensorVelocity() * kFlywheelRotationsPerPulse * 10;
+    return m_talon.getSelectedSensorVelocity() * kShooterRotationsPerPulse * 10;
   }
 
   /**
@@ -72,11 +74,11 @@ public class Flywheel extends SubsystemBase implements Loggable {
   }
 
   // runs every 10 ms (run by Robot)
-  public void fastPeriodic() {
+  public void runShooterControlLoop() {
     // Calculates voltage to apply.
     // Feedforward is scaled down to prevent overshoot since bang-bang can't correct for overshoot.
     double voltage =
-        0.95 * m_flywheelFeedforward.calculate(m_desiredVelocityRPS)
+        0.95 * m_shooterFeedforward.calculate(m_desiredVelocityRPS)
             + m_bangBangController.calculate(getTalonVelocity(), m_desiredVelocityRPS)
                 * kNominalVoltage;
     m_talon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
@@ -84,4 +86,7 @@ public class Flywheel extends SubsystemBase implements Loggable {
     SmartDashboard.putNumber("ff applied voltage", voltage);
     SmartDashboard.putNumber("talon applied voltage", m_talon.getBusVoltage());
   }
+
+  @Override
+  public void periodic() {}
 }
