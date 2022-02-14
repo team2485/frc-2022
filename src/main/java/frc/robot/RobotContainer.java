@@ -32,6 +32,7 @@ public class RobotContainer {
 
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Vision m_vision = new Vision();
+  private final Hood m_hood = new Hood();
 
   @Log(name = "Field Relative")
   private boolean m_fieldRelativeToggle = true;

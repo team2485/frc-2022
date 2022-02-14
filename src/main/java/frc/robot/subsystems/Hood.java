@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.HoodConstants.*;
 
 import com.revrobotics.SparkMaxLimitSwitch;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
@@ -32,10 +31,10 @@ public class Hood extends SubsystemBase implements Loggable {
 
   private boolean m_isZeroed = false;
 
-  public Hood(Encoder hoodEncoder) {
+  public Hood() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
 
-    m_spark.setInverted(false);
+    m_spark.setInverted(true);
 
     m_limitSwitch.enableLimitSwitch(true);
   }
