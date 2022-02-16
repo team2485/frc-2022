@@ -139,4 +139,3 @@ spotless {
 }
 
 build.dependsOn spotlessApply
-
