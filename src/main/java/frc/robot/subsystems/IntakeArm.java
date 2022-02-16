@@ -4,11 +4,10 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.IntakeArmConstants;
+import static frc.robot.Constants.IntakeArmConstants.*;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -22,38 +21,36 @@ import com.revrobotics.SparkMaxLimitSwitch;
 
 public class IntakeArm extends SubsystemBase implements Loggable {
 
-  private CANSparkMax m_armSparkMax; //pushin p
+  private WL_SparkMax m_spark;
   private SparkMaxLimitSwitch m_topSwitch;
   private SparkMaxLimitSwitch m_bottomSwitch;
   
 
   /** Creates a new intakeArm. */
   public IntakeArm() {
-
-    //pushin p
-
-    m_armSparkMax = new CANSparkMax(IntakeArmConstants.ARM_SPARKMAX_PORT, MotorType.kBrushless);
-    m_topSwitch = m_armSparkMax.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
-    m_bottomSwitch = m_armSparkMax.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+    m_spark = new WL_SparkMax(kIntakeArmSparkPort);
+    m_spark.setSmartCurrentLimit(kIntakeArmSmartCurrentLimitAmps);
+    m_spark.setSecondaryCurrentLimit(kIntakeArmImmediateCurrentLimitAmps);
+    m_topSwitch = m_spark.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+    m_bottomSwitch = m_spark.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
 
     m_topSwitch.enableLimitSwitch(true);
     m_bottomSwitch.enableLimitSwitch(true);
   }
 
 
-  public enum IntakePositionEnum{
-    up, 
-    down;
+  public enum ArmPosition {
+    kUp, 
+    kDown;
   }
 
-  public void set(IntakePositionEnum pos){
+  public void set(ArmPosition pos){
 
-    if (pos == IntakePositionEnum.up){
-      //PWM.UP;
-      m_armSparkMax.set(IntakeArmConstants.kPWMUp);
+    if (pos == ArmPosition.kUp){
+      m_spark.set(kPercentOutputUp);
     }
-    else {
-      m_armSparkMax.set(IntakeArmConstants.kPWMDown);
+    else if(pos == ArmPosition.kDown) {
+      m_spark.set(kPercentOutputDown);
     }
   }
 
@@ -66,8 +63,5 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   public boolean getBottomLimitSwitch() {
     return m_bottomSwitch.isPressed();
   }
-  
-  @Override
-  public void periodic() {
-  }
+
 }
