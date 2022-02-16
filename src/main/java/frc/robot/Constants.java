@@ -272,11 +272,18 @@ public final class Constants {
   public static final class ClimbElevatorConstants {
     // SLIDE CONSTANTS
     public static final int kElevatorTalonPort = 12;
-    public static final double kElevatorCurrentLimitAmps = 20;
+    public static final double kElevatorSupplyCurrentLimitAmps = 10;
+    public static final double kElevatorSupplyCurrentThresholdAmps = 15;
+    public static final double kElevatorSupplyCurrentThresholdTimeSecs = 0.1;
+    public static final double kElevatorStatorCurrentLimitAmps = 20;
+    public static final double kElevatorStatorCurrentThresholdAmps = 25;
+    public static final double kElevatorStatorCurrentThresholdTimeSecs = 0.1;
 
-    public static final int kElevatorSlotSensorPort = 0;
-    public static final double kElevatorSlotSensorTopPosition = 0;
-    public static final double kElevatorSlotSensorBottomPosition = 0;
+    public static final int kElevatorSlotSensorTopPort = 0;
+    public static final int kElevatorSlotSensorBottomPort = 0;
+
+    public static final double kElevatorSlotSensorTopPosition = 20.75;
+    public static final double kElevatorSlotSensorBottomPosition = 0.25;
     public static final double kSlotSensorDebounceTime = 0.1;
 
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
