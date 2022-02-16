@@ -16,7 +16,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,7 +26,11 @@ import frc.team2485.WarlordsLib.PoseHistory;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
+<<<<<<< HEAD
 import java.util.Optional;
+=======
+import org.photonvision.PhotonCamera;
+>>>>>>> feat/intake
 
 public class Drivetrain extends SubsystemBase implements Loggable {
   private final SwerveModule m_frontLeftModule;
@@ -354,6 +357,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         m_frontRightModule.getState(),
         m_backRightModule.getState());
 
+<<<<<<< HEAD
     m_odometryWithoutVision.update(
         Rotation2d.fromDegrees(m_pigeon.getFusedHeading()),
         m_frontLeftModule.getState(),
@@ -365,6 +369,29 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     Pose2d robotPose = m_odometry.getPoseMeters();
     poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
+=======
+    // var result = m_camera.getLatestResult();
+
+    // SmartDashboard.putBoolean("Camera Has Target", result.hasTargets());
+
+    // if (result.hasTargets()) {
+    //   Pose2d cameraEstimatedPose =
+    //       PhotonUtils.estimateFieldToRobot(
+    //           kCameraHeightMeters,
+    //           kTargetHeightMeters,
+    //           kCameraPitchRadians,
+    //           Math.toRadians(result.getBestTarget().getPitch()),
+    //           Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
+    //           this.getHeading(),
+    //           kFieldToTargetMeters,
+    //           kCameraToRobotMeters);
+
+    //   double imageCaptureTime = Timer.getFPGATimestamp() - result.getLatencyMillis();
+
+    //   // System.out.println("cam estimated: " + cameraEstimatedPose.toString());
+    //   m_poseEstimator.addVisionMeasurement(cameraEstimatedPose, imageCaptureTime);
+    // }
+>>>>>>> feat/intake
 
     // System.out.println("pose: " + getPoseMeters().toString());
     m_field.setRobotPose(getPoseMeters());

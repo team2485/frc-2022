@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.*;
 import static frc.robot.Constants.AutoConstants.*;
 import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
@@ -14,20 +15,28 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Shooter;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
+<<<<<<< HEAD
 import io.github.oblarg.oblog.annotations.Log;
+=======
+import io.github.oblarg.oblog.annotations.*;
+import org.photonvision.PhotonCamera;
+>>>>>>> feat/intake
 
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
 
+<<<<<<< HEAD
   public final Shooter m_shooter = new Shooter();
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Vision m_vision = new Vision();
@@ -41,6 +50,15 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
+=======
+  private final PhotonCamera m_camera = new PhotonCamera("gloworm");
+  private final Drivetrain m_drivetrain = new Drivetrain(m_camera);
+  private final Intake m_intake = new Intake();
+
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  public RobotContainer() {
+    // m_camera.setLED(VisionLEDMode.kOn);
+>>>>>>> feat/intake
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -132,5 +150,6 @@ public class RobotContainer {
   // whenever the robot is disabled, drive should be turned off
   public void disabledInit() {
     m_drivetrain.drive(0, 0, 0, false);
+    m_intake.setPercentOutput(0);
   }
 }

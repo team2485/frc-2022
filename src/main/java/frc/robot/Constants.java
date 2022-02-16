@@ -11,6 +11,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.util.Color;
 import frc.team2485.WarlordsLib.IDManager;
 
 /**
@@ -286,5 +288,21 @@ public final class Constants {
 
     public static final int kIndexerSmartCurrentLimitAmps = 5;
     public static final int kIndexerImmediateCurrentLimitAmps = 7;
+  }
+
+  public static final class IntakeConstants {
+    public static final int kIntakeSparkPort = 15;
+    public static final int kIntakeSmartCurrentLimitAmps = 5;
+    public static final int kIntakeImmediateCurrentLimitAmps = 10;
+
+    public static final double kIntakePercent = -0.5;
+    public static final double kOuttakePercent = 0.5;
+
+    public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
+
+    public static final Color kBlueBallColor = new Color(0.26, 0.42, 0.32);
+    public static final Color kRedBallColor = new Color(0.35, 0.40, 0.25);
+
+    public static final double kColorConfidenceLevel = 0.97;
   }
 }
