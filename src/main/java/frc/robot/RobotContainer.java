@@ -14,7 +14,6 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -34,7 +33,6 @@ public class RobotContainer {
   private final Drivetrain m_drivetrain = new Drivetrain(m_camera);
   private final Intake m_intake = new Intake();
 
-  private Alliance m_currentAlliance = DriverStation.getAlliance();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // m_camera.setLED(VisionLEDMode.kOn);
@@ -58,36 +56,6 @@ public class RobotContainer {
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
 
     m_driver.a().whenHeld(new AlignToTarget(m_drivetrain, m_camera));
-
-    m_driver
-        .b()
-        .whileHeld(new IntakeColorSpecific(m_intake, DriverStation.getAlliance()))
-        .whenReleased(new InstantCommand(() -> m_intake.setVoltage(0)));
-
-    m_driver
-        .start()
-        .whileHeld(
-            new InstantCommand(
-                () -> {
-                  m_intake.setVoltage(-6.5);
-                }))
-        .whenReleased(
-            new InstantCommand(
-                () -> {
-                  m_intake.setVoltage(0);
-                }));
-    m_driver
-        .back()
-        .whileHeld(
-            new InstantCommand(
-                () -> {
-                  m_intake.setVoltage(4);
-                }))
-        .whenReleased(
-            new InstantCommand(
-                () -> {
-                  m_intake.setVoltage(0);
-                }));
   }
 
   /**
@@ -138,6 +106,6 @@ public class RobotContainer {
   // whenever the robot is disabled, drive should be turned off
   public void disabledInit() {
     m_drivetrain.drive(0, 0, 0, false);
-    m_intake.setVoltage(0);
+    m_intake.setPercentOutput(0);
   }
 }

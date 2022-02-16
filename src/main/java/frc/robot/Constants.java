@@ -193,10 +193,12 @@ public final class Constants {
   }
 
   public static final class IntakeConstants {
-    public static final int kIntakePort = 15;
+    public static final int kIntakeSparkPort = 15;
+    public static final int kIntakeSmartCurrentLimitAmps = 5;
+    public static final int kIntakeImmediateCurrentLimitAmps = 10;
 
-    public static final double kIntakePWM = -0.5;
-    public static final double kOuttakePWM = 0.5;
+    public static final double kIntakePercent = -0.5;
+    public static final double kOuttakePercent = 0.5;
 
     public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
 
