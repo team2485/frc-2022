@@ -43,7 +43,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     shooterTalonConfig.voltageCompSaturation = Constants.kNominalVoltage;
     m_talon.configAllSettings(shooterTalonConfig);
 
-    m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 10);
+    m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
     m_talon.setNeutralMode(NeutralMode.Coast);
     m_talon.enableVoltageCompensation(true);
   }
