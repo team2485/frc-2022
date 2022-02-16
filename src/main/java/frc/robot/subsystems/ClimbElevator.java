@@ -4,6 +4,8 @@ import static frc.robot.Constants.ClimbElevatorConstants.*;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -16,90 +18,106 @@ import frc.robot.Constants;
 import io.github.oblarg.oblog.Loggable;
 
 public class ClimbElevator extends SubsystemBase implements Loggable {
-  private final WPI_TalonFX m_elevatorMotor = new WPI_TalonFX(kElevatorTalonPort);
-  private final DigitalInput m_elevatorSlotSensor = new DigitalInput(kElevatorSlotSensorPort);
-  private final Debouncer m_elevatorSlotSensorDebounce =
+  private final WPI_TalonFX m_talon = new WPI_TalonFX(kElevatorTalonPort);
+  private final DigitalInput m_topSlotSensor = new DigitalInput(kElevatorSlotSensorTopPort);
+  private final DigitalInput m_bottomSlotSensor = new DigitalInput(kElevatorSlotSensorBottomPort);
+
+  private final Debouncer m_slotSensorDebounce =
       new Debouncer(kSlotSensorDebounceTime, DebounceType.kBoth);
 
-  private final ProfiledPIDController m_elevatorController =
+  private final ProfiledPIDController m_pidController =
       new ProfiledPIDController(kPElevator, 0, kDElevator, kElevatorControllerConstraints);
 
-  private double m_lastElevatorVelocitySetpoint = 0;
+  private double m_lastVelocitySetpoint = 0;
 
-  private final SimpleMotorFeedforward m_elevatorFeedForward =
+  private final SimpleMotorFeedforward m_feedforward =
       new SimpleMotorFeedforward(
           ksElevatorVolts, kvElevatorVoltSecondsPerMeter, kaElevatorVoltSecondsSquaredPerMeter);
 
-  private double m_elevatorPositionSetpointMeters = 0;
-
-  private boolean m_elevatorDirection = false; // true is top, false is bottom
+  private double m_positionSetpointMeters = 0;
 
   public ClimbElevator() {
-    TalonFXConfiguration elevatorMotorConfig = new TalonFXConfiguration();
-    elevatorMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
-    elevatorMotorConfig.supplyCurrLimit.currentLimit = kElevatorCurrentLimitAmps;
-    elevatorMotorConfig.supplyCurrLimit.enable = true;
-    m_elevatorMotor.configAllSettings(elevatorMotorConfig);
-    m_elevatorMotor.enableVoltageCompensation(true);
-    m_elevatorMotor.setNeutralMode(NeutralMode.Brake);
+    TalonFXConfiguration talonConfig = new TalonFXConfiguration();
+    talonConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    talonConfig.supplyCurrLimit =
+        new SupplyCurrentLimitConfiguration(
+            true,
+            kElevatorSupplyCurrentLimitAmps,
+            kElevatorSupplyCurrentThresholdAmps,
+            kElevatorSupplyCurrentThresholdTimeSecs);
+    talonConfig.statorCurrLimit =
+        new StatorCurrentLimitConfiguration(
+            true,
+            kElevatorStatorCurrentLimitAmps,
+            kElevatorStatorCurrentThresholdAmps,
+            kElevatorStatorCurrentThresholdTimeSecs);
+
+    m_talon.configAllSettings(talonConfig);
+    m_talon.enableVoltageCompensation(true);
+    m_talon.setNeutralMode(NeutralMode.Brake);
   }
 
   public void setElevatorPositionMeters(double position) {
-    m_elevatorPositionSetpointMeters = position;
-    if (position > this.getElevatorPositionMeters()) {
-      m_elevatorDirection = true;
-    } else {
-      m_elevatorDirection = false;
-    }
+    m_positionSetpointMeters = position;
   }
 
   public double getElevatorPositionMeters() {
-    return m_elevatorMotor.getSelectedSensorPosition() * kSlideDistancePerPulseMeters;
+    return m_talon.getSelectedSensorPosition() * kSlideDistancePerPulseMeters;
   }
 
   public void resetElevatorPositionMeters(double position) {
-    m_elevatorMotor.setSelectedSensorPosition(position / kSlideDistancePerPulseMeters);
+    m_talon.setSelectedSensorPosition(position / kSlideDistancePerPulseMeters);
   }
 
   public double getElevatorVelocityMetersPerSecond() {
-    return m_elevatorMotor.getSelectedSensorVelocity() * kSlideDistancePerPulseMeters * 0.1;
+    return m_talon.getSelectedSensorVelocity() * kSlideDistancePerPulseMeters * 0.1;
   }
 
   public void runSlideControlLoop() {
     // Set slider
-    double slideFeedbackOutputVoltage =
-        m_elevatorController.calculate(
-            m_elevatorPositionSetpointMeters, this.getElevatorPositionMeters());
+    double feedbackOutputVoltage =
+        m_pidController.calculate(m_positionSetpointMeters, this.getElevatorPositionMeters());
 
-    double slideFeedforwardOutputVoltage =
-        m_elevatorFeedForward.calculate(
-            m_lastElevatorVelocitySetpoint,
-            m_elevatorController.getSetpoint().velocity,
-            Constants.kRIOLoopTime);
-    m_elevatorMotor.set(
-        ControlMode.PercentOutput,
-        (slideFeedbackOutputVoltage + slideFeedforwardOutputVoltage) * Constants.kNominalVoltage);
+    double feedforwardOutputVoltage =
+        m_feedforward.calculate(
+            m_lastVelocitySetpoint, m_pidController.getSetpoint().velocity, Constants.kRIOLoopTime);
 
-    m_lastElevatorVelocitySetpoint = m_elevatorController.getSetpoint().velocity;
+    double outputPercentage =
+        (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
+
+    m_talon.set(ControlMode.PercentOutput, limitOnSlotSensors(outputPercentage));
+    m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
   }
 
-  public void resetOnSlotSensor() {
-    boolean slotSensorTripped = m_elevatorSlotSensorDebounce.calculate(m_elevatorSlotSensor.get());
+  public double limitOnSlotSensors(double voltage) {
+    boolean topSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
+    boolean bottomSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
 
-    if (slotSensorTripped) {
-      if (m_elevatorDirection == true) {
-        this.resetElevatorPositionMeters(kElevatorSlotSensorTopPosition);
-        m_elevatorMotor.set(0);
-      } else {
-        this.resetElevatorPositionMeters(kElevatorSlotSensorTopPosition);
-        m_elevatorMotor.set(0);
-      }
+    if (bottomSlotSensorTripped && voltage < 0) {
+      return 0;
+    } else if (topSlotSensorTripped && voltage > 0) {
+      return 0;
+    } else {
+      return voltage;
+    }
+  }
+
+  public void updatePositionOnSlotSensors() {
+    boolean topSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
+    boolean bottomSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
+
+    if (bottomSlotSensorTripped
+        && this.getElevatorPositionMeters() >= kElevatorSlotSensorBottomPosition) {
+      this.resetElevatorPositionMeters(kElevatorSlotSensorBottomPosition);
+    } else if (topSlotSensorTripped
+        && this.getElevatorPositionMeters() <= kElevatorSlotSensorTopPosition) {
+      this.resetElevatorPositionMeters(kElevatorSlotSensorTopPosition);
     }
   }
 
   @Override
   public void periodic() {
-    this.resetOnSlotSensor();
+    this.updatePositionOnSlotSensors();
     this.runSlideControlLoop();
   }
 }
