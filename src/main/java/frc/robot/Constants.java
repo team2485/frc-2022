@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -276,8 +277,9 @@ public final class Constants {
     public static final double kHoodRadiansPerMotorRev = 2 * Math.PI / kHoodGearRatio;
 
     public static final double kHoodBottomPositionRadians = 0.4363323; // from horizontal
+    public static final double kHoodTopPositionRadians = 0.65;
 
-    public static final int kHoodSmartCurrentLimitAmps = 5;
+    public static final int kHoodSmartCurrentLimitAmps = 2;
     public static final int kHoodImmediateCurrentLimitAmps = 5;
 
     // Hood characterization constants
@@ -288,14 +290,20 @@ public final class Constants {
 
     public static final double kHoodMaxSpeedRadiansPerSecond = 2 * Math.PI;
     public static final double kHoodMaxAccelerationRadiansPerSecondSquared =
-        (kNominalVoltage - kSHoodVolts - kHoodMaxSpeedRadiansPerSecond * kVHoodVoltSecondsPerRadian)
-            / kAHoodVoltSecondsSquaredPerRadian;
+        new ArmFeedforward(
+                kSHoodVolts,
+                kGHoodVolts,
+                kVHoodVoltSecondsPerRadian,
+                kAHoodVoltSecondsSquaredPerRadian)
+            .maxAchievableAcceleration(
+                kNominalVoltage, kHoodBottomPositionRadians, kHoodBottomPositionRadians);
 
     public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
             kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
     // Hood PID constants
-    public static final double kPHood = 5;
+    public static final double kPHood = 50;
     public static final double kDHood = 0;
+    public static final double kHoodControllerPositionTolerance = 0.005;
   }
 }

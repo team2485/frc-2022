@@ -4,6 +4,7 @@ import static frc.robot.Constants.HoodConstants.*;
 
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.SparkMaxLimitSwitch;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -19,7 +20,6 @@ public class Hood extends SubsystemBase implements Loggable {
   private SparkMaxLimitSwitch m_limitSwitch =
       m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
 
-  @Config.PIDController(name = "Hood Controller")
   private final SR_ProfiledPIDController m_controller =
       new SR_ProfiledPIDController(kPHood, 0, kDHood, kHoodMotionProfileConstraints);
 
@@ -28,7 +28,9 @@ public class Hood extends SubsystemBase implements Loggable {
       new SR_ArmFeedforward(
           kSHoodVolts, kGHoodVolts, kVHoodVoltSecondsPerRadian, kAHoodVoltSecondsSquaredPerRadian);
 
-  private double m_angleSetpointRadians = kHoodBottomPositionRadians + 0.1;
+  @Log(name = "angle setpoint radians")
+  private double m_angleSetpointRadians = kHoodBottomPositionRadians;
+
   private double m_previousVelocitySetpoint = 0;
 
   private boolean m_isZeroed = false;
@@ -44,23 +46,27 @@ public class Hood extends SubsystemBase implements Loggable {
 
     m_limitSwitch.enableLimitSwitch(true);
 
+    m_controller.setTolerance(kHoodControllerPositionTolerance);
+
     this.resetAngleRadians(kHoodBottomPositionRadians);
+
+    Shuffleboard.getTab("Hood").add("Hood controller", m_controller);
   }
 
   /** @return current angle from horizontal */
   @Log(name = "Current angle (radians)")
   public double getAngleRadians() {
-    return m_spark.getEncoder().getPosition() * kHoodRadiansPerMotorRev
-        + kHoodBottomPositionRadians;
+    return m_spark.getEncoder().getPosition() * kHoodRadiansPerMotorRev;
   }
 
   @Config(name = "Set angle (radians)", defaultValueNumeric = kHoodBottomPositionRadians)
   public void setAngleRadians(double angle) {
-    m_angleSetpointRadians = angle;
+    m_angleSetpointRadians =
+        MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
   }
 
   public void resetAngleRadians(double angle) {
-    m_spark.getEncoder().setPosition(angle);
+    m_spark.getEncoder().setPosition(angle / kHoodRadiansPerMotorRev);
   }
 
   public boolean getBottomLimitSwitch() {
