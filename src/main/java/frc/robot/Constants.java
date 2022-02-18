@@ -31,11 +31,36 @@ import frc.team2485.WarlordsLib.sendableRichness.SR_TrapezoidProfile;
 public final class Constants {
   public static final String kRobotIdFile = "/home/lvuser/id.txt";
   public static final String kCurrentLogFolder = "/home/lvuser/currentLogs";
-
   public static final double kNominalVoltage = 12.0;
   public static final int kFalconCPR = 2048; // pulses per rotation
   public static final int kCANTimeoutMs = 250;
   public static final double kTimestepSeconds = 0.02;
+
+  public static final class TurretConstants {
+    public static final int kTurretTalonPort = 32;
+    public static final int kTurretSupplyCurrentLimitAmps = 5;
+    public static final int kTurretSupplyCurrentThresholdAmps = 10;
+    public static final int kTurretSupplyCurrentThresholdTimeMs = 1;
+
+    public static final int kTurretEncoderChannel = 0; // Analog channel
+    public static final double kTurretRangeOfMotion = 2 * Math.PI;
+    public static final double kTurretOffset = 0;
+
+    public static final double kP = 0;
+    public static final double kD = 0;
+
+    public static final double kVVoltSecondsPerMeter = 0;
+    public static final double kAVoltSecondsSquaredPerMeter = 0;
+    public static final double kSVolts = 0;
+
+    public static final double kMaxVelocityRadiansPerSecond = 0;
+    public static final double kMaxAccelerationRadiansPerSecondSquared = 0;
+
+    public static final double kMinPositionRadians = 0;
+    public static final double kMaxPositionRadians = 0;
+
+    public static final double kBufferSizeRadians = Math.toRadians(25);
+  }
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
