@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -14,6 +15,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.team2485.WarlordsLib.IDManager;
+import frc.team2485.WarlordsLib.sendableRichness.SR_TrapezoidProfile;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -33,6 +35,7 @@ public final class Constants {
   public static final double kNominalVoltage = 12.0;
   public static final int kFalconCPR = 2048; // pulses per rotation
   public static final int kCANTimeoutMs = 250;
+  public static final double kTimestepSeconds = 0.02;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -119,8 +122,8 @@ public final class Constants {
 
     //// Turning feedforward constants (unused in current implementation but useful for max speed)
     public static final double ksTurningVolts = 0.60572;
-    public static final double kvTurningVoltSecondsPerMeter = 0.20717;
-    public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;
+    public static final double kvTurningVoltSecondsPerRadian = 0.20717;
+    public static final double kaTurningVoltSecondsSquaredPerRadian = 0.0068542;
 
     //// Turning PID constants
     public static final double kPTurning = 0.07;
@@ -132,8 +135,8 @@ public final class Constants {
     public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared =
         (kNominalVoltage
                 - ksTurningVolts
-                - kModuleMaxSpeedTurningRadiansPerSecond * kvTurningVoltSecondsPerMeter)
-            / kaTurningVoltSecondsSquaredPerMeter;
+                - kModuleMaxSpeedTurningRadiansPerSecond * kvTurningVoltSecondsPerRadian)
+            / kaTurningVoltSecondsSquaredPerRadian;
     public static final double kModuleMaxSpeedTurningPulsesPer100Ms =
         kModuleMaxSpeedTurningRadiansPerSecond / kTurningRadiansPerPulse * 0.1;
     public static final double kModuleMaxAccelerationTurningPulsesPer100MsSquared =
@@ -316,5 +319,41 @@ public final class Constants {
     public static final int kIntakeArmImmediateCurrentLimitAmps = 10;
     public static final double kPercentOutputUp = 0.5;
     public static final double kPercentOutputDown = -0.5;
+  }
+
+  public static final class HoodConstants {
+    public static final int kHoodSparkPort = 31;
+    public static final double kHoodGearRatio = 225; // motor turns : output/full hood turns
+    public static final double kHoodRadiansPerMotorRev = 2 * Math.PI / kHoodGearRatio;
+
+    public static final double kHoodBottomPositionRadians = 0.4363323; // from horizontal
+    public static final double kHoodTopPositionRadians = 0.65;
+
+    public static final int kHoodSmartCurrentLimitAmps = 2;
+    public static final int kHoodImmediateCurrentLimitAmps = 5;
+
+    // Hood characterization constants
+    public static final double kSHoodVolts = 0.13428;
+    public static final double kGHoodVolts = 0.061339;
+    public static final double kVHoodVoltSecondsPerRadian = 0.99111;
+    public static final double kAHoodVoltSecondsSquaredPerRadian = 0.12369;
+
+    public static final double kHoodMaxSpeedRadiansPerSecond = 2 * Math.PI;
+    public static final double kHoodMaxAccelerationRadiansPerSecondSquared =
+        new ArmFeedforward(
+                kSHoodVolts,
+                kGHoodVolts,
+                kVHoodVoltSecondsPerRadian,
+                kAHoodVoltSecondsSquaredPerRadian)
+            .maxAchievableAcceleration(
+                kNominalVoltage, kHoodBottomPositionRadians, kHoodBottomPositionRadians);
+
+    public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
+        new SR_TrapezoidProfile.Constraints(
+            kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
+    // Hood PID constants
+    public static final double kPHood = 50;
+    public static final double kDHood = 0;
+    public static final double kHoodControllerPositionTolerance = 0.005;
   }
 }

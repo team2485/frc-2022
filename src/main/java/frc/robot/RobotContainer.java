@@ -31,6 +31,7 @@ public class RobotContainer {
   public final Shooter m_shooter = new Shooter();
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Vision m_vision = new Vision();
+  private final Hood m_hood = new Hood();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
