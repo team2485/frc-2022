@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.ModuleConstants.*;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -9,7 +11,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
-
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -19,179 +20,201 @@ import frc.robot.Constants;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
-import static frc.robot.Constants.ModuleConstants.*;
 
 public class SwerveModule implements Loggable {
 
-    private final WPI_TalonFX m_driveMotor;
-    private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(ksDriveVolts, kvDriveVoltSecondsPerMeter, kaDriveVoltSecondsSquaredPerMeter);
+  private final WPI_TalonFX m_driveMotor;
+  private final SimpleMotorFeedforward m_driveFeedforward =
+      new SimpleMotorFeedforward(
+          ksDriveVolts, kvDriveVoltSecondsPerMeter, kaDriveVoltSecondsSquaredPerMeter);
 
-    private final WPI_TalonFX m_turningMotor;
-    private final CANCoder m_turningEncoder;
-    
-    private final String m_moduleID;
+  private final WPI_TalonFX m_turningMotor;
+  private final CANCoder m_turningEncoder;
 
-    public SwerveModule(int driveMotorID, int turningMotorID, int turningEncoderID, Rotation2d zero, String moduleID) {
-        this.m_moduleID = moduleID;
+  private final String m_moduleID;
 
-        //Drive motor configuration 
-        //-- voltage compensation, current limiting, P term, brake mode
-        TalonFXConfiguration driveMotorConfig = new TalonFXConfiguration();
-        driveMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
-        driveMotorConfig.supplyCurrLimit.currentLimit = kDriveCurrentLimitAmps;
-        driveMotorConfig.supplyCurrLimit.enable = true;
-        driveMotorConfig.slot0.kP = kPDrive;
-        this.m_driveMotor = new WPI_TalonFX(driveMotorID);
-        m_driveMotor.configAllSettings(driveMotorConfig);
-        m_driveMotor.enableVoltageCompensation(true);
-        m_driveMotor.setNeutralMode(NeutralMode.Brake);
-        
-        //Turning motor configuration
-        //-- voltage compensation, current limiting, P D F terms, motion magic, brake mode
-        TalonFXConfiguration turningMotorConfig = new TalonFXConfiguration();
-        turningMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
-        turningMotorConfig.supplyCurrLimit.currentLimit = kTurningCurrentLimitAmps;
-        turningMotorConfig.supplyCurrLimit.enable = true;
-        turningMotorConfig.slot0.kP = kPTurning;
-        turningMotorConfig.slot0.kD = kDTurning;
-        turningMotorConfig.slot0.kF = kFTurning;
-        turningMotorConfig.motionCruiseVelocity = kModuleMaxSpeedTurningPulsesPer100Ms;
-        turningMotorConfig.motionAcceleration = kModuleMaxAccelerationTurningPulsesPer100MsSquared;
-        this.m_turningMotor = new WPI_TalonFX(turningMotorID);        
-        m_turningMotor.configAllSettings(turningMotorConfig);
-        m_turningMotor.enableVoltageCompensation(true);
-        m_turningMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.kCANTimeoutMs);
-        m_turningMotor.setNeutralMode(NeutralMode.Brake);
-        
-        //Turning encoder configuration
-        //-- configures offset and sensor range to +-180
-        CANCoderConfiguration turningEncoderConfig = new CANCoderConfiguration();
-        turningEncoderConfig.magnetOffsetDegrees = -zero.getDegrees();
-        turningEncoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
-        m_turningEncoder = new CANCoder(turningEncoderID);
-        m_turningEncoder.configAllSettings(turningEncoderConfig);
-    
-    }
+  public SwerveModule(
+      int driveMotorID,
+      int turningMotorID,
+      int turningEncoderID,
+      Rotation2d zero,
+      String moduleID) {
+    this.m_moduleID = moduleID;
 
-    /**
-     * Optimizes swerve module state, then sets motors to it.
-     * @param desiredState
-     */
-    public void setDesiredState(SwerveModuleState desiredState) {
-        SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getHeading());
-        this.setSpeedMetersPerSecond(state.speedMetersPerSecond);
-        this.setHeading(state.angle);
-    }
+    // Drive motor configuration
+    // -- voltage compensation, current limiting, P term, brake mode
+    TalonFXConfiguration driveMotorConfig = new TalonFXConfiguration();
+    driveMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    driveMotorConfig.supplyCurrLimit.currentLimit = kDriveCurrentLimitAmps;
+    driveMotorConfig.supplyCurrLimit.enable = true;
+    driveMotorConfig.slot0.kP = kPDrive;
+    this.m_driveMotor = new WPI_TalonFX(driveMotorID);
+    m_driveMotor.configAllSettings(driveMotorConfig);
+    m_driveMotor.enableVoltageCompensation(true);
+    m_driveMotor.setNeutralMode(NeutralMode.Brake);
 
-    /**
-     * Returns current swerve module state.
-     * @return current state
-     */
-    public SwerveModuleState getState() {
-        return new SwerveModuleState(this.getSpeedMetersPerSecond(), this.getHeading());
-    }
+    // Turning motor configuration
+    // -- voltage compensation, current limiting, P D F terms, motion magic, brake mode
+    TalonFXConfiguration turningMotorConfig = new TalonFXConfiguration();
+    turningMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    turningMotorConfig.supplyCurrLimit.currentLimit = kTurningCurrentLimitAmps;
+    turningMotorConfig.supplyCurrLimit.enable = true;
+    turningMotorConfig.slot0.kP = kPTurning;
+    turningMotorConfig.slot0.kD = kDTurning;
+    turningMotorConfig.slot0.kF = kFTurning;
+    turningMotorConfig.motionCruiseVelocity = kModuleMaxSpeedTurningPulsesPer100Ms;
+    turningMotorConfig.motionAcceleration = kModuleMaxAccelerationTurningPulsesPer100MsSquared;
+    this.m_turningMotor = new WPI_TalonFX(turningMotorID);
+    m_turningMotor.configAllSettings(turningMotorConfig);
+    m_turningMotor.enableVoltageCompensation(true);
+    m_turningMotor.configSelectedFeedbackSensor(
+        TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.kCANTimeoutMs);
+    m_turningMotor.setNeutralMode(NeutralMode.Brake);
 
-    /**
-     * Returns current heading.
-     * @return current heading in degrees
-     */
-    @Log(name = "current rotation")
-    private double getHeadingDegrees() {
-        return getHeading().getDegrees();
-    }
+    // Turning encoder configuration
+    // -- configures offset and sensor range to +-180
+    CANCoderConfiguration turningEncoderConfig = new CANCoderConfiguration();
+    turningEncoderConfig.magnetOffsetDegrees = -zero.getDegrees();
+    turningEncoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
+    m_turningEncoder = new CANCoder(turningEncoderID);
+    m_turningEncoder.configAllSettings(turningEncoderConfig);
+  }
 
-    /**
-     * Returns current heading.
-     * @return heading as Rotation2d
-     */
-    private Rotation2d getHeading() {
-        return Rotation2d.fromDegrees(m_turningEncoder.getAbsolutePosition());
-    }
-    
-    /**
-     * Optimizes and then sets heading, intended for Shuffleboard use.
-     * @param desiredRotationDegrees desired heading in degrees
-     */
-    @Config(name = "set rotation")
-    public void setHeadingDegrees(double desiredRotationDegrees) {
-        Rotation2d currentRotation = this.getHeading();
-        //use WPILib's swervemodulestate optimization to minimize change in heading
-        Rotation2d optimizedDesiredRotation = SwerveModuleState.optimize(new SwerveModuleState(0, Rotation2d.fromDegrees(desiredRotationDegrees)), currentRotation).angle;
-        this.setHeading(optimizedDesiredRotation);
-    }
+  /**
+   * Optimizes swerve module state, then sets motors to it.
+   *
+   * @param desiredState
+   */
+  public void setDesiredState(SwerveModuleState desiredState) {
+    SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getHeading());
+    this.setSpeedMetersPerSecond(state.speedMetersPerSecond);
+    this.setHeading(state.angle);
+  }
 
-    /**
-     * Sets already-optimized heading, using motion-profiled on-motor PID control
-     * @param optimizedDesiredRotation desired headiing as Rotation2d
-     */
-    public void setHeading(Rotation2d optimizedDesiredRotation) {
-        Rotation2d currentRotation = this.getHeading();
-        double optimizedRotationRadians = optimizedDesiredRotation.getRadians();
-        double currentRotationRadians = currentRotation.getRadians();
+  /**
+   * Returns current swerve module state.
+   *
+   * @return current state
+   */
+  public SwerveModuleState getState() {
+    return new SwerveModuleState(this.getSpeedMetersPerSecond(), this.getHeading());
+  }
 
-        double deltaRadians = optimizedRotationRadians - currentRotationRadians;
-        double deltaPulses = deltaRadians / kTurningRadiansPerPulse;
+  /**
+   * Returns current heading.
+   *
+   * @return current heading in degrees
+   */
+  @Log(name = "current rotation")
+  private double getHeadingDegrees() {
+    return getHeading().getDegrees();
+  }
 
-        double currentPulses = m_turningMotor.getSelectedSensorPosition();
-        double referencePulses = currentPulses + deltaPulses;
+  /**
+   * Returns current heading.
+   *
+   * @return heading as Rotation2d
+   */
+  private Rotation2d getHeading() {
+    return Rotation2d.fromDegrees(m_turningEncoder.getAbsolutePosition());
+  }
 
-        m_turningMotor.set(ControlMode.MotionMagic, referencePulses);
-    }
+  /**
+   * Optimizes and then sets heading, intended for Shuffleboard use.
+   *
+   * @param desiredRotationDegrees desired heading in degrees
+   */
+  @Config(name = "set rotation")
+  public void setHeadingDegrees(double desiredRotationDegrees) {
+    Rotation2d currentRotation = this.getHeading();
+    // use WPILib's swervemodulestate optimization to minimize change in heading
+    Rotation2d optimizedDesiredRotation =
+        SwerveModuleState.optimize(
+                new SwerveModuleState(0, Rotation2d.fromDegrees(desiredRotationDegrees)),
+                currentRotation)
+            .angle;
+    this.setHeading(optimizedDesiredRotation);
+  }
 
-    /**
-     * Returns current speed.
-     * @return speed in meters per second
-     */
-    @Log(name = "Speed meters per second")
-    private double getSpeedMetersPerSecond() {
-        return m_driveMotor.getSelectedSensorVelocity() * kDriveDistMetersPerPulse * 10;
-    }
+  /**
+   * Sets already-optimized heading, using motion-profiled on-motor PID control
+   *
+   * @param optimizedDesiredRotation desired headiing as Rotation2d
+   */
+  public void setHeading(Rotation2d optimizedDesiredRotation) {
+    Rotation2d currentRotation = this.getHeading();
+    double optimizedRotationRadians = optimizedDesiredRotation.getRadians();
+    double currentRotationRadians = currentRotation.getRadians();
 
-    /**
-     * Sets drive motor, using on-motor velocity PID and on-RIO feedforward
-     * @param desiredSpeed desired speed in meters per second
-     */
-    @Config(name = "Set speed meters per second")
-    public void setSpeedMetersPerSecond(double desiredSpeed) {
-        m_driveMotor.set(ControlMode.Velocity, desiredSpeed/kDriveDistMetersPerPulse * 0.1, DemandType.ArbitraryFeedForward, m_driveFeedforward.calculate(desiredSpeed) / Constants.kNominalVoltage);
-    }
+    double deltaRadians = optimizedRotationRadians - currentRotationRadians;
+    double deltaPulses = deltaRadians / kTurningRadiansPerPulse;
 
-    /**
-     * Resets drive encoder. 
-     */
-    public void resetDriveEncoder() {
-        m_driveMotor.setSelectedSensorPosition(0);
-    }
-    
-    /**
-     * Configures behavior of drive motor on 0 input. 
-     * @param mode NeutralMode.Brake or NeutralMode.Coast
-     */
-    public void setDriveNeutralMode(NeutralMode mode) {
-        m_driveMotor.setNeutralMode(mode);
-    }
+    double currentPulses = m_turningMotor.getSelectedSensorPosition();
+    double referencePulses = currentPulses + deltaPulses;
 
-    /**
-     * Configures behavior of turning motor on 0 input. 
-     * @param mode NeutralMode.Brake or NeutralMode.Coast
-     */
-    public void setTurningNeutralMode(NeutralMode mode) {
-        m_turningMotor.setNeutralMode(mode);
-    }
+    m_turningMotor.set(ControlMode.MotionMagic, referencePulses);
+  }
 
-    @Override
-    public String configureLogName() {
-        return m_moduleID;
-    }
+  /**
+   * Returns current speed.
+   *
+   * @return speed in meters per second
+   */
+  @Log(name = "Speed meters per second")
+  private double getSpeedMetersPerSecond() {
+    return m_driveMotor.getSelectedSensorVelocity() * kDriveDistMetersPerPulse * 10;
+  }
 
-    @Override
-    public LayoutType configureLayoutType() {
-        return BuiltInLayouts.kGrid;
-    }
+  /**
+   * Sets drive motor, using on-motor velocity PID and on-RIO feedforward
+   *
+   * @param desiredSpeed desired speed in meters per second
+   */
+  @Config(name = "Set speed meters per second")
+  public void setSpeedMetersPerSecond(double desiredSpeed) {
+    m_driveMotor.set(
+        ControlMode.Velocity,
+        desiredSpeed / kDriveDistMetersPerPulse * 0.1,
+        DemandType.ArbitraryFeedForward,
+        m_driveFeedforward.calculate(desiredSpeed) / Constants.kNominalVoltage);
+  }
 
-    @Override
-    public int[] configureLayoutSize() {
-        int[] size = {3,4};
-        return size;
-      }
+  /** Resets drive encoder. */
+  public void resetDriveEncoder() {
+    m_driveMotor.setSelectedSensorPosition(0);
+  }
+
+  /**
+   * Configures behavior of drive motor on 0 input.
+   *
+   * @param mode NeutralMode.Brake or NeutralMode.Coast
+   */
+  public void setDriveNeutralMode(NeutralMode mode) {
+    m_driveMotor.setNeutralMode(mode);
+  }
+
+  /**
+   * Configures behavior of turning motor on 0 input.
+   *
+   * @param mode NeutralMode.Brake or NeutralMode.Coast
+   */
+  public void setTurningNeutralMode(NeutralMode mode) {
+    m_turningMotor.setNeutralMode(mode);
+  }
+
+  @Override
+  public String configureLogName() {
+    return m_moduleID;
+  }
+
+  @Override
+  public LayoutType configureLayoutType() {
+    return BuiltInLayouts.kGrid;
+  }
+
+  @Override
+  public int[] configureLayoutSize() {
+    int[] size = {3, 4};
+    return size;
+  }
 }

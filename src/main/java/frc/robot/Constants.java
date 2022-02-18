@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -17,171 +16,161 @@ import edu.wpi.first.math.util.Units;
  *
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
- *  
- * Include units in Constant names whenever possible/convenient.
- * If not, include a comment designating units. 
+ *
+ * <p>Include units in Constant names whenever possible/convenient. If not, include a comment
+ * designating units.
  */
 public final class Constants {
-    public static final String kRobotIdFile = "/home/lvuser/id.txt";
-    public static final double kNominalVoltage = 12.0;
-    public static final int kFalconCPR = 2048; //pulses per rotation
-    public static final int kCANTimeoutMs = 250;
+  public static final String kRobotIdFile = "/home/lvuser/id.txt";
+  public static final double kNominalVoltage = 12.0;
+  public static final int kFalconCPR = 2048; // pulses per rotation
+  public static final int kCANTimeoutMs = 250;
+  public static final double kTimestepSeconds = 0.02;
 
-    public static final class TurretConstants {
-        static public final double KP = 0;
-        static public final double KI = 0;
-        static public final double KD = 0;
+  public static final class TurretConstants {
+    public static final int kTurretTalonPort = 32;
+    public static final int kTurretSupplyCurrentLimitAmps = 5;
+    public static final int kTurretSupplyCurrentThresholdAmps = 10;
+    public static final int kTurretSupplyCurrentThresholdTimeMs = 1;
 
-        static public final double KV = 0;
-        static public final double KA = 0;
-        static public final double KS = 0;
+    public static final int kTurretEncoderChannel = 0; // Analog channel
+    public static final double kTurretRangeOfMotion = 2 * Math.PI;
+    public static final double kTurretOffset = 0;
 
-        static public final double MAX_VELOCITY = 0;
-        static public final double MAX_ACCELERATION = 0;
+    public static final double kP = 0;
+    public static final double kD = 0;
 
-        static public int TURRET_MOTOR_PORT = 0;
+    public static final double kVVoltSecondsPerMeter = 0;
+    public static final double kAVoltSecondsSquaredPerMeter = 0;
+    public static final double kSVolts = 0;
 
-        static public int TURRET_VOLTAGE = 12;
+    public static final double kMaxVelocityRadiansPerSecond = 0;
+    public static final double kMaxAccelerationRadiansPerSecondSquared = 0;
 
-        static public double MIN_OUTPUT = 0;
-        static public double MAX_OUTPUT = 0;
+    public static final double kMinPositionRadians = 0;
+    public static final double kMaxPositionRadians = 0;
 
-        static public double MIN_POSITION = 0;
-        static public double MAX_POSITION = 0;
-        
-        static public double BUFFER_SIZE = 0;
-    }
+    public static final double kBufferSizeRadians = Math.toRadians(25);
+  }
 
-    public static final class OIConstants {
-        public static final int kDriverPort = 0;
-        public static final int kOperatorPort = 1;
+  public static final class OIConstants {
+    public static final int kDriverPort = 0;
+    public static final int kOperatorPort = 1;
 
-        public static final double kDriveSlewRate = 3; //units per second to limit rate to, inverse of how long it will take from 0 to 1
+    public static final double kDriveSlewRate =
+        3; // units per second to limit rate to, inverse of how long it will take from 0 to 1
 
-        public static final double kDriverRightXDeadband = 0.15;
-        public static final double kDriverLeftXDeadband = 0.08;
-        public static final double kDriverLeftYDeadband = 0.05;
-    }
+    public static final double kDriverRightXDeadband = 0.15;
+    public static final double kDriverLeftXDeadband = 0.08;
+    public static final double kDriverLeftYDeadband = 0.05;
+  }
 
-    public static final class AutoConstants{
-        public static final double kAutoMaxSpeedMetersPerSecond = 3;
-        public static final double kAutoMaxAccelerationMetersPerSecondSquared = 3;
+  public static final class AutoConstants {
+    public static final double kAutoMaxSpeedMetersPerSecond = 3;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 3;
 
-        public static final double kAutoMaxAngularSpeedRadiansPerSecond = 3*Math.PI;
-        public static final double kAutoMaxAngularAccelerationRadiansPerSecondSquared = 3*Math.PI;
-    
-        public static final double kPAutoXController = 1;
-        public static final double kPAutoYController = 1;
-        public static final double kPAutoThetaController = 5;
-    
-        // Constraint for the motion profilied robot angle controller
-        public static final TrapezoidProfile.Constraints kAutoThetaControllerConstraints =
-            new TrapezoidProfile.Constraints(
-                kAutoMaxAngularSpeedRadiansPerSecond, kAutoMaxAngularAccelerationRadiansPerSecondSquared); 
-    }
+    public static final double kAutoMaxAngularSpeedRadiansPerSecond = 3 * Math.PI;
+    public static final double kAutoMaxAngularAccelerationRadiansPerSecondSquared = 3 * Math.PI;
 
-    public static final class ModuleConstants{
-        //Drive control constants 
-        public static final double kDriveCurrentLimitAmps = 80;
+    public static final double kPAutoXController = 1;
+    public static final double kPAutoYController = 1;
+    public static final double kPAutoThetaController = 5;
 
-        ////Drive mechanism/encoder constants
-        public static final double kWheelDiameterMeters = 0.1016;
-        public static final double kDriveGearRatio = 8.16; //motor turns per wheel turns
-        public static final double kDriveDistMetersPerMotorRev = (kWheelDiameterMeters*Math.PI)/kDriveGearRatio; 
-        public static final double kDriveDistMetersPerPulse = kDriveDistMetersPerMotorRev/kFalconCPR;
-        ////NOTE: CTRE Encoders return velocity in units/100 ms. CTRE velocity readings should be multiplied by 10 to be per second. 
+    // Constraint for the motion profilied robot angle controller
+    public static final TrapezoidProfile.Constraints kAutoThetaControllerConstraints =
+        new TrapezoidProfile.Constraints(
+            kAutoMaxAngularSpeedRadiansPerSecond,
+            kAutoMaxAngularAccelerationRadiansPerSecondSquared);
+  }
 
-        ////Drive feedforward constants
-        public static final double ksDriveVolts = 0.66707;
-        public static final double kvDriveVoltSecondsPerMeter = 2.7887;
-        public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
+  public static final class ModuleConstants {
+    // Drive control constants
+    public static final double kDriveCurrentLimitAmps = 80;
 
-        ////Drive PID constants
-        public static final double kPDrive = 0.05;
-        //Turning control constants
-        public static final double kTurningCurrentLimitAmps = 20;
+    //// Drive mechanism/encoder constants
+    public static final double kWheelDiameterMeters = 0.1016;
+    public static final double kDriveGearRatio = 8.16; // motor turns per wheel turns
+    public static final double kDriveDistMetersPerMotorRev =
+        (kWheelDiameterMeters * Math.PI) / kDriveGearRatio;
+    public static final double kDriveDistMetersPerPulse = kDriveDistMetersPerMotorRev / kFalconCPR;
+    //// NOTE: CTRE Encoders return velocity in units/100 ms. CTRE velocity readings should be
+    // multiplied by 10 to be per second.
 
-        ////Turning mechanism/encoder constants
-        public static final double kTurningGearRatio = 12.8; //motor turns per shaft turns
-        public static final double kTurningRadiansPerMotorRev = 2*Math.PI/kTurningGearRatio;
-        public static final double kTurningRadiansPerPulse = kTurningRadiansPerMotorRev/kFalconCPR;
+    //// Drive feedforward constants
+    public static final double ksDriveVolts = 0.66707;
+    public static final double kvDriveVoltSecondsPerMeter = 2.7887;
+    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
 
-        public static final double blah = Math.PI/4 * 1/kTurningRadiansPerPulse;
-        ////Turning feedforward constants (unused in current implementation)
-        public static final double ksTurningVolts = 0.60572;
-        public static final double kvTurningVoltSecondsPerMeter = 0.20717;
-        public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;
+    //// Drive PID constants
+    public static final double kPDrive = 0.05;
+    // Turning control constants
+    public static final double kTurningCurrentLimitAmps = 20;
 
-        ////Turning PID constants
-        public static final double kPTurning = 0.2;
-        public static final double kDTurning = 0.05;
-        public static final double kFTurning = 0.4*1023/8360;
+    //// Turning mechanism/encoder constants
+    public static final double kTurningGearRatio = 12.8; // motor turns per shaft turns
+    public static final double kTurningRadiansPerMotorRev = 2 * Math.PI / kTurningGearRatio;
+    public static final double kTurningRadiansPerPulse = kTurningRadiansPerMotorRev / kFalconCPR;
 
-        ////Turning trapezoidal motion profile/motion magic constants
-        public static final double kModuleMaxSpeedTurningRadiansPerSecond = 16*Math.PI;
-        public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared = 256*Math.PI;
-        public static final double kModuleMaxSpeedTurningPulsesPer100Ms = kModuleMaxSpeedTurningRadiansPerSecond/kTurningRadiansPerPulse * 0.1;
-        public static final double kModuleMaxAccelerationTurningPulsesPer100MsSquared = kModuleMaxAccelerationTurningRadiansPerSecondSquared/kTurningRadiansPerPulse * 0.01;
+    public static final double blah = Math.PI / 4 * 1 / kTurningRadiansPerPulse;
+    //// Turning feedforward constants (unused in current implementation)
+    public static final double ksTurningVolts = 0.60572;
+    public static final double kvTurningVoltSecondsPerMeter = 0.20717;
+    public static final double kaTurningVoltSecondsSquaredPerMeter = 0.0068542;
 
-    }
+    //// Turning PID constants
+    public static final double kPTurning = 0.2;
+    public static final double kDTurning = 0.05;
+    public static final double kFTurning = 0.4 * 1023 / 8360;
 
-    public static final class DriveConstants {
-        //Ports and zeros
-        /**
-         * Zeros found with bevel gears facing right. 
-         * Applied offset is the negative of the zero. 
-         */
-        public static final int kPigeonPort = 9;
+    //// Turning trapezoidal motion profile/motion magic constants
+    public static final double kModuleMaxSpeedTurningRadiansPerSecond = 16 * Math.PI;
+    public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared = 256 * Math.PI;
+    public static final double kModuleMaxSpeedTurningPulsesPer100Ms =
+        kModuleMaxSpeedTurningRadiansPerSecond / kTurningRadiansPerPulse * 0.1;
+    public static final double kModuleMaxAccelerationTurningPulsesPer100MsSquared =
+        kModuleMaxAccelerationTurningRadiansPerSecondSquared / kTurningRadiansPerPulse * 0.01;
+  }
 
-        public static final int kFLDriveTalonPort = 1;
-        public static final int kFLTurningTalonPort = 2;
-        public static final int kFLCANCoderPort = 11;
-        public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(-3.6-5.18);
+  public static final class DriveConstants {
+    // Ports and zeros
+    /** Zeros found with bevel gears facing right. Applied offset is the negative of the zero. */
+    public static final int kPigeonPort = 9;
 
-        public static final int kFRDriveTalonPort = 3;
-        public static final int kFRTurningTalonPort = 4;
-        public static final int kFRCANCoderPort = 12;
-        public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-167.7+4.33);
+    public static final int kFLDriveTalonPort = 1;
+    public static final int kFLTurningTalonPort = 2;
+    public static final int kFLCANCoderPort = 11;
+    public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(-3.6 - 5.18);
 
-        public static final int kBRDriveTalonPort = 5;
-        public static final int kBRTurningTalonPort = 6;
-        public static final int kBRCANCoderPort = 13;
-        public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(56.0-1.66);
+    public static final int kFRDriveTalonPort = 3;
+    public static final int kFRTurningTalonPort = 4;
+    public static final int kFRCANCoderPort = 12;
+    public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33);
 
-        public static final int kBLDriveTalonPort = 7;
-        public static final int kBLTurningTalonPort = 8;
-        public static final int kBLCANCoderPort = 14;
-        public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(139.0+0.52);
+    public static final int kBRDriveTalonPort = 5;
+    public static final int kBRTurningTalonPort = 6;
+    public static final int kBRCANCoderPort = 13;
+    public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(56.0 - 1.66);
 
-        //Max speed teleoperated
-        public static final double kTeleopMaxSpeedMetersPerSecond = 2; //meters per second
-        public static final double kTeleopMaxAngularSpeedRadiansPerSecond = Math.PI; //radians per second
+    public static final int kBLDriveTalonPort = 7;
+    public static final int kBLTurningTalonPort = 8;
+    public static final int kBLCANCoderPort = 14;
+    public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(139.0 + 0.52);
 
-        //Drivebase dimensions
-        public static final double kWheelbaseLengthMeters = 0.635; //meters
-        public static final double kWheelbaseWidthMeters = 0.508; //meters
-        public static final double blah = 0.6*Math.PI; 
-        
-        public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
-            new Translation2d(
-                kWheelbaseLengthMeters/2,
-                kWheelbaseWidthMeters/2
-            ), 
-            new Translation2d(
-                kWheelbaseLengthMeters/2,
-                -kWheelbaseWidthMeters/2
-            ), 
-            new Translation2d(
-                -kWheelbaseLengthMeters/2,
-                kWheelbaseWidthMeters/2
-            ), 
-            new Translation2d(
-                -kWheelbaseLengthMeters/2,
-                -kWheelbaseWidthMeters/2
-            )  
-        );
+    // Max speed teleoperated
+    public static final double kTeleopMaxSpeedMetersPerSecond = 2; // meters per second
+    public static final double kTeleopMaxAngularSpeedRadiansPerSecond =
+        Math.PI; // radians per second
 
+    // Drivebase dimensions
+    public static final double kWheelbaseLengthMeters = 0.635; // meters
+    public static final double kWheelbaseWidthMeters = 0.508; // meters
+    public static final double blah = 0.6 * Math.PI;
 
-
-    }
+    public static final SwerveDriveKinematics kDriveKinematics =
+        new SwerveDriveKinematics(
+            new Translation2d(kWheelbaseLengthMeters / 2, kWheelbaseWidthMeters / 2),
+            new Translation2d(kWheelbaseLengthMeters / 2, -kWheelbaseWidthMeters / 2),
+            new Translation2d(-kWheelbaseLengthMeters / 2, kWheelbaseWidthMeters / 2),
+            new Translation2d(-kWheelbaseLengthMeters / 2, -kWheelbaseWidthMeters / 2));
+  }
 }

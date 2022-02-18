@@ -27,15 +27,14 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    //Instantiate IDManager -- will read ID File
+    // Instantiate IDManager -- will read ID File
     IDManager.getInstance(Constants.kRobotIdFile);
 
-    //Create RobotContainer (the place where commands are bound to buttons)
+    // Create RobotContainer (the place where commands are bound to buttons)
     m_robotContainer = new RobotContainer();
-    
-    //Make the robot container the root project for Oblog
-    Logger.configureLoggingAndConfig(m_robotContainer, false);
 
+    // Make the robot container the root project for Oblog
+    Logger.configureLoggingAndConfig(m_robotContainer, false);
   }
 
   /**
@@ -58,8 +57,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic() {
-  }
+  public void disabledPeriodic() {}
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -85,27 +83,27 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    //m_robotContainer.configureDriveCoastMode();
+    // m_robotContainer.configureDriveCoastMode();
 
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    //m_robotContainer.teleopPeriodic();
+    // m_robotContainer.teleopPeriodic();
   }
 
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
-    //m_robotContainer.configureDriveCoastMode();
+    // m_robotContainer.configureDriveCoastMode();
 
   }
 
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-    //m_robotContainer.testPeriodic();
+    // m_robotContainer.testPeriodic();
   }
 }

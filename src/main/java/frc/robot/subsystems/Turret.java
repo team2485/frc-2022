@@ -2,51 +2,106 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot.subsystems;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
+import static frc.robot.Constants.TurretConstants.*;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import WarlordsLib.BufferZone;
-//import edu.wpi.first.wpilibj.motorcontrol.Spark;
-import frc.robot.Constants.TurretConstants;
+import edu.wpi.first.math.MathUtil;
+// import edu.wpi.first.wpilibj.motorcontrol.Spark;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.team2485.WarlordsLib.math.BufferZone;
+import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
+import io.github.oblarg.oblog.annotations.*;
+
 public class Turret extends SubsystemBase {
-  private ProfiledPIDController m_controller = new ProfiledPIDController(
-    TurretConstants.KP,
-    TurretConstants.KI,
-    TurretConstants.KD,
-    new TrapezoidProfile.Constraints(TurretConstants.MAX_VELOCITY, TurretConstants.MAX_ACCELERATION)
-  );
+  private final WPI_TalonSRX m_talon = new WPI_TalonSRX(kTurretTalonPort);
+  private final AnalogPotentiometer m_encoder =
+      new AnalogPotentiometer(kTurretEncoderChannel, kTurretRangeOfMotion, kTurretOffset);
 
-  private BufferZone m_bufferZone = new BufferZone(TurretConstants.MIN_OUTPUT, TurretConstants.MAX_OUTPUT, TurretConstants.MIN_POSITION, TurretConstants.MAX_POSITION, TurretConstants.BUFFER_SIZE);
+  private ProfiledPIDController m_controller =
+      new ProfiledPIDController(
+          kP,
+          0,
+          kD,
+          new TrapezoidProfile.Constraints(
+              kMaxVelocityRadiansPerSecond, kMaxAccelerationRadiansPerSecondSquared));
 
-  private SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(TurretConstants.KS, TurretConstants.KV, TurretConstants.KA);
-  private WPI_TalonSRX m_motor = new WPI_TalonSRX(TurretConstants.TURRET_MOTOR_PORT);
-  private double m_currentVelocity = 0;
-  private double m_prevVelocity = 0;
-  private double m_currentRotation = 0;
+  private BufferZone m_bufferZone =
+      new BufferZone(
+          -kMaxVelocityRadiansPerSecond,
+          -kMaxVelocityRadiansPerSecond,
+          kMinPositionRadians,
+          kMaxPositionRadians,
+          kBufferSizeRadians);
+
+  @Log(name = "Turret Feedforward")
+  private SR_SimpleMotorFeedforward m_feedforward =
+      new SR_SimpleMotorFeedforward(kSVolts, kVVoltSecondsPerMeter, kAVoltSecondsSquaredPerMeter);
+
+  // Angle coord system is 0 forward, - CW, + CCW
+  private double m_angleSetpointRadians = 0;
+  private double m_previousVelocitySetpoint = 0;
 
   public Turret() {
+    TalonSRXConfiguration talonConfig = new TalonSRXConfiguration();
+    talonConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    talonConfig.peakCurrentLimit = kTurretSupplyCurrentThresholdAmps;
+    talonConfig.peakCurrentDuration = kTurretSupplyCurrentThresholdTimeMs;
+    talonConfig.continuousCurrentLimit = kTurretSupplyCurrentLimitAmps;
+
+    m_talon.configAllSettings(talonConfig);
+    m_talon.enableVoltageCompensation(true);
+    m_talon.setNeutralMode(NeutralMode.Brake);
+
+    m_talon.configForwardLimitSwitchSource(
+        LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    m_talon.configReverseLimitSwitchSource(
+        LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
   }
-  
-  @Override
+
+  @Config(name = "Set angle (radians)")
+  public void setAngleRadians(double angle) {
+    m_angleSetpointRadians = MathUtil.clamp(angle, kMinPositionRadians, kMaxPositionRadians);
+  }
+
+  @Log(name = "Current angle (radians)")
+  public double getAngleRadians() {
+    return m_encoder.get();
+  }
+
+  @Log(name = "Counter-clockwise limit switch")
+  private boolean getCCWLimitSwitchEnabled() {
+    return m_talon.isFwdLimitSwitchClosed() == 1 ? true : false;
+  }
+
+  @Log(name = "Clockwise limit switch")
+  private boolean getCWLimitSwitchEnabled() {
+    return m_talon.isRevLimitSwitchClosed() == 1 ? true : false;
+  }
+
   public void periodic() {
-    // This method will be called once per scheduler run
-  }
+    double controllerVoltage =
+        m_controller.calculate(this.getAngleRadians(), m_angleSetpointRadians);
 
-  public void moveTowardsRotationSetpoint(double newRotation)
-  {
-    m_prevVelocity = m_currentVelocity;
-    m_currentVelocity = m_controller.calculate(m_currentRotation, newRotation);
+    double feedforwardVoltage =
+        m_feedforward.calculate(
+            m_previousVelocitySetpoint,
+            m_controller.getSetpoint().velocity,
+            Constants.kTimestepSeconds);
 
-    double bufferedVelocity = m_bufferZone.get(m_currentVelocity, m_currentRotation);
-    double voltage = m_feedforward.calculate(bufferedVelocity, m_currentVelocity - m_prevVelocity) / TurretConstants.TURRET_VOLTAGE;
-    
-    m_motor.set(voltage);
-  }
+    m_previousVelocitySetpoint = m_controller.getSetpoint().velocity;
 
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
+    m_talon.set(
+        ControlMode.PercentOutput,
+        (controllerVoltage + feedforwardVoltage) / Constants.kNominalVoltage);
   }
 }
