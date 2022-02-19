@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.HoodConstants.*;
 
@@ -33,6 +33,7 @@ public class Hood extends SubsystemBase implements Loggable {
 
   private double m_previousVelocitySetpoint = 0;
 
+  @Log(name = "zeroed")
   private boolean m_isZeroed = false;
 
   public Hood() {
@@ -69,8 +70,17 @@ public class Hood extends SubsystemBase implements Loggable {
     m_spark.getEncoder().setPosition(angle / kHoodRadiansPerMotorRev);
   }
 
+  public void zeroAngle() {
+    this.resetAngleRadians(kHoodBottomPositionRadians);
+    m_isZeroed = true;
+  }
+
   public boolean getBottomLimitSwitch() {
     return m_limitSwitch.isPressed();
+  }
+
+  public void setPercentOutput(double percentOutput) {
+    m_spark.set(percentOutput);
   }
 
   @Override
@@ -88,5 +98,9 @@ public class Hood extends SubsystemBase implements Loggable {
     m_previousVelocitySetpoint = m_controller.getSetpoint().velocity;
 
     m_spark.set((controllerVoltage + feedforwardVoltage) / Constants.kNominalVoltage);
+
+    if (this.getBottomLimitSwitch()) {
+      zeroAngle();
+    }
   }
 }

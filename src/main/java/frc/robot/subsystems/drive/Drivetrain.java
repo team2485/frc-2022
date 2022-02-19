@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.drive;
 
 import static frc.robot.Constants.AutoConstants.*;
 import static frc.robot.Constants.DriveConstants.*;
@@ -116,22 +116,30 @@ public class Drivetrain extends SubsystemBase implements Loggable {
    * @param fieldRelative whether the robot should drive field-relative or not
    */
   public void drive(double xSpeed, double ySpeed, double rotSpeed, boolean fieldRelative) {
-    SwerveModuleState[] states =
-        kDriveKinematics.toSwerveModuleStates(
-            fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xSpeed, ySpeed, rotSpeed, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
-                : new ChassisSpeeds(xSpeed, ySpeed, rotSpeed));
-    SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
+    // if not being fed a speed, set all wheels pointing toward center to minimize pushability
+    if (xSpeed == 0 && ySpeed == 0 && rotSpeed == 0) {
+      m_frontLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+      m_frontRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+      m_backRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+    } else {
+      SwerveModuleState[] states =
+          kDriveKinematics.toSwerveModuleStates(
+              fieldRelative
+                  ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                      xSpeed, ySpeed, rotSpeed, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
+                  : new ChassisSpeeds(xSpeed, ySpeed, rotSpeed));
+      SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
 
-    m_frontLeftModule.setDesiredState(states[0]);
-    m_frontRightModule.setDesiredState(states[1]);
-    m_backLeftModule.setDesiredState(states[2]);
-    m_backRightModule.setDesiredState(states[3]);
+      m_frontLeftModule.setDesiredState(states[0]);
+      m_frontRightModule.setDesiredState(states[1]);
+      m_backLeftModule.setDesiredState(states[2]);
+      m_backRightModule.setDesiredState(states[3]);
 
-    this.m_desiredRotation = rotSpeed;
-    this.m_desiredXSpeed = xSpeed;
-    this.m_desiredYSpeed = ySpeed;
+      this.m_desiredRotation = rotSpeed;
+      this.m_desiredXSpeed = xSpeed;
+      this.m_desiredYSpeed = ySpeed;
+    }
   }
 
   /**
@@ -144,32 +152,39 @@ public class Drivetrain extends SubsystemBase implements Loggable {
    */
   public void driveWithRotationPosition(
       double xSpeed, double ySpeed, double desiredRotation, boolean fieldRelative) {
+    // if not being fed a speed, set all wheels pointing toward center to minimize pushability
+    if (xSpeed == 0 && ySpeed == 0) {
+      m_frontLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+      m_frontRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+      m_backRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+    } else {
+      double angularVelocity = 0;
+      if (Math.abs(desiredRotation % (2 * Math.PI) - this.getHeadingRadians() % (2 * Math.PI))
+          > kRotationTolerance) {
+        angularVelocity = m_rotationController.calculate(this.getHeadingRadians(), desiredRotation);
+      }
 
-    double angularVelocity = 0;
-    if (Math.abs(desiredRotation % (2 * Math.PI) - this.getHeadingRadians() % (2 * Math.PI))
-        > kRotationTolerance) {
-      angularVelocity = m_rotationController.calculate(this.getHeadingRadians(), desiredRotation);
+      SwerveModuleState[] states =
+          kDriveKinematics.toSwerveModuleStates(
+              fieldRelative
+                  ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                      xSpeed,
+                      ySpeed,
+                      angularVelocity,
+                      Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
+                  : new ChassisSpeeds(xSpeed, ySpeed, angularVelocity));
+      SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
+
+      m_frontLeftModule.setDesiredState(states[0]);
+      m_frontRightModule.setDesiredState(states[1]);
+      m_backLeftModule.setDesiredState(states[2]);
+      m_backRightModule.setDesiredState(states[3]);
+
+      this.m_desiredRotation = angularVelocity;
+      this.m_desiredXSpeed = xSpeed;
+      this.m_desiredYSpeed = ySpeed;
     }
-
-    SwerveModuleState[] states =
-        kDriveKinematics.toSwerveModuleStates(
-            fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xSpeed,
-                    ySpeed,
-                    angularVelocity,
-                    Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
-                : new ChassisSpeeds(xSpeed, ySpeed, angularVelocity));
-    SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
-
-    m_frontLeftModule.setDesiredState(states[0]);
-    m_frontRightModule.setDesiredState(states[1]);
-    m_backLeftModule.setDesiredState(states[2]);
-    m_backRightModule.setDesiredState(states[3]);
-
-    this.m_desiredRotation = angularVelocity;
-    this.m_desiredXSpeed = xSpeed;
-    this.m_desiredYSpeed = ySpeed;
   }
 
   /**
@@ -192,6 +207,11 @@ public class Drivetrain extends SubsystemBase implements Loggable {
    */
   public Pose2d getPoseMeters() {
     return m_odometry.getPoseMeters();
+  }
+
+  @Log(name = "Distance to hub (meters)")
+  public double getDistanceToHubMeters() {
+    return getPoseMeters().getTranslation().getDistance(kHubCenterTranslation);
   }
 
   /**

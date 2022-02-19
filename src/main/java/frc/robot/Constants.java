@@ -36,32 +36,6 @@ public final class Constants {
   public static final int kCANTimeoutMs = 250;
   public static final double kTimestepSeconds = 0.02;
 
-  public static final class TurretConstants {
-    public static final int kTurretTalonPort = 32;
-    public static final int kTurretSupplyCurrentLimitAmps = 5;
-    public static final int kTurretSupplyCurrentThresholdAmps = 10;
-    public static final int kTurretSupplyCurrentThresholdTimeMs = 1;
-
-    public static final int kTurretEncoderChannel = 0; // Analog channel
-    public static final double kTurretRangeOfMotion = 2 * Math.PI;
-    public static final double kTurretOffset = 0;
-
-    public static final double kP = 0;
-    public static final double kD = 0;
-
-    public static final double kVVoltSecondsPerMeter = 0;
-    public static final double kAVoltSecondsSquaredPerMeter = 0;
-    public static final double kSVolts = 0;
-
-    public static final double kMaxVelocityRadiansPerSecond = 0;
-    public static final double kMaxAccelerationRadiansPerSecondSquared = 0;
-
-    public static final double kMinPositionRadians = 0;
-    public static final double kMaxPositionRadians = 0;
-
-    public static final double kBufferSizeRadians = Math.toRadians(25);
-  }
-
   public static final class OIConstants {
     public static final int kDriverPort = 0;
     public static final int kOperatorPort = 1;
@@ -285,6 +259,32 @@ public final class Constants {
             new Rotation2d());
   }
 
+  public static final class TurretConstants {
+    public static final int kTurretTalonPort = 32;
+    public static final int kTurretSupplyCurrentLimitAmps = 5;
+    public static final int kTurretSupplyCurrentThresholdAmps = 10;
+    public static final int kTurretSupplyCurrentThresholdTimeMs = 1;
+
+    public static final int kTurretEncoderChannel = 0; // Analog channel
+    public static final double kTurretRangeOfMotion = 2 * Math.PI;
+    public static final double kTurretOffset = 0;
+
+    public static final double kP = 0;
+    public static final double kD = 0;
+
+    public static final double kVVoltSecondsPerMeter = 0;
+    public static final double kAVoltSecondsSquaredPerMeter = 0;
+    public static final double kSVolts = 0;
+
+    public static final double kMaxVelocityRadiansPerSecond = 0;
+    public static final double kMaxAccelerationRadiansPerSecondSquared = 0;
+
+    public static final double kMinPositionRadians = 0;
+    public static final double kMaxPositionRadians = 0;
+
+    public static final double kBufferSizeRadians = Math.toRadians(25);
+  }
+
   public static final class ShooterConstants {
     public static final int kShooterTalonPort = 30;
 
@@ -296,18 +296,21 @@ public final class Constants {
 
     public static final double kShooterRotationsPerPulse = 1.0 / kFalconPulsesPerRevolution;
 
-    public static final double kShooterMaxSpeedRotationsPerSecond = 30;
-
     // shooter wood prototype gains
-    public static final double kS = 0.65884;
-    public static final double kV = 0.11065;
-    public static final double kA = 0.023167;
+    public static final double kSShooterVolts = 0.65884;
+    public static final double kVShooterVoltSecondsPerMeter = 0.11065;
+    public static final double kAShooterVoltSecondsSquaredPerMeter = 0.023167;
+
+    public static final double kShooterFeedforwardScale = 0.95;
 
     // currently unused
     public static final double kP = 1;
     public static final double kD = 0;
 
     public static final double kVelocityTolerance = 0.5;
+
+    public static final double kShooterVelocityDipThresholdRotationsPerSecond = 5;
+    public static final int kShooterVelocityDipRollingAverageWindow = 5;
   }
 
   public static final class IndexerConstants {
@@ -316,6 +319,11 @@ public final class Constants {
 
     public static final int kIndexerSmartCurrentLimitAmps = 5;
     public static final int kIndexerImmediateCurrentLimitAmps = 7;
+
+    public static final double kLowIndexerPercentOutputIn = 0.5;
+
+    public static final double kHighIndexerPercentOutputFeedToShooter = 0.7;
+    public static final double kLowIndexerPercentOutputFeedToShooter = 0.5;
   }
 
   public static final class IntakeConstants {
@@ -323,8 +331,8 @@ public final class Constants {
     public static final int kIntakeSmartCurrentLimitAmps = 5;
     public static final int kIntakeImmediateCurrentLimitAmps = 10;
 
-    public static final double kIntakePercent = -0.5;
-    public static final double kOuttakePercent = 0.5;
+    public static final double kIntakePercentOutputIn = 0.5;
+    public static final double kIntakePercentOutputOut = -0.5;
 
     public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
 
@@ -334,16 +342,12 @@ public final class Constants {
     public static final double kColorConfidenceLevel = 0.97;
   }
 
-  public static final
-  class IntakeArmConstants { // currently only for new subsystem intake arm, not entirely sure where
-    // to put it ~Yuvi
-    // public static final int TOP_SWITCH_PORT = 1;
-    // public static final int BOTTOM_SWITCH_PORT = 2;
+  public static final class IntakeArmConstants {
     public static final int kIntakeArmSparkPort = 0;
     public static final int kIntakeArmSmartCurrentLimitAmps = 5;
     public static final int kIntakeArmImmediateCurrentLimitAmps = 10;
-    public static final double kPercentOutputUp = 0.5;
-    public static final double kPercentOutputDown = -0.5;
+    public static final double kIntakeArmPercentOutputUp = 0.5;
+    public static final double kIntakeArmPercentOutputDown = -0.5;
   }
 
   public static final class HoodConstants {
@@ -380,5 +384,7 @@ public final class Constants {
     public static final double kPHood = 50;
     public static final double kDHood = 0;
     public static final double kHoodControllerPositionTolerance = 0.005;
+
+    public static final double kHoodZeroingPercentOutput = -0.3;
   }
 }

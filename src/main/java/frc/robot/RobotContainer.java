@@ -10,33 +10,61 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
+import frc.robot.commands.auto.AutoCommandBuilder;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.cargoHandling.*;
+import frc.robot.subsystems.cargoHandling.indexing.*;
+import frc.robot.subsystems.drive.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
+import io.github.oblarg.oblog.annotations.Log;
 
 public class RobotContainer {
-  private IntakeArm m_intakeArm;
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
-  public final Shooter m_shooter = new Shooter();
+
   private final Drivetrain m_drivetrain = new Drivetrain();
+
   private final Vision m_vision = new Vision();
+
+  private final IntakeArm m_intakeArm = new IntakeArm();
+  private final Intake m_intake = new Intake();
+  private final LowIndexer m_lowIndexer = new LowIndexer();
+  private final HighIndexer m_highIndexer = new HighIndexer();
+  public final Shooter m_shooter = new Shooter();
   private final Hood m_hood = new Hood();
+  private final Turret m_turret = new Turret();
+
+  @Log(name = "Auto Chooser")
+  private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
     configureButtonBindings();
+
+    m_autoChooser.setDefaultOption(
+        "2 Ball Right Side",
+        AutoCommandBuilder.get2BallAuto(
+            m_drivetrain, m_vision, m_intake, m_intakeArm, m_lowIndexer, m_highIndexer, m_shooter));
+    m_autoChooser.addOption(
+        "3 Ball Right Side",
+        AutoCommandBuilder.get3BallAuto(
+            m_drivetrain, m_vision, m_intake, m_intakeArm, m_lowIndexer, m_highIndexer, m_shooter));
+    m_autoChooser.addOption(
+        "4 Ball Right Side",
+        AutoCommandBuilder.get4BallAuto(
+            m_drivetrain, m_vision, m_intake, m_intakeArm, m_lowIndexer, m_highIndexer, m_shooter));
+    m_autoChooser.addOption(
+        "5 Ball Right Side",
+        AutoCommandBuilder.get5BallAuto(
+            m_drivetrain, m_vision, m_intake, m_intakeArm, m_lowIndexer, m_highIndexer, m_shooter));
   }
 
   /**
@@ -48,6 +76,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     this.configureDrivetrainCommands();
     this.configureVisionCommands();
+    this.configureCargoHandlingCommands();
   }
 
   private void configureDrivetrainCommands() {
@@ -80,47 +109,54 @@ public class RobotContainer {
     m_driver.start().whenPressed(new InstantCommand(m_vision::cycleLEDMode));
   }
 
+  private void configureCargoHandlingCommands() {
+    // Default commands for intake, intake arm, shooter, and indexers are to turn them off
+    m_shooter.setDefaultCommand(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
+    m_intake.setDefaultCommand(CargoHandlingCommandBuilder.getIntakeOffCommand(m_intake));
+    m_intakeArm.setDefaultCommand(CargoHandlingCommandBuilder.getIntakeArmOffCommand(m_intakeArm));
+    m_lowIndexer.setDefaultCommand(
+        CargoHandlingCommandBuilder.getLowIndexerOffCommand(m_lowIndexer));
+    m_highIndexer.setDefaultCommand(
+        CargoHandlingCommandBuilder.getHighIndexerOffCommand(m_highIndexer));
+
+    // Default commands for turret and hood are to auto-aim based on robot pose/distance
+    m_turret.setDefaultCommand(
+        CargoHandlingCommandBuilder.getTurretAutoAimCommand(m_turret, m_drivetrain::getPoseMeters));
+
+    m_hood.setDefaultCommand(
+        CargoHandlingCommandBuilder.getHoodAutoAimCommand(
+            m_hood, m_drivetrain::getDistanceToHubMeters));
+
+    // Intake on driver right trigger: put intake arm down, then run intake and low indexer (until
+    // stopped by hitting high indexer path)
+    m_driver
+        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+        .whileHeld(
+            CargoHandlingCommandBuilder.getIntakeCommand(m_intake, m_intakeArm, m_lowIndexer))
+        .whenReleased(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
+
+    // Set shooter on operator left trigger: based on distance to hub
+    m_operator
+        .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
+        .whileHeld(
+            CargoHandlingCommandBuilder.getShooterAutoSetCommand(
+                m_shooter, m_drivetrain::getDistanceToHubMeters));
+
+    // Feed to shooter on operator right bumper: waits until shooter at setpoint
+    m_operator
+        .rightBumper()
+        .whileHeld(
+            CargoHandlingCommandBuilder.getIndexToShooterCommand(
+                m_lowIndexer, m_highIndexer, m_shooter));
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // load path from deploy/pathplanner folder
-    PathPlannerTrajectory testPath =
-        PathPlanner.loadPath(
-            "Blue 4 Ball Bottom Side (NOH)",
-            kAutoMaxSpeedMetersPerSecond,
-            kAutoMaxAccelerationMetersPerSecondSquared);
-
-    // put trajectory on Glass's Field2d widget
-    m_drivetrain.getField2d().getObject("traj").setTrajectory(testPath);
-
-    // create controller for robot angle
-    var thetaController =
-        new ProfiledPIDController(kPAutoThetaController, 0, 0, kAutoThetaControllerConstraints);
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-    // create reset odometry command (at start of path)
-    InstantCommand resetOdometry =
-        new InstantCommand(
-            () -> {
-              m_drivetrain.resetOdometry(testPath.getInitialPose(), false);
-            });
-
-    // create command to follow path
-    PPSwerveControllerCommand testPathCommand =
-        new PPSwerveControllerCommand(
-            testPath,
-            m_drivetrain::getPoseMeters,
-            kDriveKinematics,
-            new PIDController(kPAutoXController, 0, 0),
-            new PIDController(kPAutoYController, 0, 0),
-            thetaController,
-            m_drivetrain::setModuleStates,
-            m_drivetrain);
-
-    return resetOdometry.andThen(testPathCommand);
+    return m_autoChooser.getSelected().andThen(AutoCommandBuilder.setLEDsAutoCommand(m_vision));
   }
 
   // whenever the robot is disabled, drive should be turned off

@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.*;
 import static frc.robot.Constants.ShooterConstants.*;
@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.CurrentLogger;
+import frc.team2485.WarlordsLib.math.ChangeSensor;
 import frc.team2485.WarlordsLib.motorcontrol.WL_TalonFX;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
@@ -27,12 +28,20 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   @Config(name = "Flywheel feedforward")
   private final SR_SimpleMotorFeedforward m_shooterFeedforward =
-      new SR_SimpleMotorFeedforward(kS, kV, kA);
+      new SR_SimpleMotorFeedforward(
+          kSShooterVolts, kVShooterVoltSecondsPerMeter, kAShooterVoltSecondsSquaredPerMeter);
 
   private final BangBangController m_bangBangController =
       new BangBangController(kVelocityTolerance);
 
   private double m_desiredVelocityRPS;
+
+  private final ChangeSensor m_changeSensor =
+      new ChangeSensor(
+          this::getTalonVelocity,
+          kShooterVelocityDipThresholdRotationsPerSecond,
+          kShooterVelocityDipRollingAverageWindow,
+          ChangeSensor.Mode.kDipOnly);
 
   /** Creates a new Shooter. Controlled with a feedforward and a bang bang controlller. */
   public Shooter() {
@@ -73,12 +82,20 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_talon.setVoltage(voltage);
   }
 
+  public boolean atSetpoint() {
+    return m_bangBangController.atSetpoint();
+  }
+
+  public boolean hasDipped() {
+    return m_changeSensor.get();
+  }
+
   // runs every 10 ms (run by Robot)
   public void runShooterControlLoop() {
     // Calculates voltage to apply.
     // Feedforward is scaled down to prevent overshoot since bang-bang can't correct for overshoot.
     double voltage =
-        0.95 * m_shooterFeedforward.calculate(m_desiredVelocityRPS)
+        kShooterFeedforwardScale * m_shooterFeedforward.calculate(m_desiredVelocityRPS)
             + m_bangBangController.calculate(getTalonVelocity(), m_desiredVelocityRPS)
                 * kNominalVoltage;
     m_talon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
@@ -88,5 +105,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    m_changeSensor.update();
+  }
 }

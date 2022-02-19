@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import static frc.robot.Constants.AutoConstants.*;
 import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.Constants.OIConstants.*;
@@ -14,7 +13,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.drive.Drivetrain;
 import frc.team2485.WarlordsLib.oi.Deadband;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;

@@ -1,7 +1,7 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-package frc.robot.subsystems;
+package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.TurretConstants.*;
 
@@ -70,12 +70,13 @@ public class Turret extends SubsystemBase {
 
   @Config(name = "Set angle (radians)")
   public void setAngleRadians(double angle) {
-    m_angleSetpointRadians = MathUtil.clamp(angle, kMinPositionRadians, kMaxPositionRadians);
+    m_angleSetpointRadians =
+        MathUtil.clamp(angle % (2 * Math.PI), kMinPositionRadians, kMaxPositionRadians);
   }
 
   @Log(name = "Current angle (radians)")
   public double getAngleRadians() {
-    return m_encoder.get();
+    return m_encoder.get() % (2 * Math.PI);
   }
 
   @Log(name = "Counter-clockwise limit switch")
