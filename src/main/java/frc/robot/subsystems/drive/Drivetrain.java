@@ -6,7 +6,7 @@ import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.Constants.VisionConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.sensors.WPI_PigeonIMU;
+import com.ctre.phoenix.sensors.WPI_Pigeon2;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,7 +35,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   private final SwerveModule m_backLeftModule;
   private final SwerveModule m_backRightModule;
 
-  private final WPI_PigeonIMU m_pigeon;
+  private final WPI_Pigeon2 m_pigeon;
 
   private final SwerveDriveOdometry m_odometry;
   private final SwerveDriveOdometry m_odometryWithoutVision;
@@ -76,15 +76,13 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         new SwerveModule(
             kBRDriveTalonPort, kBRTurningTalonPort, kBRCANCoderPort, kBRCANCoderZero, "BR");
 
-    m_pigeon = new WPI_PigeonIMU(kPigeonPort);
+    m_pigeon = new WPI_Pigeon2(kPigeonPort);
 
     m_odometry =
-        new SwerveDriveOdometry(
-            kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+        new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     m_odometryWithoutVision =
-        new SwerveDriveOdometry(
-            kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+        new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     // m_odometry.resetPosition(
     //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
@@ -127,7 +125,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
           kDriveKinematics.toSwerveModuleStates(
               fieldRelative
                   ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                      xSpeed, ySpeed, rotSpeed, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
+                      xSpeed, ySpeed, rotSpeed, Rotation2d.fromDegrees(m_pigeon.getYaw()))
                   : new ChassisSpeeds(xSpeed, ySpeed, rotSpeed));
       SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
 
@@ -169,10 +167,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
           kDriveKinematics.toSwerveModuleStates(
               fieldRelative
                   ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                      xSpeed,
-                      ySpeed,
-                      angularVelocity,
-                      Rotation2d.fromDegrees(m_pigeon.getFusedHeading()))
+                      xSpeed, ySpeed, angularVelocity, Rotation2d.fromDegrees(m_pigeon.getYaw()))
                   : new ChassisSpeeds(xSpeed, ySpeed, angularVelocity));
       SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
 
@@ -223,12 +218,12 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     if (clearHistory) {
       poseHistory = new PoseHistory(kPoseHistoryCapacity);
     }
-    m_odometry.resetPosition(pose, Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+    m_odometry.resetPosition(pose, Rotation2d.fromDegrees(m_pigeon.getYaw()));
   }
 
   @Log(name = "Pigeon Heading")
   public double getPigeonHeadingDegrees() {
-    return m_pigeon.getFusedHeading();
+    return m_pigeon.getYaw();
   }
 
   /** Returns the current heading reading from the Pigeon. */
@@ -243,7 +238,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
   /** Sets the pigeon's current heading to zero. */
   public void zeroHeading() {
-    m_pigeon.setFusedHeading(0);
+    m_pigeon.setYaw(0);
   }
 
   /** Returns the current angular velocity in radians per second */
@@ -368,14 +363,14 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Override
   public void periodic() {
     m_odometry.update(
-        Rotation2d.fromDegrees(m_pigeon.getFusedHeading()),
+        Rotation2d.fromDegrees(m_pigeon.getYaw()),
         m_frontLeftModule.getState(),
         m_backRightModule.getState(),
         m_frontRightModule.getState(),
         m_backRightModule.getState());
 
     m_odometryWithoutVision.update(
-        Rotation2d.fromDegrees(m_pigeon.getFusedHeading()),
+        Rotation2d.fromDegrees(m_pigeon.getYaw()),
         m_frontLeftModule.getState(),
         m_backRightModule.getState(),
         m_frontRightModule.getState(),
