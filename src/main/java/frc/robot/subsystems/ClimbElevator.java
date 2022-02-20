@@ -5,39 +5,74 @@ import static frc.robot.Constants.ClimbElevatorConstants.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ElevatorFeedforward;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ProfiledPIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.*;
 
 public class ClimbElevator extends SubsystemBase implements Loggable {
   private final WPI_TalonFX m_talon = new WPI_TalonFX(kElevatorTalonPort);
+
+  @Log(name = "Top Slot Sensor")
   private final DigitalInput m_topSlotSensor = new DigitalInput(kElevatorSlotSensorTopPort);
+
+  @Log(name = "Bottom Slot Sensor")
   private final DigitalInput m_bottomSlotSensor = new DigitalInput(kElevatorSlotSensorBottomPort);
 
   private final Debouncer m_slotSensorDebounce =
       new Debouncer(kSlotSensorDebounceTime, DebounceType.kBoth);
 
-  @Config(name = "Elevator controller")
-  private final ProfiledPIDController m_pidController =
-      new ProfiledPIDController(kPElevator, 0, kDElevator, kElevatorControllerConstraints);
+  private final SR_ProfiledPIDController m_pidControllerUnloaded =
+      new SR_ProfiledPIDController(
+          kPElevatorUnloaded, 0, kDElevatorUnloaded, kElevatorControllerConstraintsUnloaded);
+
+  private final SR_ProfiledPIDController m_pidControllerLoaded =
+      new SR_ProfiledPIDController(
+          kPElevatorLoaded, 0, kDElevatorLoaded, kElevatorControllerConstraintsLoaded);
 
   private double m_lastVelocitySetpoint = 0;
 
-  @Log(name = "Elevator feedforward")
-  private final SR_SimpleMotorFeedforward m_feedforward =
-      new SR_SimpleMotorFeedforward(
-          ksElevatorVolts, kvElevatorVoltSecondsPerMeter, kaElevatorVoltSecondsSquaredPerMeter);
+  // @Log(name = "Elevator feedforward unloaded")
+  private final SR_ElevatorFeedforward m_feedforwardUnloaded =
+      new SR_ElevatorFeedforward(
+          ksElevatorVoltsUnloaded,
+          kgElevatorVoltsUnloaded,
+          kvElevatorVoltSecondsPerMeterUnloaded,
+          kaElevatorVoltSecondsSquaredPerMeterUnloaded);
 
+  // @Log(name = "Elevator feedforward loaded")
+  private final SR_ElevatorFeedforward m_feedforwardLoaded =
+      new SR_ElevatorFeedforward(
+          ksElevatorVoltsLoaded,
+          kgElevatorVoltsLoaded,
+          kvElevatorVoltSecondsPerMeterLoaded,
+          kaElevatorVoltSecondsSquaredPerMeterLoaded);
+
+  @Config(name = "loaded?")
+  private boolean m_loaded = false; // unloaded, true is loaded
+
+  @Log(name = "position setpoint")
   private double m_positionSetpointMeters = 0;
+
+  private final Servo m_ratchetServo = new Servo(kElevatorServoPort);
+
+  @Log(name = "feedback output")
+  private double m_feedbackOutput = 0;
+
+  @Log(name = "feedforward output")
+  private double m_feedforwardOutput = 0;
 
   public ClimbElevator() {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -56,13 +91,27 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
             kElevatorStatorCurrentThresholdTimeSecs);
 
     m_talon.configAllSettings(talonConfig);
+    m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
+
     m_talon.enableVoltageCompensation(true);
     m_talon.setNeutralMode(NeutralMode.Brake);
+
+    m_talon.setInverted(true);
+
+    m_pidControllerUnloaded.setTolerance(kElevatorPositionTolerance);
+
+    this.resetPositionMeters(0);
+
+    Shuffleboard.getTab("ClimbElevator").add("Controller", m_pidControllerUnloaded);
+    Shuffleboard.getTab("ClimbElevator").add("FF", m_feedforwardUnloaded);
   }
 
   @Config(name = "Set elevator position")
   public void setPositionMeters(double position) {
-    m_positionSetpointMeters = position;
+    m_positionSetpointMeters =
+        MathUtil.clamp(position, kElevatorSlotSensorBottomPosition, kElevatorSlotSensorTopPosition);
+
+    // m_positionSetpointMeters = position;
   }
 
   @Log(name = "Current elevator position")
@@ -75,24 +124,55 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     m_talon.setSelectedSensorPosition(position / kSlideDistancePerPulseMeters);
   }
 
-  @Log(name = "Current elevator veloity")
+  @Log(name = "Current elevator velocity")
   public double getVelocityMetersPerSecond() {
     return m_talon.getSelectedSensorVelocity() * kSlideDistancePerPulseMeters * 0.1;
   }
 
-  public void runControlLoop() {
-    double feedbackOutputVoltage =
-        m_pidController.calculate(m_positionSetpointMeters, this.getPositionMeters());
+  public void setMode(boolean loaded) {
+    this.m_loaded = loaded;
+  }
 
-    double feedforwardOutputVoltage =
-        m_feedforward.calculate(
-            m_lastVelocitySetpoint, m_pidController.getSetpoint().velocity, Constants.kRIOLoopTime);
+  public void runControlLoop() {
+    double feedbackOutputVoltage = 0;
+
+    if (m_loaded) {
+      feedbackOutputVoltage =
+          m_pidControllerLoaded.calculate(this.getPositionMeters(), m_positionSetpointMeters);
+    } else {
+      feedbackOutputVoltage =
+          m_pidControllerUnloaded.calculate(this.getPositionMeters(), m_positionSetpointMeters);
+    }
+
+    double feedforwardOutputVoltage = 0;
+    if (m_loaded) {
+      feedforwardOutputVoltage =
+          m_feedforwardLoaded.calculate(
+              m_lastVelocitySetpoint,
+              m_pidControllerLoaded.getSetpoint().velocity,
+              Constants.kRIOLoopTime);
+    } else {
+      feedforwardOutputVoltage =
+          m_feedforwardUnloaded.calculate(
+              m_lastVelocitySetpoint,
+              m_pidControllerUnloaded.getSetpoint().velocity,
+              Constants.kRIOLoopTime);
+    }
 
     double outputPercentage =
         (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
 
-    m_talon.set(ControlMode.PercentOutput, limitOnSlotSensors(outputPercentage));
-    m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
+    m_feedbackOutput = feedbackOutputVoltage;
+    m_feedforwardOutput = feedbackOutputVoltage;
+    // m_talon.set(ControlMode.PercentOutput, limitOnSlotSensors(outputPercentage));
+
+    m_talon.set(ControlMode.PercentOutput, outputPercentage);
+
+    if (m_loaded) {
+      m_lastVelocitySetpoint = m_pidControllerLoaded.getSetpoint().velocity;
+    } else {
+      m_lastVelocitySetpoint = m_pidControllerUnloaded.getSetpoint().velocity;
+    }
   }
 
   public double limitOnSlotSensors(double voltage) {
@@ -119,9 +199,20 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     }
   }
 
+  public void setRatchet(boolean engaged) {
+    if (engaged) {
+      m_ratchetServo.set(kElevatorServoEngageValue);
+    } else {
+      m_ratchetServo.set(kElevatorServoDisengageValue);
+    }
+  }
+
   @Override
   public void periodic() {
-    this.updatePositionOnSlotSensors();
-    this.runControlLoop();
+    // m_talon.setVoltage(-0.75);
+    // this.updatePositionOnSlotSensors();
+    // this.runControlLoop();
+    // remove after move to commands
+    // this.setRatchet(false);
   }
 }

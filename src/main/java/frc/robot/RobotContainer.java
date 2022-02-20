@@ -15,7 +15,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
@@ -31,6 +30,8 @@ public class RobotContainer {
 
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Vision m_vision = new Vision();
+
+  public final ClimbElevator m_climbElevator = new ClimbElevator();
 
   @Log(name = "Field Relative")
   private boolean m_fieldRelativeToggle = true;
@@ -57,30 +58,31 @@ public class RobotContainer {
   }
 
   private void configureDrivetrainCommands() {
-    m_drivetrain.setDefaultCommand(
-        new DriveWithController(
-            m_driver::getLeftY,
-            m_driver::getLeftX,
-            m_driver::getRightX,
-            () -> {
-              return !m_driver.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).get();
-            },
-            m_drivetrain));
+    // m_drivetrain.setDefaultCommand(
+    //     new DriveWithController(
+    //         m_driver::getLeftY,
+    //         m_driver::getLeftX,
+    //         m_driver::getRightX,
+    //         () -> {
+    //           return !m_driver.getJoystickAxisButton(Axis.kRightTrigger,
+    // kTriggerThreshold).get();
+    //         },
+    //         m_drivetrain));
 
-    m_driver
-        .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
-        .whileHeld(
-            new DriveFacingHub(
-                m_driver::getLeftY,
-                m_driver::getLeftX,
-                () -> {
-                  return !m_driver
-                      .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-                      .get();
-                },
-                m_drivetrain));
+    // m_driver
+    // .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
+    // .whileHeld(
+    //     new DriveFacingHub(
+    //         m_driver::getLeftY,
+    //         m_driver::getLeftX,
+    //         () -> {
+    //           return !m_driver
+    //               .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+    //               .get();
+    //         },
+    //         m_drivetrain));
 
-    m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
+    // m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
   }
 
   private void configureVisionCommands() {
