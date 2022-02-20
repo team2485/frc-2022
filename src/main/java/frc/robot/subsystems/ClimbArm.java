@@ -6,10 +6,11 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ArmFeedforward;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ElevatorFeedforward;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ProfiledPIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.*;
 
@@ -25,89 +26,130 @@ public class ClimbArm extends SubsystemBase implements Loggable {
 
   private double m_armAngleRadians = 0; // from vertical down
   private double m_armAngleSetpointRadians = 0;
-  private double m_lastArmVelocitySetpointRotation = 0;
+  private double m_lastAngularVelocitySetpointRotation = 0;
 
-  private final ProfiledPIDController m_armControllerRotation =
-      new ProfiledPIDController(kPArmRotation, 0, kDArmRotation, kArmControllerConstraintsRotation);
+  // input of angle error, output of current
+  private final SR_ProfiledPIDController m_armControllerRotation =
+      new SR_ProfiledPIDController(
+          kPArmRotationAmpsPerRadian,
+          0,
+          kDArmRotationAmpSecondsPerRadian,
+          kArmControllerConstraintsRotation);
 
-  private final ProfiledPIDController m_armControllerTranslation =
-      new ProfiledPIDController(
-          kPArmTranslation, 0, kDArmTranslation, kArmControllerConstraintsTranslation);
+  // input of angular accel, output of current
+  private final SR_ArmFeedforward m_armFeedforwardRotation =
+      new SR_ArmFeedforward(
+          ksArmRotationAmps,
+          kgArmRotationAmps,
+          kvArmRotationAmpSecondsPerRadian,
+          kaArmRotationAmpSecondsSquaredPerRadian);
 
-  private double m_lastArmVelocitySetpointTranslation = 0;
+  // input of position error, output of voltage
+  private final SR_ProfiledPIDController m_armControllerTranslation =
+      new SR_ProfiledPIDController(
+          kPArmTranslationVoltsPerMeter,
+          0,
+          kDArmTranslationVoltSecondsPerMeter,
+          kArmControllerConstraintsTranslation);
 
-  private final SimpleMotorFeedforward m_armFeedforwardTranslation =
-      new SimpleMotorFeedforward(
+  // input of acceleration, output of voltage
+  private final SR_ElevatorFeedforward m_armFeedforwardTranslation =
+      new SR_ElevatorFeedforward(
           ksArmTranslationVolts,
+          kgArmTranslationVolts,
           kvArmTranslationVoltSecondsPerMeter,
           kaArmTranslationVoltSecondsSquaredPerMeter);
 
-  public ClimbArm() {
+  private double m_translationSetpointMeters = 0;
+  private double m_lastVelocitySetpointTranslation = 0;
 
+  public ClimbArm() {
     TalonFXConfiguration armMotorConfig = new TalonFXConfiguration();
     armMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
     armMotorConfig.supplyCurrLimit.currentLimit = kArmCurrentLimitAmps;
     armMotorConfig.supplyCurrLimit.enable = true;
-    armMotorConfig.slot0.kP = kPArmCurrent;
-    armMotorConfig.slot0.kD = kDArmCurrent;
+    armMotorConfig.slot0.kP = kPArmCurrentVoltsPerAmp;
+    armMotorConfig.slot0.kD = kDArmCurrentVoltSecondsPerAmp;
     m_armMotor.configAllSettings(armMotorConfig);
     m_armMotor.enableVoltageCompensation(true);
     m_armMotor.setNeutralMode(NeutralMode.Brake);
+
+    m_armControllerRotation.setTolerance(kArmRotationToleranceRadians);
+    m_armControllerTranslation.setTolerance(kArmTranslationToleranceMeters);
+
+    this.resetAbsoluteRotation(0);
   }
 
   public void setArmControlMode(ArmMode mode) {
     m_armMode = mode;
-    this.resetArmAbsoluteRotation(0);
+    this.resetAbsoluteRotation(0);
   }
 
-  public void resetArmAbsoluteRotation(double rotations) {
+  public void resetAbsoluteRotation(double rotations) {
     m_armMotor.setSelectedSensorPosition(rotations / kArmRotationsPerPulse);
   }
 
-  public double getArmAbsoluteRotation() {
+  public double getAbsoluteRotation() {
     return m_armMotor.getSelectedSensorPosition() * kArmRotationsPerPulse;
   }
 
-  public double getArmAngleRadians() {
-    return this.getArmAbsoluteRotation() * 2 * Math.PI;
+  public double getAngleRadians() {
+    return this.getAbsoluteRotation() * 2 * Math.PI;
   }
 
-  public void setArmAngleRadians(double angle) {
+  public void setAngleRadians(double angle) {
     m_armAngleSetpointRadians = angle;
   }
 
-  public double getArmTranslationMeters() {
-    return this.getArmAbsoluteRotation() * kSprocketCircumferenceMeters;
+  public double getTranslationMeters() {
+    return this.getAbsoluteRotation() * kSprocketCircumferenceMeters;
+  }
+
+  public void setTranslationMeters(double translation) {
+    m_translationSetpointMeters = translation;
   }
 
   @Config(name = "Arm Current PD Terms")
-  private void setArmCurrentPDTerms(double kP, double kD) {
+  private void setCurrentPDTerms(double kP, double kD) {
     m_armMotor.config_kP(0, kP);
     m_armMotor.config_kD(0, kD);
   }
 
-  public void runArmControlLoop() {
+  public void runControlLoop() {
     if (m_armMode == ArmMode.kRotation) {
-      // Set arm
-      double armFeedbackOutputCurrent =
-          m_armControllerRotation.calculate(getArmAngleRadians(), m_armAngleSetpointRadians);
+      double feedbackOutputCurrent =
+          m_armControllerRotation.calculate(getAngleRadians(), m_armAngleSetpointRadians);
 
-      double armAccelerationSetpoint =
-          (m_armControllerRotation.getSetpoint().velocity - m_lastArmVelocitySetpointRotation)
-              / Constants.kRIOLoopTime;
-      double armGravityTorque =
-          kGravityMetersPerSecondSquared * Math.sin(getArmAngleRadians()) / kArmLengthMeters;
-      double armAccelerationTorque = armAccelerationSetpoint / kArmMomentOfIntertia;
-      double armFeedforwardOutputCurrent =
-          (1 / kFalconTorquePerAmp) * (armGravityTorque + armAccelerationTorque);
+      double feedforwardOutputCurrent =
+          m_armFeedforwardRotation.calculate(
+              m_lastAngularVelocitySetpointRotation,
+              m_armControllerRotation.getSetpoint().velocity,
+              kArmControlLoopTimeSeconds);
 
-      m_armMotor.set(ControlMode.Current, armFeedforwardOutputCurrent + armFeedbackOutputCurrent);
+      m_armMotor.set(ControlMode.Current, feedforwardOutputCurrent + feedbackOutputCurrent);
+
+      m_lastAngularVelocitySetpointRotation = m_armControllerRotation.getSetpoint().velocity;
     } else if (m_armMode == ArmMode.kTranslation) {
+      double feedbackOutputVoltage =
+          m_armControllerTranslation.calculate(getTranslationMeters(), m_translationSetpointMeters);
+
+      double feedforwardOutputVoltage =
+          m_armFeedforwardTranslation.calculate(
+              m_lastVelocitySetpointTranslation,
+              m_armControllerTranslation.getSetpoint().velocity,
+              kArmControlLoopTimeSeconds);
+
+      double outputPercentage =
+          (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
+
+      m_armMotor.set(ControlMode.PercentOutput, outputPercentage);
+
+      m_lastVelocitySetpointTranslation = m_armControllerTranslation.getSetpoint().velocity;
     }
   }
 
   @Override
   public void periodic() {
-    this.runArmControlLoop();
+    // this.runControlLoop();
   }
 }

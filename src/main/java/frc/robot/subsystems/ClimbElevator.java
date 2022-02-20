@@ -36,29 +36,35 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
 
   private final SR_ProfiledPIDController m_pidControllerUnloaded =
       new SR_ProfiledPIDController(
-          kPElevatorUnloaded, 0, kDElevatorUnloaded, kElevatorControllerConstraintsUnloaded);
+          kPElevatorUnloadedVoltsPerMeter,
+          0,
+          kDElevatorUnloadedVoltSecondsPerMeter,
+          kElevatorControllerConstraintsUnloaded);
 
   private final SR_ProfiledPIDController m_pidControllerLoaded =
       new SR_ProfiledPIDController(
-          kPElevatorLoaded, 0, kDElevatorLoaded, kElevatorControllerConstraintsLoaded);
+          kPElevatorLoadedVoltsPerMeter,
+          0,
+          kDElevatorLoadedVoltSecondsPerMeter,
+          kElevatorControllerConstraintsLoaded);
 
   private double m_lastVelocitySetpoint = 0;
 
   // @Log(name = "Elevator feedforward unloaded")
   private final SR_ElevatorFeedforward m_feedforwardUnloaded =
       new SR_ElevatorFeedforward(
-          ksElevatorVoltsUnloaded,
-          kgElevatorVoltsUnloaded,
-          kvElevatorVoltSecondsPerMeterUnloaded,
-          kaElevatorVoltSecondsSquaredPerMeterUnloaded);
+          ksElevatorUnloadedVolts,
+          kgElevatorUnloadedVolts,
+          kvElevatorUnloadedVoltSecondsPerMeter,
+          kaElevatorUnloadedVoltSecondsSquaredPerMeter);
 
   // @Log(name = "Elevator feedforward loaded")
   private final SR_ElevatorFeedforward m_feedforwardLoaded =
       new SR_ElevatorFeedforward(
-          ksElevatorVoltsLoaded,
-          kgElevatorVoltsLoaded,
-          kvElevatorVoltSecondsPerMeterLoaded,
-          kaElevatorVoltSecondsSquaredPerMeterLoaded);
+          ksElevatorLoadedVolts,
+          kgElevatorLoadedVolts,
+          kvElevatorLoadedVoltSecondsPerMeter,
+          kaElevatorLoadedVoltSecondsSquaredPerMeter);
 
   @Config(name = "loaded?")
   private boolean m_loaded = false; // unloaded, true is loaded
@@ -98,7 +104,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
 
     m_talon.setInverted(true);
 
-    m_pidControllerUnloaded.setTolerance(kElevatorPositionTolerance);
+    m_pidControllerUnloaded.setTolerance(kElevatorPositionToleranceMeters);
 
     this.resetPositionMeters(0);
 
@@ -150,13 +156,13 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
           m_feedforwardLoaded.calculate(
               m_lastVelocitySetpoint,
               m_pidControllerLoaded.getSetpoint().velocity,
-              Constants.kRIOLoopTime);
+              kElevatorControlLoopTimeSeconds);
     } else {
       feedforwardOutputVoltage =
           m_feedforwardUnloaded.calculate(
               m_lastVelocitySetpoint,
               m_pidControllerUnloaded.getSetpoint().velocity,
-              Constants.kRIOLoopTime);
+              kElevatorControlLoopTimeSeconds);
     }
 
     double outputPercentage =

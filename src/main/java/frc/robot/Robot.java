@@ -32,7 +32,13 @@ public class Robot extends TimedRobot {
 
     // Create RobotContainer (the place where commands are bound to buttons)
     m_robotContainer = new RobotContainer();
-    addPeriodic(() -> m_robotContainer.m_climbElevator.runControlLoop(), 0.01);
+    addPeriodic(
+        () -> m_robotContainer.m_climbElevator.runControlLoop(),
+        Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
+
+    addPeriodic(
+        () -> m_robotContainer.m_climbArm.runControlLoop(),
+        Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
 
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);

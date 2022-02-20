@@ -32,6 +32,7 @@ public class RobotContainer {
   private final Vision m_vision = new Vision();
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
+  public final ClimbArm m_climbArm = new ClimbArm();
 
   @Log(name = "Field Relative")
   private boolean m_fieldRelativeToggle = true;

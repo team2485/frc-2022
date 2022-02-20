@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,9 +29,13 @@ import frc.team2485.WarlordsLib.sendableRichness.SR_TrapezoidProfile;
 public final class Constants {
   public static final String kRobotIdFile = "/home/lvuser/id.txt";
   public static final double kNominalVoltage = 12.0;
-  public static final int kFalconCPR = 2048; // pulses per rotation
   public static final int kCANTimeoutMs = 250;
   public static final double kRIOLoopTime = 0.02;
+
+  // motor constants
+  public static final int kFalconCPR = 2048; // pulses per rotation
+  public static final double kFalconWindingsResistanceOhms = 12.0 / 257;
+  public static final double kFalconTorquePerAmp = 4.69 / 257;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -272,6 +277,7 @@ public final class Constants {
   }
 
   public static final class ClimbElevatorConstants {
+    public static final double kElevatorControlLoopTimeSeconds = 0.01;
     // SLIDE CONSTANTS
     public static final int kElevatorTalonPort = 40;
     public static final double kElevatorSupplyCurrentLimitAmps = 10;
@@ -303,40 +309,40 @@ public final class Constants {
         kElevatorDistancePerMotorRevMeters / kFalconCPR;
 
     // Slide characterization constants: UNLOADED (not carrying robot)
-    public static final double ksElevatorVoltsUnloaded = 0.70015;
-    public static final double kgElevatorVoltsUnloaded = 0.010378;
-    public static final double kvElevatorVoltSecondsPerMeterUnloaded = 30.626;
-    public static final double kaElevatorVoltSecondsSquaredPerMeterUnloaded = 1.1098;
+    public static final double ksElevatorUnloadedVolts = 0.70015;
+    public static final double kgElevatorUnloadedVolts = 0.010378;
+    public static final double kvElevatorUnloadedVoltSecondsPerMeter = 30.626;
+    public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter = 1.1098;
 
     // Slide characterization constants: LOADED ( carrying robot)
-    public static final double ksElevatorVoltsLoaded = 0;
-    public static final double kgElevatorVoltsLoaded = 0;
-    public static final double kvElevatorVoltSecondsPerMeterLoaded = 0;
-    public static final double kaElevatorVoltSecondsSquaredPerMeterLoaded = 0;
+    public static final double ksElevatorLoadedVolts = 0;
+    public static final double kgElevatorLoadedVolts = 0;
+    public static final double kvElevatorLoadedVoltSecondsPerMeter = 0;
+    public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter = 0;
 
-    public static final double kPElevatorUnloaded = 200;
-    public static final double kDElevatorUnloaded = 20;
+    public static final double kPElevatorUnloadedVoltsPerMeter = 200;
+    public static final double kDElevatorUnloadedVoltSecondsPerMeter = 20;
 
-    public static final double kPElevatorLoaded = 0;
-    public static final double kDElevatorLoaded = 0;
+    public static final double kPElevatorLoadedVoltsPerMeter = 0;
+    public static final double kDElevatorLoadedVoltSecondsPerMeter = 0;
 
-    public static final double kElevatorPositionTolerance = 0.001;
+    public static final double kElevatorPositionToleranceMeters = 0.001;
 
     public static final double kSlideMaxSpeedMetersPerSecond = 0.3;
     // Find maximum simultaneously achievable acceleration
     public static final double kSlideMaxAccelerationMetersPerSecondSquaredUnloaded =
         new ElevatorFeedforward(
-                ksElevatorVoltsUnloaded,
-                kgElevatorVoltsUnloaded,
-                kvElevatorVoltSecondsPerMeterUnloaded,
-                kaElevatorVoltSecondsSquaredPerMeterUnloaded)
+                ksElevatorUnloadedVolts,
+                kgElevatorUnloadedVolts,
+                kvElevatorUnloadedVoltSecondsPerMeter,
+                kaElevatorUnloadedVoltSecondsSquaredPerMeter)
             .maxAchievableAcceleration(kNominalVoltage, kSlideMaxSpeedMetersPerSecond);
 
     public static final double kSlideMaxAccelerationMetersPerSecondSquaredLoaded =
         (kNominalVoltage
-                - ksElevatorVoltsLoaded
-                - kSlideMaxSpeedMetersPerSecond * kvElevatorVoltSecondsPerMeterLoaded)
-            / kaElevatorVoltSecondsSquaredPerMeterLoaded;
+                - ksElevatorLoadedVolts
+                - kSlideMaxSpeedMetersPerSecond * kvElevatorLoadedVoltSecondsPerMeter)
+            / kaElevatorLoadedVoltSecondsSquaredPerMeter;
 
     // Constraint for the motion profilied elevator controller (unloaded mode)
     public static final SR_TrapezoidProfile.Constraints kElevatorControllerConstraintsUnloaded =
@@ -350,6 +356,8 @@ public final class Constants {
   }
 
   public static final class ClimbArmConstants {
+    public static final double kArmControlLoopTimeSeconds = 0.01;
+
     // ARM CONSTANTS
     public static final int kArmTalonPort = 41;
     public static final double kArmCurrentLimitAmps = 30;
@@ -360,13 +368,12 @@ public final class Constants {
 
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
 
-    public static final double kPArmCurrent = 0;
-    public static final double kDArmCurrent = 0;
+    public static final double kPArmCurrentVoltsPerAmp = 0;
+    public static final double kDArmCurrentVoltSecondsPerAmp = 0;
 
     // arm characteristics used in angular mode
     public static final double kArmMomentOfIntertia = 5;
     public static final double kArmLengthMeters = 2; // length to center of mass
-    public static final double kFalconTorquePerAmp = 4.69 / 257;
     public static final double kGravityMetersPerSecondSquared = 9.81;
 
     // arm characteristics used in translation mode
@@ -379,46 +386,61 @@ public final class Constants {
     public static final double kvArmRotationVoltSecondsPerRadian = 0;
     public static final double kaArmRotationVoltSecondsSquaredPerRadian = 0;
 
-    public static final double ksArmRotationAmps = 0;
-    public static final double kgArmRotationAmps = 0;
+    public static final double ksArmRotationAmps =
+        ksArmRotationVolts / kFalconWindingsResistanceOhms;
+    public static final double kgArmRotationAmps =
+        kgArmRotationVolts / kFalconWindingsResistanceOhms;
+    public static final double kvArmRotationAmpSecondsPerRadian =
+        kvArmRotationVoltSecondsPerRadian / kFalconWindingsResistanceOhms;
+    public static final double kaArmRotationAmpSecondsSquaredPerRadian =
+        kaArmRotationVoltSecondsSquaredPerRadian / kFalconWindingsResistanceOhms;
 
     // ARM ROTATION CONSTANTS
     // Arm motion profile constraints (rotation)
     public static final double kArmMaxSpeedRotationRadiansPerSecond = 3;
     public static final double kArmMaxAccelerationRotationRadiansPerSecondSquared =
-        (kNominalVoltage
-                - ksArmRotationVolts
-                - kArmMaxSpeedRotationRadiansPerSecond * kvArmRotationVoltSecondsPerRadian)
-            / kaArmRotationVoltSecondsSquaredPerRadian;
+        new ArmFeedforward(
+                ksArmRotationVolts,
+                kgArmRotationVolts,
+                kvArmRotationVoltSecondsPerRadian,
+                kaArmRotationVoltSecondsSquaredPerRadian)
+            .maxAchievableAcceleration(kNominalVoltage, 0, kArmCurrentLimitAmps);
 
     // Constraint for the motion profilied arm rotation controller
-    public static final TrapezoidProfile.Constraints kArmControllerConstraintsRotation =
-        new TrapezoidProfile.Constraints(
+    public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsRotation =
+        new SR_TrapezoidProfile.Constraints(
             kArmMaxSpeedRotationRadiansPerSecond,
             kArmMaxAccelerationRotationRadiansPerSecondSquared);
 
-    public static final double kPArmRotation = 0;
-    public static final double kDArmRotation = 0;
+    public static final double kPArmRotationAmpsPerRadian = 0;
+    public static final double kDArmRotationAmpSecondsPerRadian = 0;
+
+    public static final double kArmRotationToleranceRadians = 0.01;
 
     // ARM TRANSLATION CONSTANTS
     public static final double ksArmTranslationVolts = 0;
+    public static final double kgArmTranslationVolts = 0;
     public static final double kvArmTranslationVoltSecondsPerMeter = 0;
     public static final double kaArmTranslationVoltSecondsSquaredPerMeter = 0;
 
     public static final double kArmMaxSpeedTranslationMetersPerSecond = 3;
     public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared =
-        (kNominalVoltage
-                - ksArmTranslationVolts
-                - kArmMaxSpeedTranslationMetersPerSecond * kvArmTranslationVoltSecondsPerMeter)
-            / kaArmTranslationVoltSecondsSquaredPerMeter;
+        new ElevatorFeedforward(
+                ksArmTranslationVolts,
+                kgArmTranslationVolts,
+                kvArmTranslationVoltSecondsPerMeter,
+                kaArmTranslationVoltSecondsSquaredPerMeter)
+            .maxAchievableAcceleration(kNominalVoltage, kArmCurrentLimitAmps);
 
     // Constraint for the motion profilied arm rotation controller
-    public static final TrapezoidProfile.Constraints kArmControllerConstraintsTranslation =
-        new TrapezoidProfile.Constraints(
+    public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsTranslation =
+        new SR_TrapezoidProfile.Constraints(
             kArmMaxSpeedRotationRadiansPerSecond,
             kArmMaxAccelerationRotationRadiansPerSecondSquared);
 
-    public static final double kPArmTranslation = 0;
-    public static final double kDArmTranslation = 0;
+    public static final double kPArmTranslationVoltsPerMeter = 0;
+    public static final double kDArmTranslationVoltSecondsPerMeter = 0;
+
+    public static final double kArmTranslationToleranceMeters = 0.01;
   }
 }
