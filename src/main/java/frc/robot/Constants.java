@@ -36,6 +36,8 @@ public final class Constants {
   public static final int kFalconCPR = 2048; // pulses per rotation
   public static final double kFalconWindingsResistanceOhms = 12.0 / 257;
   public static final double kFalconTorquePerAmp = 4.69 / 257;
+  public static final int kFalconOutputUnitsFull = 1023;
+  public static final double kFalconOutputUnitsPerVolt = kFalconOutputUnitsFull / kNominalVoltage;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -94,7 +96,7 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.29537;
 
     // Practice carpet characterization constants
-    public static final double ksDriveVolts = 0.667;
+    public static final double ksDriveVolts = 0.3;
     public static final double kvDriveVoltSecondsPerMeter = 2.7695;
     public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
@@ -141,22 +143,22 @@ public final class Constants {
 
     public static final int kFLDriveTalonPort = 1;
     public static final int kFLTurningTalonPort = 2;
-    public static final int kFLCANCoderPort = 11;
+    public static final int kFLCANCoderPort = 10;
     public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(-3.6 - 5.18);
 
     public static final int kFRDriveTalonPort = 3;
     public static final int kFRTurningTalonPort = 4;
-    public static final int kFRCANCoderPort = 12;
+    public static final int kFRCANCoderPort = 11;
     public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33);
 
     public static final int kBRDriveTalonPort = 5;
     public static final int kBRTurningTalonPort = 6;
-    public static final int kBRCANCoderPort = 13;
+    public static final int kBRCANCoderPort = 12;
     public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(56.0 - 1.66);
 
     public static final int kBLDriveTalonPort = 7;
     public static final int kBLTurningTalonPort = 8;
-    public static final int kBLCANCoderPort = 14;
+    public static final int kBLCANCoderPort = 13;
     public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(139.0 + 0.52);
 
     // Drivebase dimensions
@@ -280,15 +282,18 @@ public final class Constants {
     public static final double kElevatorControlLoopTimeSeconds = 0.01;
     // SLIDE CONSTANTS
     public static final int kElevatorTalonPort = 40;
-    public static final double kElevatorSupplyCurrentLimitAmps = 10;
-    public static final double kElevatorSupplyCurrentThresholdAmps = 15;
+    public static final double kElevatorSupplyCurrentLimitAmps = 25;
+    public static final double kElevatorSupplyCurrentThresholdAmps = 30;
     public static final double kElevatorSupplyCurrentThresholdTimeSecs = 0.1;
     public static final double kElevatorStatorCurrentLimitAmps = 20;
-    public static final double kElevatorStatorCurrentThresholdAmps = 30;
-    public static final double kElevatorStatorCurrentThresholdTimeSecs = 0.1;
+    public static final double kElevatorStatorCurrentThresholdAmps = 25;
+    public static final double kElevatorStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final int kElevatorSlotSensorTopPort = 0; // dio
     public static final int kElevatorSlotSensorBottomPort = 1; // dio
+
+    public static final double kElevatorTopStopPosition = Units.inchesToMeters(21.25);
+    public static final double kElevatorBottomStopPosition = Units.inchesToMeters(0);
 
     public static final double kElevatorSlotSensorTopPosition = Units.inchesToMeters(20.75);
     public static final double kElevatorSlotSensorBottomPosition = Units.inchesToMeters(0.25);
@@ -310,25 +315,25 @@ public final class Constants {
 
     // Slide characterization constants: UNLOADED (not carrying robot)
     public static final double ksElevatorUnloadedVolts = 0.70015;
-    public static final double kgElevatorUnloadedVolts = 0.010378;
+    public static final double kgElevatorUnloadedVolts = -0.010378;
     public static final double kvElevatorUnloadedVoltSecondsPerMeter = 30.626;
     public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter = 1.1098;
 
     // Slide characterization constants: LOADED ( carrying robot)
-    public static final double ksElevatorLoadedVolts = 0;
-    public static final double kgElevatorLoadedVolts = 0;
-    public static final double kvElevatorLoadedVoltSecondsPerMeter = 0;
-    public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter = 0;
+    public static final double ksElevatorLoadedVolts = 0.44256;
+    public static final double kgElevatorLoadedVolts = -0.505; // this is tuned
+    public static final double kvElevatorLoadedVoltSecondsPerMeter = 32.238;
+    public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter = 14.427;
 
     public static final double kPElevatorUnloadedVoltsPerMeter = 200;
     public static final double kDElevatorUnloadedVoltSecondsPerMeter = 20;
 
-    public static final double kPElevatorLoadedVoltsPerMeter = 0;
-    public static final double kDElevatorLoadedVoltSecondsPerMeter = 0;
+    public static final double kPElevatorLoadedVoltsPerMeter = 100;
+    public static final double kDElevatorLoadedVoltSecondsPerMeter = 20;
 
     public static final double kElevatorPositionToleranceMeters = 0.001;
 
-    public static final double kSlideMaxSpeedMetersPerSecond = 0.3;
+    public static final double kSlideMaxSpeedMetersPerSecond = 1;
     // Find maximum simultaneously achievable acceleration
     public static final double kSlideMaxAccelerationMetersPerSecondSquaredUnloaded =
         new ElevatorFeedforward(
@@ -339,10 +344,12 @@ public final class Constants {
             .maxAchievableAcceleration(kNominalVoltage, kSlideMaxSpeedMetersPerSecond);
 
     public static final double kSlideMaxAccelerationMetersPerSecondSquaredLoaded =
-        (kNominalVoltage
-                - ksElevatorLoadedVolts
-                - kSlideMaxSpeedMetersPerSecond * kvElevatorLoadedVoltSecondsPerMeter)
-            / kaElevatorLoadedVoltSecondsSquaredPerMeter;
+        new ElevatorFeedforward(
+                ksElevatorLoadedVolts,
+                kgElevatorLoadedVolts,
+                kvElevatorLoadedVoltSecondsPerMeter,
+                kaElevatorLoadedVoltSecondsSquaredPerMeter)
+            .maxAchievableAcceleration(kNominalVoltage, kSlideMaxSpeedMetersPerSecond);
 
     // Constraint for the motion profilied elevator controller (unloaded mode)
     public static final SR_TrapezoidProfile.Constraints kElevatorControllerConstraintsUnloaded =
@@ -360,7 +367,12 @@ public final class Constants {
 
     // ARM CONSTANTS
     public static final int kArmTalonPort = 41;
-    public static final double kArmCurrentLimitAmps = 30;
+    public static final double kArmSupplyCurrentLimitAmps = 25;
+    public static final double kArmSupplyCurrentThresholdAmps = 30;
+    public static final double kArmSupplyCurrentThresholdTimeSecs = 0.1;
+    public static final double kArmStatorCurrentLimitAmps = 10;
+    public static final double kArmStatorCurrentThresholdAmps = 15;
+    public static final double kArmStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final double kArmGearRatio = 57.6; // motor turns/pinion turns
     public static final double kArmRotationsPerMotorRev = 1 / kArmGearRatio;
@@ -368,8 +380,15 @@ public final class Constants {
 
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
 
-    public static final double kPArmCurrentVoltsPerAmp = 0;
-    public static final double kDArmCurrentVoltSecondsPerAmp = 0;
+    public static final double kPArmCurrentOutputUnitsPerMilliamp = 0.005;
+    public static final double kIArmCurrentOutputUnitsPerMilliamp = 0;
+
+    // feedforward term is enough to generate the given current in motor at stall
+    // (other stuff like back-emf, friction, gravity is handled by )
+    public static final double kVArmCurrentOutputUnitsPerMilliamp =
+        kFalconWindingsResistanceOhms // volts per amp
+            * kFalconOutputUnitsPerVolt // output units per volt
+            * 0.001; // amps per milliamp
 
     // arm characteristics used in angular mode
     public static final double kArmMomentOfIntertia = 5;
@@ -404,7 +423,7 @@ public final class Constants {
                 kgArmRotationVolts,
                 kvArmRotationVoltSecondsPerRadian,
                 kaArmRotationVoltSecondsSquaredPerRadian)
-            .maxAchievableAcceleration(kNominalVoltage, 0, kArmCurrentLimitAmps);
+            .maxAchievableAcceleration(kNominalVoltage, 0, kArmMaxSpeedRotationRadiansPerSecond);
 
     // Constraint for the motion profilied arm rotation controller
     public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsRotation =
@@ -430,7 +449,7 @@ public final class Constants {
                 kgArmTranslationVolts,
                 kvArmTranslationVoltSecondsPerMeter,
                 kaArmTranslationVoltSecondsSquaredPerMeter)
-            .maxAchievableAcceleration(kNominalVoltage, kArmCurrentLimitAmps);
+            .maxAchievableAcceleration(kNominalVoltage, kArmMaxSpeedTranslationMetersPerSecond);
 
     // Constraint for the motion profilied arm rotation controller
     public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsTranslation =

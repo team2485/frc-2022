@@ -98,7 +98,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
     SmartDashboard.putData("Field", m_field);
-    this.zeroHeading();
+    // this.zeroHeading();
   }
 
   /**

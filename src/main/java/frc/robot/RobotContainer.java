@@ -15,13 +15,17 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Flywheel;
+import frc.robot.subsystems.climb.ClimbArm;
+import frc.robot.subsystems.climb.ClimbElevator;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
-import io.github.oblarg.oblog.annotations.Log;
+import io.github.oblarg.oblog.annotations.*;
 
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
@@ -34,11 +38,8 @@ public class RobotContainer {
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
 
-  @Log(name = "Field Relative")
-  private boolean m_fieldRelativeToggle = true;
-
-  @Log(name = "Facing Hub")
-  private boolean m_hubFacingToggle = false;
+  @Log(name = "Climb mode")
+  private boolean m_climbMode = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -56,39 +57,63 @@ public class RobotContainer {
   private void configureButtonBindings() {
     this.configureDrivetrainCommands();
     this.configureVisionCommands();
+    this.configureClimbCommands();
   }
 
   private void configureDrivetrainCommands() {
-    // m_drivetrain.setDefaultCommand(
-    //     new DriveWithController(
-    //         m_driver::getLeftY,
-    //         m_driver::getLeftX,
-    //         m_driver::getRightX,
-    //         () -> {
-    //           return !m_driver.getJoystickAxisButton(Axis.kRightTrigger,
-    // kTriggerThreshold).get();
-    //         },
-    //         m_drivetrain));
+    m_drivetrain.setDefaultCommand(
+        new DriveWithController(
+            m_driver::getLeftY,
+            m_driver::getLeftX,
+            m_driver::getRightX,
+            () -> {
+              return !m_driver.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).get();
+            },
+            m_drivetrain));
 
-    // m_driver
-    // .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
-    // .whileHeld(
-    //     new DriveFacingHub(
-    //         m_driver::getLeftY,
-    //         m_driver::getLeftX,
-    //         () -> {
-    //           return !m_driver
-    //               .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-    //               .get();
-    //         },
-    //         m_drivetrain));
+    m_driver
+        .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
+        .whileHeld(
+            new DriveFacingHub(
+                m_driver::getLeftY,
+                m_driver::getLeftX,
+                () -> {
+                  return !m_driver
+                      .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+                      .get();
+                },
+                m_drivetrain));
 
-    // m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
+    m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
   }
 
   private void configureVisionCommands() {
     // Cycle LED Mode when start button pressed
     m_driver.start().whenPressed(new InstantCommand(m_vision::cycleLEDMode));
+  }
+
+  private void configureClimbCommands() {
+    // toggle climb mode
+    m_driver
+        .start()
+        .and(m_driver.back())
+        .whileActiveOnce(
+            new InstantCommand(
+                () -> {
+                  m_climbMode = !m_climbMode;
+                }));
+
+    // start climb
+    m_driver
+        .a()
+        .and(
+            new Trigger(
+                () -> {
+                  return m_climbMode = true;
+                }))
+        .whileActiveOnce(
+            ClimbCommandBuilder.getMidBarNoProceedClimbCommand(
+                m_climbElevator, m_climbArm, m_driver.b(), m_driver.y()));
   }
 
   /**
@@ -131,7 +156,7 @@ public class RobotContainer {
             m_drivetrain::setModuleStates,
             m_drivetrain);
 
-    return resetOdometry.andThen(testPathCommand);
+    return null;
   }
 
   // whenever the robot is disabled, drive should be turned off
