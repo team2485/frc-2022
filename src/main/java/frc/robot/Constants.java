@@ -301,8 +301,8 @@ public final class Constants {
 
     public static final int kElevatorServoPort = 0; // pwm
     public static final double kElevatorServoRange = 270;
-    public static final double kElevatorServoEngageValue = 0.5;
-    public static final double kElevatorServoDisengageValue = 0;
+    public static final double kElevatorServoEngageValue = 0;
+    public static final double kElevatorServoDisengageValue = 0.5;
 
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
 
@@ -315,25 +315,28 @@ public final class Constants {
 
     // Slide characterization constants: UNLOADED (not carrying robot)
     public static final double ksElevatorUnloadedVolts = 0.70015;
-    public static final double kgElevatorUnloadedVolts = -0.010378;
+    public static final double kgElevatorUnloadedVolts = 0.010378;
     public static final double kvElevatorUnloadedVoltSecondsPerMeter = 30.626;
-    public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter = 1.1098;
+    public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter = 0;
 
     // Slide characterization constants: LOADED ( carrying robot)
     public static final double ksElevatorLoadedVolts = 0.44256;
-    public static final double kgElevatorLoadedVolts = -0.505; // this is tuned
+    public static final double kgElevatorLoadedVolts =
+        -0.39796; // this is negative because gravity fights the downward motion when loaded --
+    // retracting the elevator moves the robot up.
     public static final double kvElevatorLoadedVoltSecondsPerMeter = 32.238;
-    public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter = 14.427;
+    public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter =
+        0.18; // these are recalc gains -- the ka from sysid was lost in the noise
 
-    public static final double kPElevatorUnloadedVoltsPerMeter = 200;
+    public static final double kPElevatorUnloadedVoltsPerMeter = 165;
     public static final double kDElevatorUnloadedVoltSecondsPerMeter = 20;
 
-    public static final double kPElevatorLoadedVoltsPerMeter = 100;
-    public static final double kDElevatorLoadedVoltSecondsPerMeter = 20;
+    public static final double kPElevatorLoadedVoltsPerMeter = 500;
+    public static final double kDElevatorLoadedVoltSecondsPerMeter = 40;
 
-    public static final double kElevatorPositionToleranceMeters = 0.001;
+    public static final double kElevatorPositionToleranceMeters = 0.003;
 
-    public static final double kSlideMaxSpeedMetersPerSecond = 1;
+    public static final double kSlideMaxSpeedMetersPerSecond = 0.8;
     // Find maximum simultaneously achievable acceleration
     public static final double kSlideMaxAccelerationMetersPerSecondSquaredUnloaded =
         new ElevatorFeedforward(
@@ -370,8 +373,8 @@ public final class Constants {
     public static final double kArmSupplyCurrentLimitAmps = 25;
     public static final double kArmSupplyCurrentThresholdAmps = 30;
     public static final double kArmSupplyCurrentThresholdTimeSecs = 0.1;
-    public static final double kArmStatorCurrentLimitAmps = 10;
-    public static final double kArmStatorCurrentThresholdAmps = 15;
+    public static final double kArmStatorCurrentLimitAmps = 30;
+    public static final double kArmStatorCurrentThresholdAmps = 35;
     public static final double kArmStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final double kArmGearRatio = 57.6; // motor turns/pinion turns
@@ -380,8 +383,9 @@ public final class Constants {
 
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
 
-    public static final double kPArmCurrentOutputUnitsPerMilliamp = 0.005;
-    public static final double kIArmCurrentOutputUnitsPerMilliamp = 0;
+    public static final double kPArmCurrentOutputUnitsPerMilliamp = 0.1;
+    public static final double kIArmCurrentOutputUnitsPerMilliamp =
+        0.01 * kPArmCurrentOutputUnitsPerMilliamp;
 
     // feedforward term is enough to generate the given current in motor at stall
     // (other stuff like back-emf, friction, gravity is handled by )
@@ -401,9 +405,9 @@ public final class Constants {
 
     // Arm rotation characterization constants
     public static final double ksArmRotationVolts = 0;
-    public static final double kgArmRotationVolts = 0;
-    public static final double kvArmRotationVoltSecondsPerRadian = 0;
-    public static final double kaArmRotationVoltSecondsSquaredPerRadian = 0;
+    public static final double kgArmRotationVolts = 0.42;
+    public static final double kvArmRotationVoltSecondsPerRadian = 1.03;
+    public static final double kaArmRotationVoltSecondsSquaredPerRadian = 0.03;
 
     public static final double ksArmRotationAmps =
         ksArmRotationVolts / kFalconWindingsResistanceOhms;
@@ -416,7 +420,7 @@ public final class Constants {
 
     // ARM ROTATION CONSTANTS
     // Arm motion profile constraints (rotation)
-    public static final double kArmMaxSpeedRotationRadiansPerSecond = 3;
+    public static final double kArmMaxSpeedRotationRadiansPerSecond = 1;
     public static final double kArmMaxAccelerationRotationRadiansPerSecondSquared =
         new ArmFeedforward(
                 ksArmRotationVolts,
@@ -431,10 +435,12 @@ public final class Constants {
             kArmMaxSpeedRotationRadiansPerSecond,
             kArmMaxAccelerationRotationRadiansPerSecondSquared);
 
-    public static final double kPArmRotationAmpsPerRadian = 0;
-    public static final double kDArmRotationAmpSecondsPerRadian = 0;
+    public static final double kPArmRotationAmpsPerRadian = 10;
+    public static final double kDArmRotationAmpSecondsPerRadian = 2;
 
-    public static final double kArmRotationToleranceRadians = 0.01;
+    // public static final double kArmRotationToleranceRadians = 0.05;
+
+    public static final double kArmRotationTolerance = 0.01;
 
     // ARM TRANSLATION CONSTANTS
     public static final double ksArmTranslationVolts = 0;

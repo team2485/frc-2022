@@ -48,6 +48,10 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
+  @Log(name = "b button", tabName = "ClimbElevator")
+  private boolean getBButton() {
+    return m_driver.b().get();
+  }
   /**
    * Use this method to define your utton->command mappings. Buttons can be created by instantiating
    * a {@link GenericHID} or one of its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or {@link
@@ -103,17 +107,30 @@ public class RobotContainer {
                   m_climbMode = !m_climbMode;
                 }));
 
+    // disengage ratchet
+    // m_driver.x().whenPressed(ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator));
+
     // start climb
     m_driver
         .a()
         .and(
             new Trigger(
                 () -> {
-                  return m_climbMode = true;
+                  return m_climbMode == true;
                 }))
-        .whileActiveOnce(
+        .whenActive(
             ClimbCommandBuilder.getMidBarNoProceedClimbCommand(
-                m_climbElevator, m_climbArm, m_driver.b(), m_driver.y()));
+                m_climbElevator, m_climbArm, () -> m_driver.b().get(), () -> m_driver.x().get()));
+
+    m_driver
+        .x()
+        .and(
+            new Trigger(
+                () -> {
+                  return m_climbMode == true && !m_climbElevator.getHookedOnMidBar();
+                }))
+        .whenActive((
+.          () ->  imbCommandBuilder.getRaiseHookCommand(m_climbElevator).andThen(() - > m_climbElevator.setHookedOnMidBar(false))).;
   }
 
   /**
