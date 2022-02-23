@@ -15,6 +15,49 @@ import java.util.function.BooleanSupplier;
 
 public class ClimbCommandBuilder {
 
+  public static Command lineUpToTape() {
+    return () -> {
+      System.out.println("one");
+      return null;
+    };
+    // ClimbStateMachine.setState(3);
+  }
+
+  public static Command raiseHook() {
+    return () -> {
+      System.out.println("two");
+      return null;
+    };
+  }
+
+  public static Command backUp() {
+    return () -> {
+      System.out.println("three");
+      return null;
+    };
+  }
+
+  public static Command hookOnBar() {
+    return () -> {
+      System.out.println("four");
+      return null;
+    };
+  }
+
+  public static Command climbVertically() {
+    return () -> {
+      System.out.println("five");
+      return null;
+    };
+  }
+
+  public static Command swingRackUp() {
+    return () -> {
+      System.out.println("six");
+      return null;
+    };
+  }
+
   public static Command getMidBarNoProceedClimbCommand(
       ClimbElevator elevator,
       ClimbArm arm,

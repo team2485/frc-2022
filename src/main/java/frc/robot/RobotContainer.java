@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
+import frc.robot.commands.ClimbStateMachine;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Flywheel;
 import frc.robot.subsystems.climb.ClimbArm;
@@ -37,6 +38,7 @@ public class RobotContainer {
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
+  public final ClimbStateMachine m_climbStateMachine = new ClimbStateMachine();
 
   @Log(name = "Climb mode")
   private boolean m_climbMode = false;
@@ -111,7 +113,7 @@ public class RobotContainer {
     // m_driver.x().whenPressed(ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator));
 
     // start climb
-    m_driver
+    /*m_driver
         .a()
         .and(
             new Trigger(
@@ -130,7 +132,18 @@ public class RobotContainer {
                   return m_climbMode == true && !m_climbElevator.getHookedOnMidBar();
                 }))
         .whenActive((
-.          () ->  imbCommandBuilder.getRaiseHookCommand(m_climbElevator).andThen(() - > m_climbElevator.setHookedOnMidBar(false))).;
+          () ->  ClimbCommandBuilder.getRaiseHookCommand(m_climbElevator).andThen(() -> m_climbElevator.setHookedOnMidBar(false))));
+    */
+    m_driver
+        .a()
+        .and(
+            new Trigger(
+                () -> {
+                  return m_climbMode == true;
+                }))
+        .whenActive(
+            m_climbStateMachine.runCurrentStep(
+                m_climbElevator, m_climbArm, () -> m_driver.b().get(), () -> m_driver.x().get()));
   }
 
   /**
