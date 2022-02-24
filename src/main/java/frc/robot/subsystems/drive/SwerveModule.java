@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -77,6 +78,8 @@ public class SwerveModule implements Loggable {
     CANCoderConfiguration turningEncoderConfig = new CANCoderConfiguration();
     turningEncoderConfig.magnetOffsetDegrees = -zero.getDegrees();
     turningEncoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
+    turningEncoderConfig.initializationStrategy =
+        SensorInitializationStrategy.BootToAbsolutePosition;
     m_turningEncoder = new CANCoder(turningEncoderID);
     m_turningEncoder.configAllSettings(turningEncoderConfig);
   }
@@ -117,7 +120,7 @@ public class SwerveModule implements Loggable {
    * @return heading as Rotation2d
    */
   private Rotation2d getHeading() {
-    return Rotation2d.fromDegrees(m_turningEncoder.getAbsolutePosition());
+    return Rotation2d.fromDegrees(m_turningEncoder.getPosition());
   }
 
   /**
