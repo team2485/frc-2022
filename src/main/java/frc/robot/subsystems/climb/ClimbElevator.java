@@ -70,6 +70,8 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
 
   private boolean m_zeroOverride = false;
 
+  private boolean m_limitOverride = false;
+
   @Log(name = "position setpoint")
   private double m_positionSetpointMeters = 0;
 
@@ -129,6 +131,10 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
         MathUtil.clamp(position, kElevatorBottomStopPosition, kElevatorTopStopPosition);
 
     /// m_positionSetpointMeters = position;
+  }
+
+  public void setLimitOverride(boolean limitOverride) {
+    m_limitOverride = limitOverride;
   }
 
   @Log(name = "Current elevator position")
@@ -203,6 +209,10 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
 
     double outputPercentage =
         (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
+
+    if (!m_limitOverride) {
+      outputPercentage = this.limitOnSlotSensors(outputPercentage);
+    }
 
     m_feedbackOutput = feedbackOutputVoltage;
     m_feedforwardOutput = feedforwardOutputVoltage;
