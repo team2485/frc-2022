@@ -8,7 +8,6 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,9 +23,6 @@ public class DriveFacingHub extends CommandBase {
   private final BooleanSupplier m_fieldRelative;
 
   private final Drivetrain m_drivetrain;
-
-  private final SlewRateLimiter m_xSpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
-  private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
 
   public DriveFacingHub(
       DoubleSupplier xSpeedSupplier,
@@ -51,13 +47,11 @@ public class DriveFacingHub extends CommandBase {
     SmartDashboard.putNumber("xbox left x", m_ySpeedSupplier.getAsDouble());
 
     final double xSpeed =
-        -m_xSpeedLimiter.calculate(
-                Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband))
+        Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband)
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double ySpeed =
-        -m_ySpeedLimiter.calculate(
-                Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband))
+        Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband)
             * kTeleopMaxSpeedMetersPerSecond;
 
     // Find hub position relative to the robot. The rotation of the hub relative to the robot is

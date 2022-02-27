@@ -8,6 +8,7 @@ import static frc.robot.Constants.VisionConstants.*;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -28,6 +29,7 @@ import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class Drivetrain extends SubsystemBase implements Loggable {
   private final SwerveModule m_frontLeftModule;
@@ -39,6 +41,13 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
   private final SwerveDriveOdometry m_odometry;
   private final SwerveDriveOdometry m_odometryWithoutVision;
+
+  private final SlewRateLimiter m_xAccelLimiterTeleop =
+      new SlewRateLimiter(kTeleopMaxAccelerationMetersPerSecondSquared);
+  private final SlewRateLimiter m_yAccelLimiterTeleop =
+      new SlewRateLimiter(kTeleopMaxAccelerationMetersPerSecondSquared);
+  private final SlewRateLimiter m_angAccelLimiterTeleop =
+      new SlewRateLimiter(kTeleopMaxAngularAccelerationRadiansPerSecondSquared);
 
   private PoseHistory poseHistory = new PoseHistory(kPoseHistoryCapacity);
   private Pose2d lastVisionPose = new Pose2d();
@@ -58,7 +67,9 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Log(name = "Angle PID (hub tracking)")
   private final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
 
-  public Drivetrain() {
+  private Supplier<Rotation2d> m_turretAngle;
+
+  public Drivetrain(Supplier<Rotation2d> turretAngle) {
     m_frontLeftModule =
         new SwerveModule(
             kFLDriveTalonPort, kFLTurningTalonPort, kFLCANCoderPort, kFLCANCoderZero, "FL");
@@ -102,20 +113,26 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_rotationController.setTolerance(kRotationTolerance);
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
+    m_turretAngle = turretAngle;
     SmartDashboard.putData("Field", m_field);
   }
 
   /**
    * Drives the robot at given speeds and rotation. (Used in teleop)
    *
-   * @param xSpeed desired forward velocity in meters per second
-   * @param ySpeed desired sideways (strafe) velocity in meters per second
-   * @param rotSpeed desired angular velocity in radians per second
+   * @param xVelocity desired forward velocity in meters per second
+   * @param yVelocity desired sideways (strafe) velocity in meters per second
+   * @param angularVelocity desired angular velocity in radians per second
    * @param fieldRelative whether the robot should drive field-relative or not
    */
-  public void drive(double xSpeed, double ySpeed, double rotSpeed, boolean fieldRelative) {
+  public void drive(
+      double xVelocity, double yVelocity, double angularVelocity, boolean fieldRelative) {
+    xVelocity = m_xAccelLimiterTeleop.calculate(xVelocity);
+    yVelocity = m_yAccelLimiterTeleop.calculate(yVelocity);
+    angularVelocity = m_angAccelLimiterTeleop.calculate(angularVelocity);
+
     // if not being fed a speed, set all wheels pointing toward center to minimize pushability
-    if (xSpeed == 0 && ySpeed == 0 && rotSpeed == 0) {
+    if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
       m_frontLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
       m_frontRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
       m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
@@ -125,50 +142,11 @@ public class Drivetrain extends SubsystemBase implements Loggable {
           kDriveKinematics.toSwerveModuleStates(
               fieldRelative
                   ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                      xSpeed, ySpeed, rotSpeed, Rotation2d.fromDegrees(m_pigeon.getYaw()))
-                  : new ChassisSpeeds(xSpeed, ySpeed, rotSpeed));
-      SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
-
-      m_frontLeftModule.setDesiredState(states[0]);
-      m_frontRightModule.setDesiredState(states[1]);
-      m_backLeftModule.setDesiredState(states[2]);
-      m_backRightModule.setDesiredState(states[3]);
-
-      this.m_desiredRotation = rotSpeed;
-      this.m_desiredXSpeed = xSpeed;
-      this.m_desiredYSpeed = ySpeed;
-    }
-  }
-
-  /**
-   * Drives the robot at given speed and rotation position (used for hub facing drive).
-   *
-   * @param xSpeed desired forward velocity in meters per second
-   * @param ySpeed desired sideways (strafe) velocity in meters per second
-   * @param rotation desired rotation
-   * @param fieldRelative whether the robot should drive field-relative or not
-   */
-  public void driveWithRotationPosition(
-      double xSpeed, double ySpeed, double desiredRotation, boolean fieldRelative) {
-    // if not being fed a speed, set all wheels pointing toward center to minimize pushability
-    if (xSpeed == 0 && ySpeed == 0) {
-      m_frontLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-      m_frontRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-      m_backRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-    } else {
-      double angularVelocity = 0;
-      if (Math.abs(desiredRotation % (2 * Math.PI) - this.getHeadingRadians() % (2 * Math.PI))
-          > kRotationTolerance) {
-        angularVelocity = m_rotationController.calculate(this.getHeadingRadians(), desiredRotation);
-      }
-
-      SwerveModuleState[] states =
-          kDriveKinematics.toSwerveModuleStates(
-              fieldRelative
-                  ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                      xSpeed, ySpeed, angularVelocity, Rotation2d.fromDegrees(m_pigeon.getYaw()))
-                  : new ChassisSpeeds(xSpeed, ySpeed, angularVelocity));
+                      xVelocity,
+                      yVelocity,
+                      angularVelocity,
+                      Rotation2d.fromDegrees(m_pigeon.getYaw()))
+                  : new ChassisSpeeds(xVelocity, yVelocity, angularVelocity));
       SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
 
       m_frontLeftModule.setDesiredState(states[0]);
@@ -177,9 +155,57 @@ public class Drivetrain extends SubsystemBase implements Loggable {
       m_backRightModule.setDesiredState(states[3]);
 
       this.m_desiredRotation = angularVelocity;
-      this.m_desiredXSpeed = xSpeed;
-      this.m_desiredYSpeed = ySpeed;
+      this.m_desiredXSpeed = xVelocity;
+      this.m_desiredYSpeed = yVelocity;
     }
+  }
+
+  /**
+   * Drives the robot at given speed and rotation position (used for hub facing drive).
+   *
+   * @param xVelocity desired forward velocity in meters per second
+   * @param yVelocity desired sideways (strafe) velocity in meters per second
+   * @param rotation desired rotation
+   * @param fieldRelative whether the robot should drive field-relative or not
+   */
+  public void driveWithRotationPosition(
+      double xVelocity, double yVelocity, double desiredRotation, boolean fieldRelative) {
+
+    xVelocity = m_xAccelLimiterTeleop.calculate(xVelocity);
+    yVelocity = m_yAccelLimiterTeleop.calculate(yVelocity);
+
+    double angularVelocity = 0;
+    if (Math.abs(desiredRotation % (2 * Math.PI) - this.getHeadingRadians() % (2 * Math.PI))
+        > kRotationTolerance) {
+      angularVelocity = m_rotationController.calculate(this.getHeadingRadians(), desiredRotation);
+    }
+
+    // if not being fed a speed, set all wheels pointing toward center to minimize pushability
+    if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
+      m_frontLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+      m_frontRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+      m_backRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+    } else {
+      SwerveModuleState[] states =
+          kDriveKinematics.toSwerveModuleStates(
+              fieldRelative
+                  ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                      xVelocity,
+                      yVelocity,
+                      angularVelocity,
+                      Rotation2d.fromDegrees(m_pigeon.getYaw()))
+                  : new ChassisSpeeds(xVelocity, yVelocity, angularVelocity));
+      SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
+
+      m_frontLeftModule.setDesiredState(states[0]);
+      m_frontRightModule.setDesiredState(states[1]);
+      m_backLeftModule.setDesiredState(states[2]);
+      m_backRightModule.setDesiredState(states[3]);
+    }
+    this.m_desiredRotation = angularVelocity;
+    this.m_desiredXSpeed = xVelocity;
+    this.m_desiredYSpeed = yVelocity;
   }
 
   /**
@@ -282,13 +308,19 @@ public class Drivetrain extends SubsystemBase implements Loggable {
       // Calculate new robot pose
 
       Rotation2d robotRotation = historicalFieldToTarget.get().getRotation();
-      Rotation2d cameraRotation = robotRotation.rotateBy(kRobotToCameraMeters.getRotation());
+      Rotation2d cameraRotation =
+          robotRotation.rotateBy(
+              kRobotToTurretCenterMeters.getRotation().plus(m_turretAngle.get()));
       Transform2d fieldToTargetRotated = new Transform2d(kHubCenterTranslation, cameraRotation);
       Transform2d fieldToCamera =
           fieldToTargetRotated.plus(
               new Transform2d(data.translation.unaryMinus(), new Rotation2d()));
 
-      Transform2d visionFieldToTargetTransform = fieldToCamera.plus(kRobotToCameraMeters.inverse());
+      Transform2d visionFieldToTargetTransform =
+          fieldToCamera.plus(
+              kRobotToTurretCenterMeters
+                  .plus(new Transform2d(kTurretCentertoCameraMeters, m_turretAngle.get()))
+                  .inverse());
 
       Pose2d visionFieldToTarget =
           new Pose2d(

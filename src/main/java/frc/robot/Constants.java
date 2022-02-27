@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -39,9 +40,6 @@ public final class Constants {
   public static final class OIConstants {
     public static final int kDriverPort = 0;
     public static final int kOperatorPort = 1;
-
-    public static final double kDriveSlewRate =
-        3; // units per second to limit rate to, inverse of how long it will take from 0 to 1
 
     public static final double kDriverRightXDeadband = 0.15;
     public static final double kDriverLeftXDeadband = 0.08;
@@ -186,6 +184,10 @@ public final class Constants {
     public static final double kTeleopMaxAngularSpeedRadiansPerSecond =
         kTeleopMaxSpeedMetersPerSecond / kTurningRadiusMeters; // radians per second
 
+    public static final double kTeleopMaxAccelerationMetersPerSecondSquared = 1;
+    public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared =
+        kTeleopMaxAccelerationMetersPerSecondSquared / kTurningRadiusMeters;
+
     // Vision pose estimation constants
     public static final double kVisionWeightPerSec =
         0.85; // After one second, what % of pose average should be vision (4% in weighted avg)
@@ -253,13 +255,16 @@ public final class Constants {
     public static final double kBlinkPeriodSecs = 3.0;
     public static final double kBlinkLengthSecs = 0.5;
 
-    public static final Transform2d kRobotToCameraMeters =
+    public static final Transform2d kRobotToTurretCenterMeters =
         new Transform2d(
             new Translation2d(0.4, 0), // in meters
             new Rotation2d());
+
+    public static final Translation2d kTurretCentertoCameraMeters = new Translation2d(0, 0);
   }
 
   public static final class TurretConstants {
+    public static final double kTurretLoopTimeSeconds = 0.020;
     public static final int kTurretTalonPort = 32;
     public static final int kTurretSupplyCurrentLimitAmps = 5;
     public static final int kTurretSupplyCurrentThresholdAmps = 10;
@@ -269,15 +274,24 @@ public final class Constants {
     public static final double kTurretRangeOfMotion = 2 * Math.PI;
     public static final double kTurretOffset = 0;
 
-    public static final double kP = 0;
-    public static final double kD = 0;
+    public static final double kVTurretVoltSecondsPerMeter = 0;
+    public static final double kATurretVoltSecondsSquaredPerMeter = 0;
+    public static final double kSTurretVolts = 0;
 
-    public static final double kVVoltSecondsPerMeter = 0;
-    public static final double kAVoltSecondsSquaredPerMeter = 0;
-    public static final double kSVolts = 0;
+    public static final double kTurretVelocityRMSE = 0;
+    public static final double kTurretAcclerationRMSE = 0;
 
-    public static final double kMaxVelocityRadiansPerSecond = 0;
-    public static final double kMaxAccelerationRadiansPerSecondSquared = 0;
+    public static final double kTurretPotentiometerStdDev = 0;
+
+    public static final double kTurretMaxVelocityRadiansPerSecond = 0;
+    public static final double kTurretMaxAccelerationRadiansPerSecondSquared =
+        new SimpleMotorFeedforward(
+                kSTurretVolts, kVTurretVoltSecondsPerMeter, kATurretVoltSecondsSquaredPerMeter)
+            .maxAchievableAcceleration(kNominalVoltage, kTurretMaxVelocityRadiansPerSecond);
+
+    public static final SR_TrapezoidProfile.Constraints kTurretMotionProfileConstraints =
+        new SR_TrapezoidProfile.Constraints(
+            kTurretMaxVelocityRadiansPerSecond, kTurretMaxAccelerationRadiansPerSecondSquared);
 
     public static final double kMinPositionRadians = 0;
     public static final double kMaxPositionRadians = 0;

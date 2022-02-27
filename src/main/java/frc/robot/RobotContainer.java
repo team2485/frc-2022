@@ -29,8 +29,6 @@ public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
 
-  private final Drivetrain m_drivetrain = new Drivetrain();
-
   private final Vision m_vision = new Vision();
 
   private final IntakeArm m_intakeArm = new IntakeArm();
@@ -40,6 +38,7 @@ public class RobotContainer {
   public final Shooter m_shooter = new Shooter();
   private final Hood m_hood = new Hood();
   private final Turret m_turret = new Turret();
+  private final Drivetrain m_drivetrain = new Drivetrain(m_turret::getRotation2d);
 
   @Log(name = "Auto Chooser")
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();

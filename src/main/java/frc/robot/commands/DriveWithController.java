@@ -7,7 +7,6 @@ package frc.robot.commands;
 import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.drive.Drivetrain;
@@ -22,10 +21,6 @@ public class DriveWithController extends CommandBase {
   private final BooleanSupplier m_fieldRelative;
 
   private final Drivetrain m_drivetrain;
-
-  private final SlewRateLimiter m_xSpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
-  private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(kDriveSlewRate);
-  private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(kDriveSlewRate);
 
   public DriveWithController(
       DoubleSupplier xSpeedSupplier,
@@ -52,19 +47,15 @@ public class DriveWithController extends CommandBase {
     SmartDashboard.putNumber("xbox left y", m_rotSpeedSupplier.getAsDouble());
 
     final double xSpeed =
-        -m_xSpeedLimiter.calculate(
-                Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband))
+        Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband)
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double ySpeed =
-        -m_ySpeedLimiter.calculate(
-                Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband))
+        Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband)
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double rot =
-        -m_rotLimiter.calculate(
-                Deadband.cubicScaledDeadband(
-                    m_rotSpeedSupplier.getAsDouble(), kDriverRightXDeadband))
+        Deadband.cubicScaledDeadband(m_rotSpeedSupplier.getAsDouble(), kDriverRightXDeadband)
             * kTeleopMaxAngularSpeedRadiansPerSecond;
 
     final boolean fieldRelative = m_fieldRelative.getAsBoolean();
