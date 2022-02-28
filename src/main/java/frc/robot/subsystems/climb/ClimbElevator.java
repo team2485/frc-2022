@@ -109,8 +109,10 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
 
     m_talon.setInverted(true);
 
-    m_pidControllerUnloaded.setTolerance(kElevatorPositionToleranceMeters);
-    m_pidControllerLoaded.setTolerance(kElevatorPositionToleranceMeters);
+    m_pidControllerUnloaded.setTolerance(
+        kElevatorPositionToleranceMeters, kElevatorVelocityToleranceMetersPerSecond);
+    m_pidControllerLoaded.setTolerance(
+        kElevatorPositionToleranceMeters, kElevatorVelocityToleranceMetersPerSecond);
 
     m_loaded = false;
     this.resetPositionMeters(0);
@@ -142,14 +144,13 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     return m_talon.getSelectedSensorPosition() * kSlideDistancePerPulseMeters;
   }
 
-  @Config(name = "Reset elevator position")
   public void resetPositionMeters(double position) {
     m_talon.setSelectedSensorPosition(position / kSlideDistancePerPulseMeters);
   }
 
   @Log(name = "Current elevator velocity")
   public double getVelocityMetersPerSecond() {
-    return m_talon.getSelectedSensorVelocity() * kSlideDistancePerPulseMeters * 0.1;
+    return m_talon.getSelectedSensorVelocity() * kSlideDistancePerPulseMeters * 10;
   }
 
   @Log(name = "At position goal")
@@ -177,6 +178,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     m_zeroOverride = true;
   }
 
+  @Config(name = "set loaded")
   public void setMode(boolean loaded) {
     this.m_loaded = loaded;
   }
@@ -232,33 +234,32 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
   }
 
   public double limitOnSlotSensors(double voltage) {
-    // boolean topSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
-    boolean bottomSlotSensorTripped = m_slotSensorDebounce.calculate(m_bottomSlotSensor.get());
+    boolean topSlotSensorTripped = m_topSlotSensor.get();
+    boolean bottomSlotSensorTripped = m_bottomSlotSensor.get();
 
     if (bottomSlotSensorTripped && voltage < 0) {
       return 0;
-      // } else
-      // if (topSlotSensorTripped && voltage > 0) {
-      //   return 0;
+    } else if (topSlotSensorTripped && voltage > 0) {
+      return 0;
     } else {
       return voltage;
     }
   }
 
   public void updatePositionOnSlotSensors() {
-    boolean topSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
-    // boolean bottomSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
+    // boolean topSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
+    // // boolean bottomSlotSensorTripped = m_slotSensorDebounce.calculate(m_topSlotSensor.get());
 
-    // if (bottomSlotSensorTripped && this.getPositionMeters() >= kElevatorSlotSensorBottomPosition)
-    // {
-    //   this.resetPositionMeters(kElevatorSlotSensorBottomPosition);
-    // } else
-    if (topSlotSensorTripped && this.getPositionMeters() <= kElevatorSlotSensorTopPosition) {
-      this.resetPositionMeters(kElevatorSlotSensorTopPosition);
-    }
+    // // if (bottomSlotSensorTripped && this.getPositionMeters() >=
+    // kElevatorSlotSensorBottomPosition)
+    // // {
+    // //   this.resetPositionMeters(kElevatorSlotSensorBottomPosition);
+    // // } else
+    // if (topSlotSensorTripped && this.getPositionMeters() <= kElevatorSlotSensorTopPosition) {
+    //   this.resetPositionMeters(kElevatorSlotSensorTopPosition);
+    // }
   }
 
-  @Config(name = "Set Ratchet")
   public void setRatchet(boolean engaged) {
     if (engaged) {
       m_ratchetServo.set(kElevatorServoEngageValue);

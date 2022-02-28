@@ -48,6 +48,7 @@ public class ClimbStateMachine implements Loggable {
 
   public ClimbStateMachine() {
     m_state = ClimbState.kNotClimbing;
+    m_preDisableState = ClimbState.kNotClimbing;
   }
 
   public void setState(ClimbState state) {

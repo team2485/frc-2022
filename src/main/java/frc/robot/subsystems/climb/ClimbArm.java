@@ -38,8 +38,25 @@ public class ClimbArm extends SubsystemBase implements Loggable {
           kvArmTranslationVoltSecondsPerMeter,
           kaArmTranslationVoltSecondsSquaredPerMeter);
 
+  private final SR_ElevatorFeedforward m_feedforwardUnloaded =
+      new SR_ElevatorFeedforward(
+          ksArmUnloadedVolts,
+          kgArmUnloadedVolts,
+          kvArmUnloadedVoltSecondsPerMeter,
+          kaArmUnloadedVoltSecondsSquaredPerMeter);
+
+  @Log(name = "feedback output")
+  private double m_feedbackOutput = 0;
+
+  @Log(name = "feedforward output")
+  private double m_feedforwardOutput = 0;
+
+  @Log(name = "Translation setpoint")
   private double m_translationSetpointMeters = 0;
+
   private double m_lastVelocitySetpointTranslation = 0;
+
+  private boolean m_loaded;
 
   public ClimbArm() {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -57,20 +74,25 @@ public class ClimbArm extends SubsystemBase implements Loggable {
             kArmStatorCurrentThresholdAmps,
             kArmStatorCurrentThresholdTimeSecs);
 
-    // current pi and feedforward terms
-    talonConfig.slot0.kP = kPArmCurrentOutputUnitsPerMilliamp;
-    talonConfig.slot0.kI = kIArmCurrentOutputUnitsPerMilliamp;
-    // talonConfig.slot0.kF = kVArmCurrentOutputUnitsPerMilliamp;
     m_talon.configAllSettings(talonConfig);
     m_talon.enableVoltageCompensation(true);
     m_talon.setNeutralMode(NeutralMode.Brake);
+    m_talon.setInverted(true);
 
-    m_pidControllerTranslation.setTolerance(kArmTranslationToleranceMeters);
+    m_pidControllerTranslation.setTolerance(
+        kArmTranslationToleranceMeters, kArmTranslationVelocityToleranceMetersPerSecond);
 
     this.resetAbsoluteRotation(0);
 
+    m_loaded = true;
+
     Shuffleboard.getTab("ClimbArm").add("Controller Translation", m_pidControllerTranslation);
     Shuffleboard.getTab("ClimbArm").add("FF Translation", m_feedforwardTranslation);
+    Shuffleboard.getTab("ClimbArm").add("FF Unloaded", m_feedforwardUnloaded);
+  }
+
+  public void setMode(boolean loaded) {
+    m_loaded = loaded;
   }
 
   @Config(name = "Reset absolute rotation")
@@ -83,10 +105,12 @@ public class ClimbArm extends SubsystemBase implements Loggable {
     return m_talon.getSelectedSensorPosition() * kArmRotationsPerPulse;
   }
 
+  @Log(name = "Current translation")
   public double getTranslationMeters() {
     return this.getAbsoluteRotation() * kSprocketCircumferenceMeters;
   }
 
+  @Config(name = "Set translation")
   public void setTranslationMeters(double translation) {
     m_voltageOverride = false;
     m_translationSetpointMeters = translation;
@@ -107,6 +131,15 @@ public class ClimbArm extends SubsystemBase implements Loggable {
     return m_talon.getSupplyCurrent();
   }
 
+  public boolean getStatorCurrentSpike(double threshold) {
+    return this.getStatorCurrentAmps() > threshold;
+  }
+
+  @Log(name = "current above 15")
+  public boolean getStatorCurrentSpike15() {
+    return this.getStatorCurrentAmps() > 10;
+  }
+
   @Config(name = "Set voltage")
   public void setVoltage(double voltage) {
     m_voltageOverride = true;
@@ -125,15 +158,26 @@ public class ClimbArm extends SubsystemBase implements Loggable {
       double feedbackOutputVoltage =
           m_pidControllerTranslation.calculate(getTranslationMeters(), m_translationSetpointMeters);
 
-      double feedforwardOutputVoltage =
-          m_feedforwardTranslation.calculate(
-              m_lastVelocitySetpointTranslation,
-              m_pidControllerTranslation.getSetpoint().velocity,
-              kArmControlLoopTimeSeconds);
+      double feedforwardOutputVoltage = 0;
+      if (m_loaded) {
+        feedforwardOutputVoltage =
+            m_feedforwardTranslation.calculate(
+                m_lastVelocitySetpointTranslation,
+                m_pidControllerTranslation.getSetpoint().velocity,
+                kArmControlLoopTimeSeconds);
+      } else {
+        feedforwardOutputVoltage =
+            m_feedforwardUnloaded.calculate(
+                m_lastVelocitySetpointTranslation,
+                m_pidControllerTranslation.getSetpoint().velocity,
+                kArmControlLoopTimeSeconds);
+      }
 
       double outputPercentage =
           (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
 
+      m_feedbackOutput = feedbackOutputVoltage;
+      m_feedforwardOutput = feedforwardOutputVoltage;
       m_talon.set(ControlMode.PercentOutput, outputPercentage);
 
       m_lastVelocitySetpointTranslation = m_pidControllerTranslation.getSetpoint().velocity;
