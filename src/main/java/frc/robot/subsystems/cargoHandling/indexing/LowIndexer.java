@@ -7,10 +7,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class LowIndexer extends SubsystemBase implements Loggable {
-  private WL_SparkMax m_spark = new WL_SparkMax(kHighIndexerSparkPort);
+  private WL_SparkMax m_spark = new WL_SparkMax(kLowIndexerSparkPort);
 
   private double m_lastVelocity;
 
@@ -21,6 +22,7 @@ public class LowIndexer extends SubsystemBase implements Loggable {
     m_spark.setIdleMode(IdleMode.kBrake);
   }
 
+  @Config.NumberSlider(name = "Set percent output", tabName = "Indexing")
   public void setPercentOutput(double percentOutput) {
     m_spark.set(percentOutput);
   }

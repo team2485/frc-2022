@@ -26,7 +26,7 @@ public class Robot extends TimedRobot {
   public Robot() {
     CurrentLogger.getInstance().registerLogFolder(Constants.kCurrentLogFolder);
     m_robotContainer = new RobotContainer();
-    addPeriodic(() -> m_robotContainer.m_shooter.runShooterControlLoop(), 0.01);
+    // addPeriodic(() -> m_robotContainer.m_shooter.runShooterControlLoop(), 0.01);
   }
 
   /**

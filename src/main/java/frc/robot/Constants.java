@@ -331,8 +331,8 @@ public final class Constants {
     public static final int kLowIndexerSparkPort = 22;
     public static final int kHighIndexerSparkPort = 23;
 
-    public static final int kIndexerSmartCurrentLimitAmps = 5;
-    public static final int kIndexerImmediateCurrentLimitAmps = 7;
+    public static final int kIndexerSmartCurrentLimitAmps = 20;
+    public static final int kIndexerImmediateCurrentLimitAmps = 25;
 
     public static final double kLowIndexerPercentOutputIn = 0.5;
 
