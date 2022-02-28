@@ -149,7 +149,6 @@ public class Turret extends SubsystemBase {
   }
 
   public void periodic() {
-
     // Step our TrapezoidalProfile forward 20ms and set it as our next reference
     m_lastProfiledReference =
         (new SR_TrapezoidProfile(

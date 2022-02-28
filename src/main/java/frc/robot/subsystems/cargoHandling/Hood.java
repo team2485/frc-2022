@@ -20,10 +20,9 @@ public class Hood extends SubsystemBase implements Loggable {
   private SparkMaxLimitSwitch m_limitSwitch =
       m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
 
-  private final SR_ProfiledPIDController m_controller =
+  private final SR_ProfiledPIDController m_pidController =
       new SR_ProfiledPIDController(kPHood, 0, kDHood, kHoodMotionProfileConstraints);
 
-  @Log(name = "Hood Feedforward")
   private final SR_ArmFeedforward m_feedforward =
       new SR_ArmFeedforward(
           kSHoodVolts, kGHoodVolts, kVHoodVoltSecondsPerRadian, kAHoodVoltSecondsSquaredPerRadian);
@@ -31,7 +30,7 @@ public class Hood extends SubsystemBase implements Loggable {
   @Log(name = "angle setpoint radians")
   private double m_angleSetpointRadians = kHoodBottomPositionRadians;
 
-  private double m_previousVelocitySetpoint = 0;
+  private double m_lastVelocitySetpoint = 0;
 
   @Log(name = "zeroed")
   private boolean m_isZeroed = false;
@@ -47,11 +46,12 @@ public class Hood extends SubsystemBase implements Loggable {
 
     m_limitSwitch.enableLimitSwitch(true);
 
-    m_controller.setTolerance(kHoodControllerPositionTolerance);
+    m_pidController.setTolerance(kHoodControllerPositionTolerance);
 
     this.resetAngleRadians(kHoodBottomPositionRadians);
 
-    Shuffleboard.getTab("Hood").add("Hood controller", m_controller);
+    Shuffleboard.getTab("Hood").add("Hood controller", m_pidController);
+    Shuffleboard.getTab("Hood").add("Hood feedforward", m_feedforward);
   }
 
   /** @return current angle from horizontal */
@@ -64,10 +64,18 @@ public class Hood extends SubsystemBase implements Loggable {
   public void setAngleRadians(double angle) {
     m_angleSetpointRadians =
         MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
+
+    m_pidController.setGoal(
+        m_angleSetpointRadians); // need to do this here because otherwise atGoal will return true
+    // briefly before the new goal is set in periodic
   }
 
   public void resetAngleRadians(double angle) {
     m_spark.getEncoder().setPosition(angle / kHoodRadiansPerMotorRev);
+  }
+
+  public boolean atGoal() {
+    return m_pidController.atGoal();
   }
 
   public void zeroAngle() {
@@ -85,19 +93,21 @@ public class Hood extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
-    double controllerVoltage =
-        m_controller.calculate(this.getAngleRadians(), m_angleSetpointRadians);
+    double feedbackOutputVoltage =
+        m_pidController.calculate(
+            this.getAngleRadians()); // feedback controller already has goal from setAngleRadians
+    // method
 
-    double feedforwardVoltage =
+    double feedforwardOutputVoltage =
         m_feedforward.calculate(
             m_angleSetpointRadians,
-            m_previousVelocitySetpoint,
-            m_controller.getSetpoint().velocity,
+            m_lastVelocitySetpoint,
+            m_pidController.getSetpoint().velocity,
             Constants.kTimestepSeconds);
 
-    m_previousVelocitySetpoint = m_controller.getSetpoint().velocity;
+    m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
 
-    m_spark.set((controllerVoltage + feedforwardVoltage) / Constants.kNominalVoltage);
+    m_spark.setVoltage(feedbackOutputVoltage + feedforwardOutputVoltage);
 
     if (this.getBottomLimitSwitch()) {
       zeroAngle();
