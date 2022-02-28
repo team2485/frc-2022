@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static java.util.Map.entry;
+
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,8 +17,11 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
+import frc.robot.commands.interpolation.ShotParameter;
 import frc.team2485.WarlordsLib.IDManager;
 import frc.team2485.WarlordsLib.sendableRichness.SR_TrapezoidProfile;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -36,6 +41,14 @@ public final class Constants {
   public static final int kFalconCPR = 2048; // pulses per rotation
   public static final int kCANTimeoutMs = 250;
   public static final double kTimestepSeconds = 0.02;
+
+  // meters and shot parameters (radians and rps)
+  public static final TreeMap<Double, ShotParameter> kShootingMap =
+      new TreeMap<>(
+          Map.ofEntries(
+              entry(5.0, new ShotParameter(0.45, 60)),
+              entry(6.0, new ShotParameter(0.4, 65)),
+              entry(7.0, new ShotParameter(0.35, 70))));
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;

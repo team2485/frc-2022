@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.commands.interpolation.InterpolatingTable;
 import frc.robot.subsystems.cargoHandling.Hood;
 import frc.robot.subsystems.cargoHandling.Intake;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
@@ -18,27 +19,12 @@ import frc.robot.subsystems.cargoHandling.Shooter;
 import frc.robot.subsystems.cargoHandling.Turret;
 import frc.robot.subsystems.cargoHandling.indexing.HighIndexer;
 import frc.robot.subsystems.cargoHandling.indexing.LowIndexer;
-import frc.team2485.WarlordsLib.math.Interpolator;
-import java.util.TreeMap;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class CargoHandlingCommandBuilder {
-  // meters and radians
-  private static final TreeMap<Double, Double> distancesAndHoodPositions =
-      new TreeMap<Double, Double>();
 
-  // meters and rotations per second
-  private static final TreeMap<Double, Double> distancesAndFlywheelVelocities =
-      new TreeMap<Double, Double>();
-
-  public CargoHandlingCommandBuilder() {
-    distancesAndHoodPositions.put(5.0, 0.45);
-    distancesAndHoodPositions.put(6.0, 0.45);
-
-    distancesAndFlywheelVelocities.put(5.0, 60.0);
-    distancesAndFlywheelVelocities.put(6.0, 70.0);
-  }
+  public CargoHandlingCommandBuilder() {}
 
   public static Command getIntakeCommand(
       Intake intake, IntakeArm intakeArm, LowIndexer lowIndexer) {
@@ -75,8 +61,7 @@ public class CargoHandlingCommandBuilder {
     return new RunCommand(
         () ->
             hood.setAngleRadians(
-                Interpolator.linearInterpolate(
-                    distancesAndHoodPositions, distanceToHub.getAsDouble())),
+                InterpolatingTable.get(distanceToHub.getAsDouble()).hoodAngleRadians),
         hood);
   }
 
@@ -84,8 +69,7 @@ public class CargoHandlingCommandBuilder {
     return new RunCommand(
         () ->
             shooter.setVelocityRotationsPerSecond(
-                Interpolator.linearInterpolate(
-                    distancesAndFlywheelVelocities, distanceToHub.getAsDouble())),
+                InterpolatingTable.get(distanceToHub.getAsDouble()).shooterSpeedRotationsPerSecond),
         shooter);
   }
 
