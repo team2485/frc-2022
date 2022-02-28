@@ -23,7 +23,6 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -62,12 +61,15 @@ public class Turret extends SubsystemBase {
   private final LinearQuadraticRegulator<N2, N1, N1> m_controller =
       new LinearQuadraticRegulator<>(
           m_turretPlant,
-          VecBuilder.fill(Units.degreesToRadians(1.0), Units.degreesToRadians(10.0)), // qelms.
+          VecBuilder.fill(
+              kTurretPositionToleranceRadians, kTurretVelocityToleranceRadiansPerSecond), // qelms.
           // Position and velocity error tolerances, in radians and radians per second. Decrease
           // this
           // to more heavily penalize state excursion, or make the controller behave more
           // aggressively..
-          VecBuilder.fill(12.0), // relms. Control effort (voltage) tolerance. Decrease this to more
+          VecBuilder.fill(
+              kTurretVoltageTolerance), // relms. Control effort (voltage) tolerance. Decrease this
+          // to more
           // heavily penalize control effort, or make the controller less aggressive. 12 is a good
           // starting point because that is the (approximate) maximum voltage of a battery.
           kTurretLoopTimeSeconds); // Nominal time between loops.
@@ -132,12 +134,12 @@ public class Turret extends SubsystemBase {
   }
 
   @Log(name = "Counter-clockwise limit switch")
-  private boolean getCCWLimitSwitchEnabled() {
+  private boolean getCCWLimitSwitch() {
     return m_talon.isFwdLimitSwitchClosed() == 1 ? true : false;
   }
 
   @Log(name = "Clockwise limit switch")
-  private boolean getCWLimitSwitchEnabled() {
+  private boolean getCWLimitSwitch() {
     return m_talon.isRevLimitSwitchClosed() == 1 ? true : false;
   }
 
@@ -155,7 +157,7 @@ public class Turret extends SubsystemBase {
                 kTurretMotionProfileConstraints,
                 new SR_TrapezoidProfile.State(m_angleSetpointRadians, 0.0),
                 m_lastProfiledReference))
-            .calculate(0.020);
+            .calculate(kTurretLoopTimeSeconds);
     m_loop.setNextR(m_lastProfiledReference.position, m_lastProfiledReference.velocity);
 
     // Correct our Kalman filter's state vector estimate with encoder data.

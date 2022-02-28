@@ -294,7 +294,16 @@ public final class Constants {
     public static final double kTurretVelocityRMSE = 0;
     public static final double kTurretAcclerationRMSE = 0;
 
-    public static final double kTurretPotentiometerStdDev = 0;
+    public static final double kTurretPotentiometerStdDev =
+        0; // find voltage noise under ordinary operation
+
+    // Q elements
+    public static final double kTurretPositionToleranceRadians = Units.degreesToRadians(1.0);
+    public static final double kTurretVelocityToleranceRadiansPerSecond =
+        Units.degreesToRadians(10.0);
+
+    // R elements
+    public static final double kTurretVoltageTolerance = 12.0;
 
     public static final double kTurretMaxVelocityRadiansPerSecond = 0;
     public static final double kTurretMaxAccelerationRadiansPerSecondSquared =
