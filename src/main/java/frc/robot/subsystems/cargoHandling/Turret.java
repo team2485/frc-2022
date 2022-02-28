@@ -169,7 +169,12 @@ public class Turret extends SubsystemBase {
     // voltage = duty cycle * battery voltage, so
     // duty cycle = voltage / battery voltage
     double nextVoltage = m_loop.getU(0);
+    double outputVoltage =
+        nextVoltage
+            + kSTurretVolts
+                * Math.signum(
+                    nextVoltage); // add in kS -- this isn't used in the loop because it's nonlinear
 
-    m_talon.set(ControlMode.PercentOutput, nextVoltage / Constants.kNominalVoltage);
+    m_talon.set(ControlMode.PercentOutput, outputVoltage / Constants.kNominalVoltage);
   }
 }
