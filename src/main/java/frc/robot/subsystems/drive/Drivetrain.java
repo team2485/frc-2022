@@ -49,8 +49,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   private final SlewRateLimiter m_angAccelLimiterTeleop =
       new SlewRateLimiter(kTeleopMaxAngularAccelerationRadiansPerSecondSquared);
 
-  private PoseHistory poseHistory = new PoseHistory(kPoseHistoryCapacity);
-  private Pose2d lastVisionPose = new Pose2d();
+  private PoseHistory m_poseHistory = new PoseHistory(kPoseHistoryCapacity);
+  private Translation2d m_velocity = new Translation2d();
   private boolean m_resetOnVision = false;
   @Log private double m_desiredRotation;
   @Log private double m_desiredXSpeed;
@@ -230,6 +230,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     return m_odometry.getPoseMeters();
   }
 
+  public Translation2d getVelocity() {
+    return m_velocity;
+  }
+
   @Log(name = "Distance to hub (meters)")
   public double getDistanceToHubMeters() {
     return getPoseMeters().getTranslation().getDistance(kHubCenterTranslation);
@@ -242,7 +246,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
    */
   public void resetOdometry(Pose2d pose, boolean clearHistory) {
     if (clearHistory) {
-      poseHistory = new PoseHistory(kPoseHistoryCapacity);
+      m_poseHistory = new PoseHistory(kPoseHistoryCapacity);
     }
     m_odometry.resetPosition(pose, Rotation2d.fromDegrees(m_pigeon.getYaw()));
   }
@@ -302,7 +306,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   }
 
   public void addVisionMeasurement(TimestampedTranslation2d data) {
-    Optional<Pose2d> historicalFieldToTarget = poseHistory.get(data.timestamp);
+    Optional<Pose2d> historicalFieldToTarget = m_poseHistory.get(data.timestamp);
 
     if (historicalFieldToTarget.isPresent()) {
       // Calculate new robot pose
@@ -411,7 +415,9 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_field.getObject("Pure Odometry").setPose(m_odometryWithoutVision.getPoseMeters());
 
     Pose2d robotPose = m_odometry.getPoseMeters();
-    poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
+    Pose2d lastPose = m_poseHistory.getLatest().get().getPose();
+    m_velocity = robotPose.getTranslation().minus(lastPose.getTranslation());
+    m_poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
 
     // System.out.println("pose: " + getPoseMeters().toString());
     m_field.setRobotPose(getPoseMeters());

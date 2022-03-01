@@ -46,9 +46,9 @@ public final class Constants {
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
           Map.ofEntries(
-              entry(5.0, new ShotParameter(0.45, 60)),
-              entry(6.0, new ShotParameter(0.4, 65)),
-              entry(7.0, new ShotParameter(0.35, 70))));
+              entry(5.0, new ShotParameter(0.45, 60, 3)),
+              entry(6.0, new ShotParameter(0.4, 65, 4)),
+              entry(7.0, new ShotParameter(0.35, 70, 5))));
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;

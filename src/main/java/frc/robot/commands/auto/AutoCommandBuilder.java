@@ -31,7 +31,7 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter, drivetrain::getDistanceToHubMeters);
+            shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
@@ -59,7 +59,7 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter, drivetrain::getDistanceToHubMeters);
+            shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
@@ -83,7 +83,7 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter, drivetrain::getDistanceToHubMeters);
+            shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
@@ -110,7 +110,7 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter, drivetrain::getDistanceToHubMeters);
+            shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 

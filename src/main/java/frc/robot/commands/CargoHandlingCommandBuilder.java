@@ -7,6 +7,7 @@ import static frc.robot.Constants.IntakeArmConstants.*;
 import static frc.robot.Constants.IntakeConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -46,7 +47,8 @@ public class CargoHandlingCommandBuilder {
         .withInterrupt(intakeArm::getBottomLimitSwitch);
   }
 
-  public static Command getTurretAutoAimCommand(Turret turret, Supplier<Pose2d> robotPose) {
+  public static Command getTurretAutoAimCommand(
+      Turret turret, Supplier<Pose2d> robotPose, Supplier<Translation2d> robotVelocity) {
     return new RunCommand(
         () ->
             turret.setAngleRadians(
@@ -57,7 +59,8 @@ public class CargoHandlingCommandBuilder {
         turret);
   }
 
-  public static Command getHoodAutoAimCommand(Hood hood, DoubleSupplier distanceToHub) {
+  public static Command getHoodAutoAimCommand(
+      Hood hood, DoubleSupplier distanceToHub, Supplier<Translation2d> robotVelocity) {
     return new RunCommand(
         () ->
             hood.setAngleRadians(
@@ -65,7 +68,8 @@ public class CargoHandlingCommandBuilder {
         hood);
   }
 
-  public static Command getShooterAutoSetCommand(Shooter shooter, DoubleSupplier distanceToHub) {
+  public static Command getShooterAutoSetCommand(
+      Shooter shooter, DoubleSupplier distanceToHub, Supplier<Translation2d> robotVelocity) {
     return new RunCommand(
         () ->
             shooter.setVelocityRotationsPerSecond(

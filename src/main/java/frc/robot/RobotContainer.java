@@ -120,11 +120,14 @@ public class RobotContainer {
 
     // Default commands for turret and hood are to auto-aim based on robot pose/distance
     m_turret.setDefaultCommand(
-        CargoHandlingCommandBuilder.getTurretAutoAimCommand(m_turret, m_drivetrain::getPoseMeters));
+        CargoHandlingCommandBuilder.getTurretAutoAimCommand(
+            m_turret, m_drivetrain::getPoseMeters, m_drivetrain::getVelocityMetersPerSecond));
 
     m_hood.setDefaultCommand(
         CargoHandlingCommandBuilder.getHoodAutoAimCommand(
-            m_hood, m_drivetrain::getDistanceToHubMeters));
+            m_hood,
+            m_drivetrain::getDistanceToHubMeters,
+            m_drivetrain::getVelocityMetersPerSecond));
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer (until
     // stopped by hitting high indexer path)
@@ -139,7 +142,9 @@ public class RobotContainer {
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         .whileHeld(
             CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-                m_shooter, m_drivetrain::getDistanceToHubMeters));
+                m_shooter,
+                m_drivetrain::getDistanceToHubMeters,
+                m_drivetrain::getVelocityMetersPerSecond));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
     m_operator
