@@ -28,7 +28,8 @@ public class ClimbArm extends SubsystemBase implements Loggable {
           kPArmTranslationVoltsPerMeter,
           0,
           kDArmTranslationVoltSecondsPerMeter,
-          kArmControllerConstraintsTranslation);
+          kArmControllerConstraintsTranslation,
+          kArmControlLoopTimeSeconds);
 
   // input of acceleration, output of voltage
   private final SR_ElevatorFeedforward m_feedforwardTranslation =

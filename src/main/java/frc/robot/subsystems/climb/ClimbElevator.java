@@ -10,8 +10,6 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -31,21 +29,21 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
   @Log(name = "Bottom Slot Sensor")
   private final DigitalInput m_bottomSlotSensor = new DigitalInput(kElevatorSlotSensorBottomPort);
 
-  private final Debouncer m_slotSensorDebounce =
-      new Debouncer(kSlotSensorDebounceTime, DebounceType.kBoth);
   private final SR_ProfiledPIDController m_pidControllerUnloaded =
       new SR_ProfiledPIDController(
           kPElevatorUnloadedVoltsPerMeter,
           0,
           kDElevatorUnloadedVoltSecondsPerMeter,
-          kElevatorControllerConstraintsUnloaded);
+          kElevatorControllerConstraintsUnloaded,
+          kElevatorControlLoopTimeSeconds);
 
   private final SR_ProfiledPIDController m_pidControllerLoaded =
       new SR_ProfiledPIDController(
           kPElevatorLoadedVoltsPerMeter,
           0,
           kDElevatorLoadedVoltSecondsPerMeter,
-          kElevatorControllerConstraintsLoaded);
+          kElevatorControllerConstraintsLoaded,
+          kElevatorControlLoopTimeSeconds);
 
   private double m_lastVelocitySetpoint = 0;
 
@@ -68,8 +66,6 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
   @Log(name = "loaded")
   private boolean m_loaded; // unloaded, true is loaded
 
-  private boolean m_zeroOverride = false;
-
   private boolean m_limitOverride = false;
 
   @Log(name = "position setpoint")
@@ -84,6 +80,9 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
   private double m_feedforwardOutput = 0;
 
   private boolean m_hookedOnMidBar = false;
+
+  private boolean m_voltageOverride = false;
+  private double m_voltageSetpoint = 0;
 
   public ClimbElevator() {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -117,7 +116,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     m_loaded = false;
     this.resetPositionMeters(0);
 
-    this.setRatchet(true);
+    this.setRatchet(false);
 
     Shuffleboard.getTab("ClimbElevator").add("Controller Unloaded", m_pidControllerUnloaded);
     Shuffleboard.getTab("ClimbElevator").add("FF Unloaded", m_feedforwardUnloaded);
@@ -128,7 +127,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
 
   @Config(name = "Set elevator position")
   public void setPositionMeters(double position) {
-    m_zeroOverride = false;
+    m_voltageOverride = false;
     m_positionSetpointMeters =
         MathUtil.clamp(position, kElevatorBottomStopPosition, kElevatorTopStopPosition);
 
@@ -144,6 +143,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     return m_talon.getSelectedSensorPosition() * kSlideDistancePerPulseMeters;
   }
 
+  @Config(name = "Reset elevator positon")
   public void resetPositionMeters(double position) {
     m_talon.setSelectedSensorPosition(position / kSlideDistancePerPulseMeters);
   }
@@ -170,66 +170,64 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     return m_hookedOnMidBar;
   }
 
-  public void setVoltage(double voltage) {
-    m_talon.set(ControlMode.PercentOutput, voltage / Constants.kNominalVoltage);
-  }
-
-  public void zeroOverride() {
-    m_zeroOverride = true;
-  }
-
   @Config(name = "set loaded")
   public void setMode(boolean loaded) {
     this.m_loaded = loaded;
   }
 
+  @Config(name = "Set voltage")
+  public void setVoltage(double voltage) {
+    m_voltageOverride = true;
+    m_voltageSetpoint = voltage;
+  }
+
   public void runControlLoop() {
-    double feedbackOutputVoltage = 0;
-
-    if (m_loaded) {
-      feedbackOutputVoltage =
-          m_pidControllerLoaded.calculate(this.getPositionMeters(), m_positionSetpointMeters);
+    if (m_voltageOverride) {
+      m_talon.set(ControlMode.PercentOutput, m_voltageSetpoint / Constants.kNominalVoltage);
     } else {
-      feedbackOutputVoltage =
-          m_pidControllerUnloaded.calculate(this.getPositionMeters(), m_positionSetpointMeters);
-    }
+      double feedbackOutputVoltage = 0;
 
-    double feedforwardOutputVoltage = 0;
-    if (m_loaded) {
-      feedforwardOutputVoltage =
-          m_feedforwardLoaded.calculate(
-              m_lastVelocitySetpoint,
-              m_pidControllerLoaded.getSetpoint().velocity,
-              kElevatorControlLoopTimeSeconds);
-    } else {
-      feedforwardOutputVoltage =
-          m_feedforwardUnloaded.calculate(
-              m_lastVelocitySetpoint,
-              m_pidControllerUnloaded.getSetpoint().velocity,
-              kElevatorControlLoopTimeSeconds);
-    }
+      if (m_loaded) {
+        feedbackOutputVoltage =
+            m_pidControllerLoaded.calculate(this.getPositionMeters(), m_positionSetpointMeters);
+      } else {
+        feedbackOutputVoltage =
+            m_pidControllerUnloaded.calculate(this.getPositionMeters(), m_positionSetpointMeters);
+      }
 
-    double outputPercentage =
-        (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
+      double feedforwardOutputVoltage = 0;
+      if (m_loaded) {
+        feedforwardOutputVoltage =
+            m_feedforwardLoaded.calculate(
+                m_lastVelocitySetpoint,
+                m_pidControllerLoaded.getSetpoint().velocity,
+                kElevatorControlLoopTimeSeconds);
+      } else {
+        feedforwardOutputVoltage =
+            m_feedforwardUnloaded.calculate(
+                m_lastVelocitySetpoint,
+                m_pidControllerUnloaded.getSetpoint().velocity,
+                kElevatorControlLoopTimeSeconds);
+      }
 
-    if (!m_limitOverride) {
-      outputPercentage = this.limitOnSlotSensors(outputPercentage);
-    }
+      double outputPercentage =
+          (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
 
-    m_feedbackOutput = feedbackOutputVoltage;
-    m_feedforwardOutput = feedforwardOutputVoltage;
-    // m_talon.set(ControlMode.PercentOutput, limitOnSlotSensors(outputPercentage));
+      if (!m_limitOverride) {
+        outputPercentage = this.limitOnSlotSensors(outputPercentage);
+      }
 
-    if (m_zeroOverride) {
-      m_talon.set(ControlMode.PercentOutput, 0);
-    } else {
+      m_feedbackOutput = feedbackOutputVoltage;
+      m_feedforwardOutput = feedforwardOutputVoltage;
+      // m_talon.set(ControlMode.PercentOutput, limitOnSlotSensors(outputPercentage));
+
       m_talon.set(ControlMode.PercentOutput, outputPercentage);
-    }
 
-    if (m_loaded) {
-      m_lastVelocitySetpoint = m_pidControllerLoaded.getSetpoint().velocity;
-    } else {
-      m_lastVelocitySetpoint = m_pidControllerUnloaded.getSetpoint().velocity;
+      if (m_loaded) {
+        m_lastVelocitySetpoint = m_pidControllerLoaded.getSetpoint().velocity;
+      } else {
+        m_lastVelocitySetpoint = m_pidControllerUnloaded.getSetpoint().velocity;
+      }
     }
   }
 

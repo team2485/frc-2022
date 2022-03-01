@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.Flywheel;
 import frc.robot.subsystems.climb.ClimbArm;
 import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.climb.ClimbStateMachine;
@@ -31,7 +30,7 @@ import io.github.oblarg.oblog.annotations.*;
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
-  Flywheel m_flywheel = new Flywheel();
+  //   Flywheel m_flywheel = new Flywheel();
 
   private final Drivetrain m_drivetrain = new Drivetrain();
   private final Vision m_vision = new Vision();
@@ -105,13 +104,17 @@ public class RobotContainer {
     m_driver
         .start()
         .and(m_driver.back())
-        .whileActiveOnce(new InstantCommand(m_climbStateMachine::enableClimb));
+        .whileActiveOnce(
+            new InstantCommand(m_climbStateMachine::enableClimb)
+                .alongWith(ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator)));
 
     // turn off climb mode
     m_driver
         .leftPOV()
         .and(m_driver.back())
-        .whileActiveOnce(new InstantCommand(m_climbStateMachine::disableClimb));
+        .whileActiveOnce(
+            new InstantCommand(m_climbStateMachine::disableClimb)
+                .alongWith(ClimbCommandBuilder.getEngageRatchetCommand(m_climbElevator)));
 
     // disengage ratchet
     // m_driver.x().whenPressed(ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator));

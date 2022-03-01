@@ -6,7 +6,6 @@ import static frc.robot.Constants.ClimbElevatorConstants.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -64,9 +63,11 @@ public class ClimbCommandBuilder {
 
   // Swing arm up, and then reset absolute rotation.
   public static Command getArmOnNextBarCommand(ClimbElevator elevator, ClimbArm arm) {
-    return new RunCommand(() -> arm.setVoltage(-7))
-        .withTimeout(2)
-        .andThen(new InstantCommand(() -> arm.setVoltage(0)));
+    return new RunCommand(() -> arm.setVoltage(-8))
+        .withTimeout(1)
+        .andThen(
+            new InstantCommand(() -> arm.setVoltage(0)),
+            getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator));
   }
 
   // Reset arm rotation. Pull arm back to settle on bar, unload hook, roll up rack partway, lower
@@ -88,24 +89,22 @@ public class ClimbCommandBuilder {
                         .andThen(
                             getMoveElevatorCommand(
                                 kElevatorSlotSensorBottomPosition, elevator))), // lower hook
-            new PrintCommand("arm to the end"),
             getMoveElevatorCommand(Units.inchesToMeters(5.5), elevator), // raise hook
-            new PrintCommand("elevator up"),
-            getTranslateArmCommand(0.6, arm), // roll back
+            getTranslateArmCommand(0.605, arm), // roll back
             getMoveElevatorCommand(Units.inchesToMeters(4), elevator)); // lower hook onto bar
   }
 
   public static Command getResetClimberCommand(ClimbElevator elevator, ClimbArm arm) {
     return new InstantCommand(() -> elevator.setMode(true), elevator)
         .andThen(
-            getMoveElevatorCommand(Units.inchesToMeters(3), elevator),
+            getMoveElevatorCommand(Units.inchesToMeters(3.2), elevator),
             new InstantCommand(() -> arm.setMode(false), arm),
-            getTranslateArmCommand(Units.inchesToMeters(8.125), arm), // push arm forward
+            getTranslateArmCommand(0.25, arm), // push arm forward
             getMoveElevatorCommand(
                 Units.inchesToMeters(12), elevator), // extend elevator to release arm
             new InstantCommand(() -> arm.setVoltage(0)), // let arm fall to rest
-            new WaitCommand(3), // wait for a few seconds
-            new RunCommand(() -> arm.setVoltage(-0.2 * Constants.kNominalVoltage))
+            new WaitCommand(1), // wait for a few seconds
+            new RunCommand(() -> arm.setVoltage(-0.4 * Constants.kNominalVoltage))
                 .until(() -> arm.getStatorCurrentSpike(10)),
             new InstantCommand(() -> arm.setVoltage(0)),
             getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator)); // climb vertically
@@ -113,16 +112,19 @@ public class ClimbCommandBuilder {
 
   // Push rack forward a bit to ensure not contacting low bar
   public static Command getPushArmForwardAtEndCommand(ClimbArm arm, ClimbElevator elevator) {
-    return getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator)
+    return getMoveElevatorCommand(
+            Units.inchesToMeters(3.5), elevator) // climb up to remove arm contact
         .andThen(
-            new RunCommand(() -> arm.setVoltage(-0.2 * Constants.kNominalVoltage)).withTimeout(1.5),
+            new RunCommand(() -> arm.setVoltage(-0.4 * Constants.kNominalVoltage)).withTimeout(1),
             new InstantCommand(() -> arm.setVoltage(0))); // push arm forward some arbitrary amount
   }
 
+  public static Command getEngageRatchetCommand(ClimbElevator elevator) {
+    return new InstantCommand(() -> elevator.setRatchet(true), elevator);
+  }
   // Engage the ratchet to stop climb sliding down, and then cut power to the elevator
   public static Command getEngageRatchetAndLowerCommand(ClimbElevator elevator) {
-    return new InstantCommand(() -> elevator.setRatchet(true), elevator)
-        .andThen(new InstantCommand(elevator::zeroOverride, elevator));
+    return getEngageRatchetCommand(elevator).andThen(new InstantCommand(() -> {}, elevator));
   }
 
   private static Command getMoveElevatorCommand(double positionMeters, ClimbElevator elevator) {
