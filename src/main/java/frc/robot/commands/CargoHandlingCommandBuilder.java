@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import static frc.robot.Constants.FeederConstants.*;
 import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.Constants.HoodConstants.*;
 import static frc.robot.Constants.IndexerConstants.*;
@@ -13,13 +14,13 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
+import frc.robot.subsystems.cargoHandling.Feeder;
 import frc.robot.subsystems.cargoHandling.Hood;
+import frc.robot.subsystems.cargoHandling.Indexer;
 import frc.robot.subsystems.cargoHandling.Intake;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
 import frc.robot.subsystems.cargoHandling.Shooter;
 import frc.robot.subsystems.cargoHandling.Turret;
-import frc.robot.subsystems.cargoHandling.indexing.HighIndexer;
-import frc.robot.subsystems.cargoHandling.indexing.LowIndexer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -27,14 +28,12 @@ public class CargoHandlingCommandBuilder {
 
   public CargoHandlingCommandBuilder() {}
 
-  public static Command getIntakeCommand(
-      Intake intake, IntakeArm intakeArm, LowIndexer lowIndexer) {
+  public static Command getIntakeCommand(Intake intake, IntakeArm intakeArm, Indexer indexer) {
     return getIntakeArmDownCommand(intakeArm)
         .andThen(new RunCommand(() -> intake.setPercentOutput(kIntakePercentOutputIn), intake))
         .alongWith(
-            new RunCommand(
-                    () -> lowIndexer.setPercentOutput(kLowIndexerPercentOutputIn), lowIndexer)
-                .withInterrupt(lowIndexer::hasStopped));
+            new RunCommand(() -> indexer.setPercentOutput(kIndexerPercentOutputIn), indexer)
+                .withInterrupt(indexer::hasStopped));
   }
 
   public static Command getIntakeArmUpCommand(IntakeArm intakeArm) {
@@ -77,39 +76,38 @@ public class CargoHandlingCommandBuilder {
         shooter);
   }
 
-  public static Command getIndexToShooterCommand(
-      LowIndexer lowIndexer, HighIndexer highIndexer, Shooter shooter) {
+  public static Command getIndexToShooterCommand(Indexer indexer, Feeder feeder, Shooter shooter) {
     return new ConditionalCommand(
         new InstantCommand(
             () -> {
-              lowIndexer.setPercentOutput(kLowIndexerPercentOutputFeedToShooter);
-              highIndexer.setPercentOutput(kHighIndexerPercentOutputFeedToShooter);
+              indexer.setPercentOutput(kIndexerPercentOutputFeedToShooter);
+              feeder.setPercentOutput(kFeederPercentOutputFeedToShooter);
             },
-            lowIndexer,
-            highIndexer),
+            indexer,
+            feeder),
         new InstantCommand(
             () -> {
-              lowIndexer.setPercentOutput(0);
-              highIndexer.setPercentOutput(0);
+              indexer.setPercentOutput(0);
+              feeder.setPercentOutput(0);
             },
-            lowIndexer,
-            highIndexer),
+            indexer,
+            feeder),
         shooter::atSetpoint);
   }
 
   public static Command getIndexToShooterOnceCommand(
-      LowIndexer lowIndexer, HighIndexer highIndexer, Shooter shooter) {
+      Indexer indexer, Feeder feeder, Shooter shooter) {
 
-    return getIndexToShooterCommand(lowIndexer, highIndexer, shooter)
+    return getIndexToShooterCommand(indexer, feeder, shooter)
         .withInterrupt(shooter::hasDipped)
         .andThen(
             new InstantCommand(
                 () -> {
-                  lowIndexer.setPercentOutput(0);
-                  highIndexer.setPercentOutput(0);
+                  indexer.setPercentOutput(0);
+                  feeder.setPercentOutput(0);
                 },
-                lowIndexer,
-                highIndexer));
+                indexer,
+                feeder));
   }
 
   public static Command getZeroHoodCommand(Hood hood) {
@@ -123,12 +121,12 @@ public class CargoHandlingCommandBuilder {
     return new InstantCommand(() -> shooter.setVelocityRotationsPerSecond(0), shooter);
   }
 
-  public static Command getLowIndexerOffCommand(LowIndexer lowIndexer) {
-    return new InstantCommand(() -> lowIndexer.setPercentOutput(0), lowIndexer);
+  public static Command getIndexerOffCommand(Indexer indexer) {
+    return new InstantCommand(() -> indexer.setPercentOutput(0), indexer);
   }
 
-  public static Command getHighIndexerOffCommand(HighIndexer highIndexer) {
-    return new InstantCommand(() -> highIndexer.setPercentOutput(0), highIndexer);
+  public static Command getFeederOffCommand(Feeder feeder) {
+    return new InstantCommand(() -> feeder.setPercentOutput(0), feeder);
   }
 
   public static Command getIntakeOffCommand(Intake intake) {

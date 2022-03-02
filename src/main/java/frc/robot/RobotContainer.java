@@ -20,7 +20,6 @@ import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoCommandBuilder;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.cargoHandling.*;
-import frc.robot.subsystems.cargoHandling.indexing.*;
 import frc.robot.subsystems.drive.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import io.github.oblarg.oblog.annotations.Log;
@@ -33,8 +32,8 @@ public class RobotContainer {
 
   private final IntakeArm m_intakeArm = new IntakeArm();
   private final Intake m_intake = new Intake();
-  private final LowIndexer m_lowIndexer = new LowIndexer();
-  private final HighIndexer m_highIndexer = new HighIndexer();
+  private final Indexer m_indexer = new Indexer();
+  private final Feeder m_feeder = new Feeder();
   public final Shooter m_shooter = new Shooter();
   private final Hood m_hood = new Hood();
   private final Turret m_turret = new Turret();
@@ -51,19 +50,19 @@ public class RobotContainer {
     m_autoChooser.setDefaultOption(
         "2 Ball Right Side",
         AutoCommandBuilder.get2BallAuto(
-            m_drivetrain, m_vision, m_intake, m_intakeArm, m_lowIndexer, m_highIndexer, m_shooter));
+            m_drivetrain, m_vision, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter));
     m_autoChooser.addOption(
         "3 Ball Right Side",
         AutoCommandBuilder.get3BallAuto(
-            m_drivetrain, m_vision, m_intake, m_intakeArm, m_lowIndexer, m_highIndexer, m_shooter));
+            m_drivetrain, m_vision, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter));
     m_autoChooser.addOption(
         "4 Ball Right Side",
         AutoCommandBuilder.get4BallAuto(
-            m_drivetrain, m_vision, m_intake, m_intakeArm, m_lowIndexer, m_highIndexer, m_shooter));
+            m_drivetrain, m_vision, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter));
     m_autoChooser.addOption(
         "5 Ball Right Side",
         AutoCommandBuilder.get5BallAuto(
-            m_drivetrain, m_vision, m_intake, m_intakeArm, m_lowIndexer, m_highIndexer, m_shooter));
+            m_drivetrain, m_vision, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter));
   }
 
   /**
@@ -113,10 +112,8 @@ public class RobotContainer {
     m_shooter.setDefaultCommand(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
     m_intake.setDefaultCommand(CargoHandlingCommandBuilder.getIntakeOffCommand(m_intake));
     m_intakeArm.setDefaultCommand(CargoHandlingCommandBuilder.getIntakeArmOffCommand(m_intakeArm));
-    m_lowIndexer.setDefaultCommand(
-        CargoHandlingCommandBuilder.getLowIndexerOffCommand(m_lowIndexer));
-    m_highIndexer.setDefaultCommand(
-        CargoHandlingCommandBuilder.getHighIndexerOffCommand(m_highIndexer));
+    m_indexer.setDefaultCommand(CargoHandlingCommandBuilder.getIndexerOffCommand(m_indexer));
+    m_feeder.setDefaultCommand(CargoHandlingCommandBuilder.getFeederOffCommand(m_feeder));
 
     // Default commands for turret and hood are to auto-aim based on robot pose/distance
     m_turret.setDefaultCommand(
@@ -133,8 +130,7 @@ public class RobotContainer {
     // stopped by hitting high indexer path)
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-        .whileHeld(
-            CargoHandlingCommandBuilder.getIntakeCommand(m_intake, m_intakeArm, m_lowIndexer))
+        .whileHeld(CargoHandlingCommandBuilder.getIntakeCommand(m_intake, m_intakeArm, m_indexer))
         .whenReleased(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
 
     // Set shooter on operator left trigger: based on distance to hub
@@ -150,8 +146,7 @@ public class RobotContainer {
     m_operator
         .rightBumper()
         .whileHeld(
-            CargoHandlingCommandBuilder.getIndexToShooterCommand(
-                m_lowIndexer, m_highIndexer, m_shooter));
+            CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder, m_shooter));
   }
 
   /**

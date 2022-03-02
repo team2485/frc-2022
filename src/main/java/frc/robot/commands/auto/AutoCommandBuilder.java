@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.CargoHandlingCommandBuilder;
 import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.cargoHandling.*;
-import frc.robot.subsystems.cargoHandling.indexing.*;
 import frc.robot.subsystems.drive.*;
 
 public class AutoCommandBuilder {
@@ -14,8 +13,8 @@ public class AutoCommandBuilder {
       Vision vision,
       Intake intake,
       IntakeArm intakeArm,
-      LowIndexer lowIndexer,
-      HighIndexer highIndexer,
+      Indexer lowIndexer,
+      Feeder highIndexer,
       Shooter shooter) {
 
     WL_SwerveControllerCommand backUpPath =
@@ -48,8 +47,8 @@ public class AutoCommandBuilder {
       Vision vision,
       Intake intake,
       IntakeArm intakeArm,
-      LowIndexer lowIndexer,
-      HighIndexer highIndexer,
+      Indexer lowIndexer,
+      Feeder highIndexer,
       Shooter shooter) {
 
     WL_SwerveControllerCommand thirdBallPath =
@@ -72,8 +71,8 @@ public class AutoCommandBuilder {
       Vision vision,
       Intake intake,
       IntakeArm intakeArm,
-      LowIndexer lowIndexer,
-      HighIndexer highIndexer,
+      Indexer lowIndexer,
+      Feeder highIndexer,
       Shooter shooter) {
 
     WL_SwerveControllerCommand thirdAndFourthBallPath =
@@ -99,8 +98,8 @@ public class AutoCommandBuilder {
       Vision vision,
       Intake intake,
       IntakeArm intakeArm,
-      LowIndexer lowIndexer,
-      HighIndexer highIndexer,
+      Indexer lowIndexer,
+      Feeder highIndexer,
       Shooter shooter) {
 
     WL_SwerveControllerCommand thirdAndFourthBallPath =

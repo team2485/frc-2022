@@ -1,4 +1,4 @@
-package frc.robot.subsystems.cargoHandling.indexing;
+package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.IndexerConstants.*;
 
@@ -7,11 +7,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
 
-public class HighIndexer extends SubsystemBase implements Loggable {
-  private WL_SparkMax m_spark = new WL_SparkMax(kHighIndexerSparkPort);
+public class Indexer extends SubsystemBase implements Loggable {
+  private WL_SparkMax m_spark = new WL_SparkMax(kIndexerSparkPort);
 
-  public HighIndexer() {
+  private double m_lastVelocity;
+
+  public Indexer() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kIndexerSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIndexerImmediateCurrentLimitAmps);
@@ -20,5 +23,18 @@ public class HighIndexer extends SubsystemBase implements Loggable {
 
   public void setPercentOutput(double percentOutput) {
     m_spark.set(percentOutput);
+  }
+
+  @Log(name = "Low velocity (rotations per second)")
+  public double getVelocity() {
+    return m_spark.getEncoder().getVelocity() / 60;
+  }
+
+  public boolean hasStopped() {
+    return this.getVelocity() == 0 && m_lastVelocity > 0;
+  }
+
+  public void periodic() {
+    m_lastVelocity = this.getVelocity();
   }
 }

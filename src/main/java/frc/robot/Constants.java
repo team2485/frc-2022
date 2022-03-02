@@ -350,16 +350,20 @@ public final class Constants {
   }
 
   public static final class IndexerConstants {
-    public static final int kLowIndexerSparkPort = 22;
-    public static final int kHighIndexerSparkPort = 23;
+    public static final int kIndexerSparkPort = 22;
 
     public static final int kIndexerSmartCurrentLimitAmps = 5;
     public static final int kIndexerImmediateCurrentLimitAmps = 7;
 
-    public static final double kLowIndexerPercentOutputIn = 0.5;
+    public static final double kIndexerPercentOutputIn = 0.5;
+    public static final double kIndexerPercentOutputFeedToShooter = 0.5;
+  }
 
-    public static final double kHighIndexerPercentOutputFeedToShooter = 0.7;
-    public static final double kLowIndexerPercentOutputFeedToShooter = 0.5;
+  public static final class FeederConstants {
+    public static final int kFeederSparkPort = 23;
+    public static final double kFeederPercentOutputFeedToShooter = 0.7;
+    public static final int kFeederSmartCurrentLimitAmps = 15;
+    public static final int kFeederImmediateCurrentLimitAmps = 20;
   }
 
   public static final class IntakeConstants {
