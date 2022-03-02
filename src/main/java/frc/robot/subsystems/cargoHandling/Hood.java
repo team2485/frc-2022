@@ -60,7 +60,10 @@ public class Hood extends SubsystemBase implements Loggable {
     return m_spark.getEncoder().getPosition() * kHoodRadiansPerMotorRev;
   }
 
-  @Config(name = "Set angle (radians)", defaultValueNumeric = kHoodBottomPositionRadians)
+  @Config.NumberSlider(
+      name = "Set angle (radians)",
+      min = kHoodBottomPositionRadians,
+      max = kHoodTopPositionRadians)
   public void setAngleRadians(double angle) {
     m_angleSetpointRadians =
         MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);

@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static java.util.Map.entry;
-
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,11 +15,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
-import frc.robot.commands.interpolation.ShotParameter;
 import frc.team2485.WarlordsLib.IDManager;
 import frc.team2485.WarlordsLib.sendableRichness.SR_TrapezoidProfile;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -41,14 +36,6 @@ public final class Constants {
   public static final int kFalconCPR = 2048; // pulses per rotation
   public static final int kCANTimeoutMs = 250;
   public static final double kTimestepSeconds = 0.02;
-
-  // meters and shot parameters (radians and rps)
-  public static final TreeMap<Double, ShotParameter> kShootingMap =
-      new TreeMap<>(
-          Map.ofEntries(
-              entry(5.0, new ShotParameter(0.45, 60, 3)),
-              entry(6.0, new ShotParameter(0.4, 65, 4)),
-              entry(7.0, new ShotParameter(0.35, 70, 5))));
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -324,7 +311,9 @@ public final class Constants {
   public static final class ShooterConstants {
     public static final int kShooterTalonPort = 30;
 
-    public static final double kShooterTalonCurrentLimit = 50;
+    public static final double kShooterStatorCurrentLimitAmps = 50;
+    public static final double kShooterStatorCurrentThresholdAmps = 55;
+    public static final double kShooterStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final int kRevEncoderPulsesPerRevolution = 2048;
     public static final int kRevEncoderSamplesToAverage = 5;
@@ -337,7 +326,7 @@ public final class Constants {
     public static final double kVShooterVoltSecondsPerMeter = 0.11065;
     public static final double kAShooterVoltSecondsSquaredPerMeter = 0.023167;
 
-    public static final double kShooterFeedforwardScale = 0.95;
+    public static final double kShooterFeedforwardScale = 0.9;
 
     // currently unused
     public static final double kP = 1;
@@ -353,8 +342,8 @@ public final class Constants {
     public static final int kLowIndexerSparkPort = 22;
     public static final int kHighIndexerSparkPort = 23;
 
-    public static final int kIndexerSmartCurrentLimitAmps = 5;
-    public static final int kIndexerImmediateCurrentLimitAmps = 7;
+    public static final int kIndexerSmartCurrentLimitAmps = 20;
+    public static final int kIndexerImmediateCurrentLimitAmps = 25;
 
     public static final double kLowIndexerPercentOutputIn = 0.5;
 
