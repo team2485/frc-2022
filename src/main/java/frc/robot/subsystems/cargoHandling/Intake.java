@@ -10,6 +10,12 @@ import io.github.oblarg.oblog.Loggable;
 public class Intake extends SubsystemBase implements Loggable {
   private final WL_SparkMax m_spark = new WL_SparkMax(kIntakeSparkPort);
 
+  @Config(name = "Intake Feedforward")
+  private final SR_SimpleMotorFeedforward m_intakeFeedforward =
+    new SR_SimpleMotorFeedforward m_intakeFeedforward =
+      new SR_SimpleMotorFeedforward (
+        kSIntakeVolt, kVIntakeVoltsSecondsPerRadian, kAIntakeVoltsSecondsSquaredPerRadian);
+
   public Intake() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kIntakeSmartCurrentLimitAmps);

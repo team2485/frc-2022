@@ -376,6 +376,17 @@ public final class Constants {
     public static final Color kRedBallColor = new Color(0.35, 0.40, 0.25);
 
     public static final double kColorConfidenceLevel = 0.97;
+
+    //intake characterization constants
+        new ArmFeedforward(
+            kSIntakeArmVolts,
+            kGIntakeArmVolts,
+            kVIntakeArmVoltsSecondsPerRadian,
+            kAIntakeArmVoltsSecondsSquaredPerRadian)
+        .maxAchievableAcceleration(
+            kNominalVoltage, kIntakePercentOutputOut, kIntakeArmPercentOutputIn);
+        )
+        )
   }
 
   public static final class IntakeArmConstants {
@@ -384,6 +395,34 @@ public final class Constants {
     public static final int kIntakeArmImmediateCurrentLimitAmps = 10;
     public static final double kIntakeArmPercentOutputUp = 0.5;
     public static final double kIntakeArmPercentOutputDown = -0.5;
+
+    //Intake Arm characterization constants
+    public static final double kSIntakeArmVolts = 0;
+    public static final double kGIntakeArmVolts = 0;
+    public static final double kVIntakeArmVoltsSecondsPerRadian = 0;
+    public static final double kAIntakeArmVoltsSecondsSquaredPerRadian = 0;
+
+    public static final double kIntakeArmMaxSpeedRadiansPerSecond = 5/4; 
+    public static final double kIntakeArmMaxAccelerationRadiansPerSecondSquared = 
+        new ArmFeedforward(
+            kSIntakeArmVolts,
+            kGIntakeArmVolts,
+            kVIntakeArmVoltsSecondsPerRadian,
+            kAIntakeArmVoltsSecondsSquaredPerRadian)
+        .maxAchievableAcceleration(
+            kNominalVoltage, kIntakeArmPercentOutputDown, kIntakeArmPercentOutputUp);
+        )
+        )
+
+    public static final SR_TrapezoidProfile.Constraints kIntakeArmMotionProfile Constraints =
+        new SR_TrapezoidProfile(
+            kIntakeArmMaxSpeedRadiansPerSecond, kIntakeArmMaxAccelerationRadiansPerSecondSquared);
+        )
+
+    // Intake Arm PID constants
+    public static final double kPIntakeArm = 0;
+    public static final double kDIntakeArm = 0;
+    public static final double kIntakeArmControllerPositionTolerance = 0;
   }
 
   public static final class HoodConstants {

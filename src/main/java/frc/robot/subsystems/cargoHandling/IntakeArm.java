@@ -7,9 +7,11 @@ package frc.robot.subsystems.cargoHandling;
 import static frc.robot.Constants.IntakeArmConstants.*;
 
 import com.revrobotics.SparkMaxLimitSwitch;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ProfiledPIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -18,6 +20,16 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   private WL_SparkMax m_spark;
   private SparkMaxLimitSwitch m_topSwitch;
   private SparkMaxLimitSwitch m_bottomSwitch;
+
+  private final SR_ProfiledPIDController m_controller = 
+    new SR_ProfiledPIDController(kPIntakeArm, 0, kDIntakeArm, kIntakeArmMotionProfileConstraints);
+
+  private final SR_ArmFeedforward m_feedforward =
+    new SR_ArmFeedforward(
+      kSHoodVolts, 
+      kGHoodVolt,
+      kVHoodVoltSecondsPerRadian,
+      kAHoodVoltSecondsSquaredPerRadian);
 
   /** Creates a new intakeArm. */
   public IntakeArm() {
@@ -59,4 +71,5 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   public boolean getBottomLimitSwitch() {
     return m_bottomSwitch.isPressed();
   }
+
 }
