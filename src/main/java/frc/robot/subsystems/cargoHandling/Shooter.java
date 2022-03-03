@@ -11,55 +11,67 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.controller.BangBangController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.team2485.WarlordsLib.CurrentLogger;
-import frc.team2485.WarlordsLib.math.ChangeSensor;
-import frc.team2485.WarlordsLib.motorcontrol.WL_TalonFX;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Shooter extends SubsystemBase implements Loggable {
-  private final WL_TalonFX m_talon = new WL_TalonFX(kShooterTalonPort);
+  private final WPI_TalonFX m_talon = new WPI_TalonFX(kShooterTalonPort);
 
-  @Config(name = "Flywheel feedforward")
-  private final SR_SimpleMotorFeedforward m_shooterFeedforward =
+  private final SR_SimpleMotorFeedforward m_feedforward =
       new SR_SimpleMotorFeedforward(
           kSShooterVolts, kVShooterVoltSecondsPerMeter, kAShooterVoltSecondsSquaredPerMeter);
 
   private final BangBangController m_bangBangController =
       new BangBangController(kVelocityTolerance);
 
-  private double m_desiredVelocityRPS;
+  @Log(name = "Velocity Setpoint")
+  private double m_velocitySetpoint;
 
-  private final ChangeSensor m_changeSensor =
-      new ChangeSensor(
-          this::getTalonVelocity,
-          kShooterVelocityDipThresholdRotationsPerSecond,
-          kShooterVelocityDipRollingAverageWindow,
-          ChangeSensor.Mode.kDipOnly);
+  private double m_lastVelocitySetpoint;
+
+  @Log(name = "Feedback output")
+  private double m_feedbackOutput;
+
+  @Log(name = "Feedforward output")
+  private double m_feedforwardOutput;
+
+  private double m_lastVelocity;
+
+  DoubleLogEntry statorCurrentLog;
+  DoubleLogEntry supplyCurrentLog;
 
   /** Creates a new Shooter. Controlled with a feedforward and a bang bang controlller. */
   public Shooter() {
-    CurrentLogger.getInstance().register(m_talon, "Shooter");
-    TalonFXConfiguration shooterTalonConfig = new TalonFXConfiguration();
-    shooterTalonConfig.supplyCurrLimit.currentLimit = kShooterTalonCurrentLimit;
-    shooterTalonConfig.supplyCurrLimit.enable = true;
-    shooterTalonConfig.voltageCompSaturation = Constants.kNominalVoltage;
-    m_talon.configAllSettings(shooterTalonConfig);
+    TalonFXConfiguration talonConfig = new TalonFXConfiguration();
+    talonConfig.supplyCurrLimit.currentLimit = kShooterTalonCurrentLimit;
+    talonConfig.supplyCurrLimit.enable = true;
+    talonConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    m_talon.configAllSettings(talonConfig);
 
     m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
     m_talon.setNeutralMode(NeutralMode.Coast);
     m_talon.enableVoltageCompensation(true);
+
+    statorCurrentLog =
+        new DoubleLogEntry(DataLogManager.getLog(), "/current/shooter/statorCurrent");
+    supplyCurrentLog =
+        new DoubleLogEntry(DataLogManager.getLog(), "/current/shooter/supplyCurrent");
+
+    Shuffleboard.getTab("Shooter").add("Feedforward", m_feedforward);
   }
 
   /** @return the current talon-reported velocity in rotations per second. */
-  @Log(name = "Current Talon-reported Velocity (RPS)")
-  public double getTalonVelocity() {
+  @Log(name = "Current velocity (RPS)")
+  public double getVelocity() {
     return m_talon.getSelectedSensorVelocity() * kShooterRotationsPerPulse * 10;
   }
 
@@ -70,7 +82,7 @@ public class Shooter extends SubsystemBase implements Loggable {
    */
   @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
-    m_desiredVelocityRPS = rotationsPerSecond;
+    m_velocitySetpoint = rotationsPerSecond;
   }
 
   /**
@@ -87,25 +99,32 @@ public class Shooter extends SubsystemBase implements Loggable {
   }
 
   public boolean hasDipped() {
-    return m_changeSensor.get();
+    return m_lastVelocity - this.getVelocity() > kShooterVelocityDipThresholdRotationsPerSecond;
   }
 
   // runs every 10 ms (run by Robot)
-  public void runShooterControlLoop() {
+  public void runControlLoop() {
     // Calculates voltage to apply.
     // Feedforward is scaled down to prevent overshoot since bang-bang can't correct for overshoot.
-    double voltage =
-        kShooterFeedforwardScale * m_shooterFeedforward.calculate(m_desiredVelocityRPS)
-            + m_bangBangController.calculate(getTalonVelocity(), m_desiredVelocityRPS)
-                * kNominalVoltage;
-    m_talon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
+    double feedforwardOutput =
+        kShooterFeedforwardScale
+            * m_feedforward.calculate(
+                m_lastVelocitySetpoint, m_velocitySetpoint, kShooterLoopTimeSeconds);
+    double feedbackOutput =
+        m_bangBangController.calculate(getVelocity(), m_velocitySetpoint) * kNominalVoltage;
 
-    SmartDashboard.putNumber("ff applied voltage", voltage);
-    SmartDashboard.putNumber("talon applied voltage", m_talon.getBusVoltage());
+    double outputVoltage = feedforwardOutput + feedbackOutput;
+    m_talon.set(ControlMode.PercentOutput, outputVoltage / kNominalVoltage);
+
+    m_feedbackOutput = feedbackOutput;
+    m_feedforwardOutput = feedforwardOutput;
+
+    m_lastVelocity = this.getVelocity();
+
+    statorCurrentLog.append(m_talon.getStatorCurrent());
+    supplyCurrentLog.append(m_talon.getSupplyCurrent());
   }
 
   @Override
-  public void periodic() {
-    m_changeSensor.update();
-  }
+  public void periodic() {}
 }

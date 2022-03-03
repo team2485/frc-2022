@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -24,9 +25,11 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   public Robot() {
-    CurrentLogger.getInstance().registerLogFolder(Constants.kCurrentLogFolder);
+    DataLogManager.start();
     m_robotContainer = new RobotContainer();
-    addPeriodic(() -> m_robotContainer.m_shooter.runShooterControlLoop(), 0.01);
+    addPeriodic(
+        () -> m_robotContainer.m_shooter.runControlLoop(),
+        Constants.ShooterConstants.kShooterLoopTimeSeconds);
   }
 
   /**

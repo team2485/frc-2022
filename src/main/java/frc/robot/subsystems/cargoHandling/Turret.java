@@ -23,7 +23,9 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.sendableRichness.SR_TrapezoidProfile;
@@ -89,6 +91,9 @@ public class Turret extends SubsystemBase {
   private double m_lastAngleRadians = 0;
   private double m_velocityRadiansPerSecond = 0;
 
+  DoubleLogEntry statorCurrentLog;
+  DoubleLogEntry supplyCurrentLog;
+
   public Turret() {
 
     TalonSRXConfiguration talonConfig = new TalonSRXConfiguration();
@@ -112,6 +117,9 @@ public class Turret extends SubsystemBase {
     // Reset our last reference to the current state.
     m_lastProfiledReference =
         new SR_TrapezoidProfile.State(this.getAngleRadians(), this.getVelocityRadiansPerSecond());
+
+    statorCurrentLog = new DoubleLogEntry(DataLogManager.getLog(), "/current/turret/statorCurrent");
+    supplyCurrentLog = new DoubleLogEntry(DataLogManager.getLog(), "/current/turret/supplyCurrent");
   }
 
   @Config(name = "Set angle (radians)")
@@ -147,10 +155,7 @@ public class Turret extends SubsystemBase {
     double currentAngleRadians = this.getAngleRadians();
     m_velocityRadiansPerSecond =
         (currentAngleRadians - m_lastAngleRadians) / kTurretLoopTimeSeconds;
-    m_lastAngleRadians = currentAngleRadians;
-  }
 
-  public void periodic() {
     // Step our TrapezoidalProfile forward 20ms and set it as our next reference
     m_lastProfiledReference =
         (new SR_TrapezoidProfile(
@@ -178,5 +183,12 @@ public class Turret extends SubsystemBase {
                     nextVoltage); // add in kS -- this isn't used in the loop because it's nonlinear
 
     m_talon.set(ControlMode.PercentOutput, outputVoltage / Constants.kNominalVoltage);
+
+    m_lastAngleRadians = currentAngleRadians;
+
+    statorCurrentLog.append(m_talon.getStatorCurrent());
+    supplyCurrentLog.append(m_talon.getSupplyCurrent());
   }
+
+  public void periodic() {}
 }

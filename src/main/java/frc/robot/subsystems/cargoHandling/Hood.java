@@ -5,6 +5,8 @@ import static frc.robot.Constants.HoodConstants.*;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -35,6 +37,9 @@ public class Hood extends SubsystemBase implements Loggable {
   @Log(name = "zeroed")
   private boolean m_isZeroed = false;
 
+  DoubleLogEntry statorCurrentLog;
+  DoubleLogEntry supplyCurrentLog;
+
   public Hood() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kHoodSmartCurrentLimitAmps);
@@ -49,6 +54,9 @@ public class Hood extends SubsystemBase implements Loggable {
     m_pidController.setTolerance(kHoodControllerPositionTolerance);
 
     this.resetAngleRadians(kHoodBottomPositionRadians);
+
+    statorCurrentLog = new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/statorCurrent");
+    supplyCurrentLog = new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/supplyCurrent");
 
     Shuffleboard.getTab("Hood").add("Hood controller", m_pidController);
     Shuffleboard.getTab("Hood").add("Hood feedforward", m_feedforward);
@@ -91,8 +99,7 @@ public class Hood extends SubsystemBase implements Loggable {
     m_spark.set(percentOutput);
   }
 
-  @Override
-  public void periodic() {
+  public void runControlLoop() {
     double feedbackOutputVoltage =
         m_pidController.calculate(
             this.getAngleRadians()); // feedback controller already has goal from setAngleRadians
@@ -103,7 +110,7 @@ public class Hood extends SubsystemBase implements Loggable {
             m_angleSetpointRadians,
             m_lastVelocitySetpoint,
             m_pidController.getSetpoint().velocity,
-            Constants.kTimestepSeconds);
+            kHoodLoopTimeSeconds);
 
     m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
 
@@ -112,5 +119,13 @@ public class Hood extends SubsystemBase implements Loggable {
     if (this.getBottomLimitSwitch()) {
       zeroAngle();
     }
+
+    statorCurrentLog.append(m_spark.getOutputCurrent());
+    supplyCurrentLog.append(m_spark.getSupplyCurrent());
+  }
+
+  @Override
+  public void periodic() {
+    this.runControlLoop();
   }
 }

@@ -14,6 +14,10 @@ public class Indexer extends SubsystemBase implements Loggable {
 
   private double m_lastVelocity;
 
+  private double m_velocitySetpoint;
+
+  private double m_lastVelocitySetpoint;
+
   public Indexer() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kIndexerSmartCurrentLimitAmps);
@@ -25,7 +29,7 @@ public class Indexer extends SubsystemBase implements Loggable {
     m_spark.set(percentOutput);
   }
 
-  @Log(name = "Low velocity (rotations per second)")
+  @Log(name = "Indexer velocity (rotations per second)")
   public double getVelocity() {
     return m_spark.getEncoder().getVelocity() / 60;
   }

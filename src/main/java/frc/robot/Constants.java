@@ -277,7 +277,7 @@ public final class Constants {
   }
 
   public static final class TurretConstants {
-    public static final double kTurretLoopTimeSeconds = 0.020;
+    public static final double kTurretLoopTimeSeconds = 0.02;
     public static final int kTurretTalonPort = 32;
     public static final int kTurretSupplyCurrentLimitAmps = 5;
     public static final int kTurretSupplyCurrentThresholdAmps = 10;
@@ -324,6 +324,7 @@ public final class Constants {
   public static final class ShooterConstants {
     public static final int kShooterTalonPort = 30;
 
+    public static final double kShooterLoopTimeSeconds = 0.01;
     public static final double kShooterTalonCurrentLimit = 50;
 
     public static final int kRevEncoderPulsesPerRevolution = 2048;
@@ -346,7 +347,6 @@ public final class Constants {
     public static final double kVelocityTolerance = 0.5;
 
     public static final double kShooterVelocityDipThresholdRotationsPerSecond = 5;
-    public static final int kShooterVelocityDipRollingAverageWindow = 5;
   }
 
   public static final class IndexerConstants {
@@ -392,6 +392,9 @@ public final class Constants {
 
   public static final class HoodConstants {
     public static final int kHoodSparkPort = 31;
+
+    public static final double kHoodLoopTimeSeconds = 0.02;
+
     public static final double kHoodGearRatio = 225; // motor turns : output/full hood turns
     public static final double kHoodRadiansPerMotorRev = 2 * Math.PI / kHoodGearRatio;
 
