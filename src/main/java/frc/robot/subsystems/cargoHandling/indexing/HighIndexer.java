@@ -20,7 +20,7 @@ public class HighIndexer extends SubsystemBase implements Loggable {
     m_spark.setIdleMode(IdleMode.kBrake);
   }
 
-  @Config.NumberSlider(name = "Set percent output", tabName = "Indexing")
+  @Config.NumberSlider(name = "Set percent output high", tabName = "Indexing")
   public void setPercentOutput(double percentOutput) {
     m_spark.set(percentOutput);
   }

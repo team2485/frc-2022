@@ -22,7 +22,7 @@ public class LowIndexer extends SubsystemBase implements Loggable {
     m_spark.setIdleMode(IdleMode.kBrake);
   }
 
-  @Config.NumberSlider(name = "Set percent output", tabName = "Indexing")
+  @Config.NumberSlider(name = "Set percent output low", tabName = "Indexing")
   public void setPercentOutput(double percentOutput) {
     m_spark.set(percentOutput);
   }
@@ -30,6 +30,11 @@ public class LowIndexer extends SubsystemBase implements Loggable {
   @Log(name = "Low velocity (rotations per second)")
   public double getVelocity() {
     return m_spark.getEncoder().getVelocity() / 60;
+  }
+
+  @Log.Graph(name = "output current")
+  public double getOutputCurrent() {
+    return m_spark.getOutputCurrent();
   }
 
   public boolean hasStopped() {
