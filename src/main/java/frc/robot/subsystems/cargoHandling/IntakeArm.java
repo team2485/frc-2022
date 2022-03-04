@@ -21,10 +21,10 @@ import io.github.oblarg.oblog.annotations.Log;
 
 public class IntakeArm extends SubsystemBase implements Loggable {
 
-  private WL_SparkMax m_spark;
-  private SparkMaxLimitSwitch m_topLimit =
+  private final WL_SparkMax m_spark = new WL_SparkMax(kIntakeArmSparkPort);
+  private final SparkMaxLimitSwitch m_topLimitSwitch =
       m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
-  private SparkMaxLimitSwitch m_bottomSwitch =
+  private final SparkMaxLimitSwitch m_bottomSwitch =
       m_spark.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
 
   private final SR_ProfiledPIDController m_pidController =
@@ -56,12 +56,11 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   /** Creates a new intakeArm. */
   public IntakeArm() {
-    m_spark = new WL_SparkMax(kIntakeArmSparkPort);
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kIntakeArmSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIntakeArmImmediateCurrentLimitAmps);
 
-    m_topLimit.enableLimitSwitch(true);
+    m_topLimitSwitch.enableLimitSwitch(true);
     m_bottomSwitch.enableLimitSwitch(true);
   }
 
@@ -88,7 +87,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   @Log(name = "Top Limit Switch")
   public boolean getTopLimitSwitch() {
-    return m_topLimit.isPressed();
+    return m_topLimitSwitch.isPressed();
   }
 
   @Log(name = "Bottom Limit Switch")

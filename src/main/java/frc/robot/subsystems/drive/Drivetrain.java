@@ -94,7 +94,6 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     m_odometryWithoutVision =
         new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
-
     // m_odometry.resetPosition(
     //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
     //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
@@ -115,6 +114,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     m_turretAngle = turretAngle;
     SmartDashboard.putData("Field", m_field);
+    // this.zeroHeading();
   }
 
   /**

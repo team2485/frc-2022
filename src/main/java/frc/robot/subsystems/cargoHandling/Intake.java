@@ -5,6 +5,7 @@ import static frc.robot.Constants.IntakeConstants.*;
 import com.revrobotics.CANSparkMax.IdleMode;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
@@ -14,7 +15,14 @@ import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Intake extends SubsystemBase implements Loggable {
-  private WL_SparkMax m_spark = new WL_SparkMax(kIntakeSparkPort);
+  private final WL_SparkMax m_spark = new WL_SparkMax(kIntakeSparkPort);
+
+  @Log(name = "Photo sensor")
+  private final DigitalInput m_photoSensor = new DigitalInput(kPhotoSensorPort);
+
+  private boolean m_lastPhotoSensorOutput = false;
+
+  private int m_numCargo = 0;
 
   private final SR_SimpleMotorFeedforward m_feedforward =
       new SR_SimpleMotorFeedforward(
@@ -71,6 +79,18 @@ public class Intake extends SubsystemBase implements Loggable {
         < kIntakeVelocityToleranceRotationsPerSecond;
   }
 
+  public boolean getPhotoSensor() {
+    return m_photoSensor.get();
+  }
+
+  public void setNumCargo(int num) {
+    m_numCargo = num;
+  }
+
+  public int getNumCargo() {
+    return m_numCargo;
+  }
+
   public void runControlLoop() {
     // Calculates voltage to apply.
 
@@ -88,6 +108,11 @@ public class Intake extends SubsystemBase implements Loggable {
 
   public void periodic() {
     this.runControlLoop();
-    ;
+
+    if (m_lastPhotoSensorOutput == true || m_photoSensor.get()) {
+      this.setNumCargo(this.getNumCargo() + 1);
+    }
+
+    m_lastPhotoSensorOutput = m_photoSensor.get();
   }
 }

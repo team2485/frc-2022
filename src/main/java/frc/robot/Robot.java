@@ -30,6 +30,14 @@ public class Robot extends TimedRobot {
     addPeriodic(
         () -> m_robotContainer.m_shooter.runControlLoop(),
         Constants.ShooterConstants.kShooterLoopTimeSeconds);
+
+    addPeriodic(
+        () -> m_robotContainer.m_climbElevator.runControlLoop(),
+        Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
+
+    addPeriodic(
+        () -> m_robotContainer.m_climbArm.runControlLoop(),
+        Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
   }
 
   /**
@@ -40,6 +48,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate IDManager -- will read ID File
     IDManager.getInstance(Constants.kRobotIdFile);
+
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);
   }

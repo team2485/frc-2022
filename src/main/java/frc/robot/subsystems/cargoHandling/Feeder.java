@@ -16,9 +16,9 @@ import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Feeder extends SubsystemBase implements Loggable {
-  private WL_SparkMax m_spark = new WL_SparkMax(kFeederSparkPort);
+  private final WL_SparkMax m_spark = new WL_SparkMax(kFeederSparkPort);
 
-  private Servo m_servo = new Servo(kFeederServoPort);
+  private final Servo m_servo = new Servo(kFeederServoPort);
   private double m_servoPositionSetpoint = 0;
 
   private final SR_SimpleMotorFeedforward m_feedforward =
@@ -102,6 +102,8 @@ public class Feeder extends SubsystemBase implements Loggable {
 
     statorCurrentLog.append(m_spark.getOutputCurrent());
     supplyCurrentLog.append(m_spark.getSupplyCurrent());
+
+    m_servo.set(m_servoPositionSetpoint);
   }
 
   @Override
