@@ -20,7 +20,7 @@ public class RobotContainer {
 
   private final Feeder m_feeder = new Feeder();
   public final Shooter m_shooter = new Shooter();
-  private final Hood m_hood = new Hood();
+  // private final Hood m_hood = new Hood();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

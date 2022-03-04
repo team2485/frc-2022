@@ -326,13 +326,13 @@ public final class Constants {
     public static final double kVShooterVoltSecondsPerMeter = 0.11065;
     public static final double kAShooterVoltSecondsSquaredPerMeter = 0.023167;
 
-    public static final double kShooterFeedforwardScale = 0.9;
+    public static final double kShooterFeedforwardScale = 0.89;
 
     // currently unused
     public static final double kP = 1;
     public static final double kD = 0;
 
-    public static final double kVelocityTolerance = 0.5;
+    public static final double kVelocityTolerance = 1.5;
 
     public static final double kShooterVelocityDipThresholdRotationsPerSecond = 5;
     public static final int kShooterVelocityDipRollingAverageWindow = 5;

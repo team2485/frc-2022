@@ -32,7 +32,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   private final BangBangController m_bangBangController =
       new BangBangController(kVelocityTolerance);
 
-  private double m_desiredVelocityRPS;
+  private double m_desiredVelocityRPS = 0;
 
   /** Creates a new Shooter. Controlled with a feedforward and a bang bang controlller. */
   public Shooter() {
@@ -91,7 +91,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     double feedforwardVoltage =
         kShooterFeedforwardScale * m_shooterFeedforward.calculate(m_desiredVelocityRPS);
     double feedbackVoltage =
-        m_bangBangController.atSetpoint()
+        this.atSetpoint()
             ? 0
             : m_bangBangController.calculate(getTalonVelocity(), m_desiredVelocityRPS)
                 * kNominalVoltage;
