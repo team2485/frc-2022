@@ -34,7 +34,7 @@ public class Shooter extends SubsystemBase implements Loggable {
       new BangBangController(kVelocityTolerance);
 
   @Log(name = "Velocity Setpoint")
-  private double m_velocitySetpoint;
+  private double m_velocitySetpointRotationsPerSecond;
 
   private double m_lastVelocitySetpoint;
 
@@ -71,7 +71,7 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   /** @return the current talon-reported velocity in rotations per second. */
   @Log(name = "Current velocity (RPS)")
-  public double getVelocity() {
+  public double getVelocityRotationsPerSecond() {
     return m_talon.getSelectedSensorVelocity() * kShooterRotationsPerPulse * 10;
   }
 
@@ -82,7 +82,7 @@ public class Shooter extends SubsystemBase implements Loggable {
    */
   @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
-    m_velocitySetpoint = rotationsPerSecond;
+    m_velocitySetpointRotationsPerSecond = rotationsPerSecond;
   }
 
   /**
@@ -94,12 +94,15 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_talon.setVoltage(voltage);
   }
 
+  @Log(name = "At setpoint")
   public boolean atSetpoint() {
-    return m_bangBangController.atSetpoint();
+    return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
+        < kVelocityTolerance;
   }
 
   public boolean hasDipped() {
-    return m_lastVelocity - this.getVelocity() > kShooterVelocityDipThresholdRotationsPerSecond;
+    return m_lastVelocity - this.getVelocityRotationsPerSecond()
+        > kShooterVelocityDipThresholdRotationsPerSecond;
   }
 
   // runs every 10 ms (run by Robot)
@@ -109,9 +112,15 @@ public class Shooter extends SubsystemBase implements Loggable {
     double feedforwardOutput =
         kShooterFeedforwardScale
             * m_feedforward.calculate(
-                m_lastVelocitySetpoint, m_velocitySetpoint, kShooterLoopTimeSeconds);
+                m_lastVelocitySetpoint,
+                m_velocitySetpointRotationsPerSecond,
+                kShooterLoopTimeSeconds);
     double feedbackOutput =
-        m_bangBangController.calculate(getVelocity(), m_velocitySetpoint) * kNominalVoltage;
+        this.atSetpoint()
+            ? 0
+            : m_bangBangController.calculate(
+                    this.getVelocityRotationsPerSecond(), m_velocitySetpointRotationsPerSecond)
+                * kNominalVoltage;
 
     double outputVoltage = feedforwardOutput + feedbackOutput;
     m_talon.set(ControlMode.PercentOutput, outputVoltage / kNominalVoltage);
@@ -119,7 +128,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_feedbackOutput = feedbackOutput;
     m_feedforwardOutput = feedforwardOutput;
 
-    m_lastVelocity = this.getVelocity();
+    m_lastVelocity = this.getVelocityRotationsPerSecond();
 
     statorCurrentLog.append(m_talon.getStatorCurrent());
     supplyCurrentLog.append(m_talon.getSupplyCurrent());

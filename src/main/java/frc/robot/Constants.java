@@ -42,6 +42,8 @@ public final class Constants {
   public static final int kCANTimeoutMs = 250;
   public static final double kTimestepSeconds = 0.02;
 
+  public static final double kNeoFreeSpeedRotationsPerSecond = 5676.0 / 60.0;
+  public static final double kNeo550FreeSpeedRotationsPerSecond = 11000.0 / 60.0;
   // meters and shot parameters (radians and rps)
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
@@ -351,28 +353,64 @@ public final class Constants {
 
   public static final class IndexerConstants {
     public static final int kIndexerSparkPort = 22;
-
+    public static final double kIndexerLoopTimeSeconds = 0.02;
     public static final int kIndexerSmartCurrentLimitAmps = 5;
     public static final int kIndexerImmediateCurrentLimitAmps = 7;
 
-    public static final double kIndexerPercentOutputIn = 0.5;
-    public static final double kIndexerPercentOutputFeedToShooter = 0.5;
+    public static final double kIndexerGearRatio = 4; // motor turns : output/full hood turns
+
+    public static final double kIndexerFreeSpeedRotationsPerSecond =
+        kNeoFreeSpeedRotationsPerSecond / kIndexerGearRatio;
+
+    public static final double kIndexerWheelRadiusMeters = Units.inchesToMeters(3);
+
+    public static final double kSIndexerVolts = 0.65884;
+    public static final double kVIndexerVoltSecondsPerMeter = 0.11065;
+    public static final double kAIndexerVoltSecondsSquaredPerMeter = 0.023167;
+
+    public static final double kIndexerVelocityToleranceRotationsPerSecond = 1;
   }
 
   public static final class FeederConstants {
     public static final int kFeederSparkPort = 23;
-    public static final double kFeederPercentOutputFeedToShooter = 0.7;
+    public static final double kFeederLoopTimeSeconds = 0.02;
     public static final int kFeederSmartCurrentLimitAmps = 15;
     public static final int kFeederImmediateCurrentLimitAmps = 20;
+
+    public static final double kFeederGearRatio = 4; // motor turns : output/full hood turns
+
+    public static final double kFeederFreeSpeedRotationsPerSecond =
+        kNeo550FreeSpeedRotationsPerSecond / kFeederGearRatio;
+
+    public static final double kSFeederVolts = 0.65884;
+    public static final double kVFeederVoltSecondsPerMeter = 0.11065;
+    public static final double kAFeederVoltSecondsSquaredPerMeter = 0.023167;
+
+    public static final double kFeederVelocityToleranceRotationsPerSecond = 1;
+
+    public static final int kFeederServoPort = 1;
+    public static final double kServoDisengagedPosition = 0.37;
+    public static final double kServoEngagedPosition = 0;
   }
 
   public static final class IntakeConstants {
     public static final int kIntakeSparkPort = 15;
+    public static final double kIntakeLoopTimeSeconds = 0.02;
     public static final int kIntakeSmartCurrentLimitAmps = 5;
     public static final int kIntakeImmediateCurrentLimitAmps = 10;
 
-    public static final double kIntakePercentOutputIn = 0.5;
-    public static final double kIntakePercentOutputOut = -0.5;
+    public static final double kIntakeGearRatio = 4; // motor turns : output/full hood turns
+
+    public static final double kIntakeFreeSpeedRotationsPerSecond =
+        kNeo550FreeSpeedRotationsPerSecond / kIntakeGearRatio;
+
+    public static final double kIntakeTopWheelDiameter = Units.inchesToMeters(4);
+
+    public static final double kSIntakeVolts = 0.65884;
+    public static final double kVIntakeVoltSecondsPerMeter = 0.11065;
+    public static final double kAIntakeVoltSecondsSquaredPerMeter = 0.023167;
+
+    public static final double kIntakeVelocityToleranceRotationsPerSecond = 1;
 
     public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
 
@@ -384,41 +422,78 @@ public final class Constants {
 
   public static final class IntakeArmConstants {
     public static final int kIntakeArmSparkPort = 0;
+    public static final double kIntakeArmLoopTimeSeconds = 0.020;
     public static final int kIntakeArmSmartCurrentLimitAmps = 5;
     public static final int kIntakeArmImmediateCurrentLimitAmps = 10;
-    public static final double kIntakeArmPercentOutputUp = 0.5;
-    public static final double kIntakeArmPercentOutputDown = -0.5;
+
+    public static final double kIntakeArmGearRatio = 12.0;
+    public static final double kIntakeArmFreeSpeedRadiansPerSecond =
+        kNeoFreeSpeedRotationsPerSecond / kIntakeArmGearRatio * (2 * Math.PI);
+    public static final double kIntakeArmRadiansPerMotorRev =
+        1.0 / kIntakeArmGearRatio * 2 * Math.PI;
+
+    public static final double kIntakeArmBottomPositionRadians = 0; // from horizontal
+    public static final double kIntakeArmTopPositionRadians = 1.6; // change later
+
+    // Intake Arm characterization constants
+    public static final double kSIntakeArmVolts = 0;
+    public static final double kGIntakeArmVolts = 0;
+    public static final double kVIntakeArmVoltsSecondsPerRadian = 0;
+    public static final double kAIntakeArmVoltsSecondsSquaredPerRadian = 0;
+
+    public static final double kIntakeArmMaxSpeedRadiansPerSecond = 4;
+    public static final double kIntakeArmMaxAccelerationRadiansPerSecondSquared =
+        new ArmFeedforward(
+                kSIntakeArmVolts,
+                kGIntakeArmVolts,
+                kVIntakeArmVoltsSecondsPerRadian,
+                kAIntakeArmVoltsSecondsSquaredPerRadian)
+            .maxAchievableAcceleration(
+                kNominalVoltage,
+                kIntakeArmBottomPositionRadians,
+                kIntakeArmMaxSpeedRadiansPerSecond);
+
+    public static final SR_TrapezoidProfile.Constraints kIntakeArmMotionProfileConstraints =
+        new SR_TrapezoidProfile.Constraints(
+            kIntakeArmMaxSpeedRadiansPerSecond, kIntakeArmMaxAccelerationRadiansPerSecondSquared);
+
+    // Intake Arm PID constants
+    public static final double kPIntakeArmVoltsPerRadian = 0;
+    public static final double kDIntakeArmVoltSecondsPerRadian = 0;
+    public static final double kIntakeArmPositionToleranceRadians = 0.005;
   }
 
   public static final class HoodConstants {
     public static final int kHoodSparkPort = 31;
+    public static final int kHoodSmartCurrentLimitAmps = 2;
+    public static final int kHoodImmediateCurrentLimitAmps = 5;
 
     public static final double kHoodLoopTimeSeconds = 0.02;
 
     public static final double kHoodGearRatio = 225; // motor turns : output/full hood turns
     public static final double kHoodRadiansPerMotorRev = 2 * Math.PI / kHoodGearRatio;
 
-    public static final double kHoodBottomPositionRadians = 0.4363323; // from horizontal
-    public static final double kHoodTopPositionRadians = 0.65;
+    public static final double kHoodFreeSpeedRadiansPerSecond =
+        kNeoFreeSpeedRotationsPerSecond / kHoodGearRatio * (2 * Math.PI);
 
-    public static final int kHoodSmartCurrentLimitAmps = 2;
-    public static final int kHoodImmediateCurrentLimitAmps = 5;
+    public static final double kHoodBottomPositionRadians = 0.4399; // from horizontal (25.21 deg)
+    public static final double kHoodTopPositionRadians = 0.7341; // (42.06 deg)
 
     // Hood characterization constants
-    public static final double kSHoodVolts = 0.13428;
-    public static final double kGHoodVolts = 0.061339;
-    public static final double kVHoodVoltSecondsPerRadian = 0.99111;
-    public static final double kAHoodVoltSecondsSquaredPerRadian = 0.12369;
+    public static final double ksHoodVolts = 0.13428;
+    public static final double kgHoodVolts = 0.061339;
+    public static final double kvHoodVoltSecondsPerRadian = 0.99111;
+    public static final double kaHoodVoltSecondsSquaredPerRadian = 0.12369;
 
-    public static final double kHoodMaxSpeedRadiansPerSecond = 2 * Math.PI;
+    public static final double kHoodMaxSpeedRadiansPerSecond = 0.7 * kHoodFreeSpeedRadiansPerSecond;
     public static final double kHoodMaxAccelerationRadiansPerSecondSquared =
         new ArmFeedforward(
-                kSHoodVolts,
-                kGHoodVolts,
-                kVHoodVoltSecondsPerRadian,
-                kAHoodVoltSecondsSquaredPerRadian)
+                ksHoodVolts,
+                kgHoodVolts,
+                kvHoodVoltSecondsPerRadian,
+                kaHoodVoltSecondsSquaredPerRadian)
             .maxAchievableAcceleration(
-                kNominalVoltage, kHoodBottomPositionRadians, kHoodBottomPositionRadians);
+                kNominalVoltage, kHoodBottomPositionRadians, kHoodMaxSpeedRadiansPerSecond);
 
     public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
@@ -426,7 +501,7 @@ public final class Constants {
     // Hood PID constants
     public static final double kPHood = 50;
     public static final double kDHood = 0;
-    public static final double kHoodControllerPositionTolerance = 0.005;
+    public static final double kHoodPositionToleranceRadians = 0.005;
 
     public static final double kHoodZeroingPercentOutput = -0.3;
   }
