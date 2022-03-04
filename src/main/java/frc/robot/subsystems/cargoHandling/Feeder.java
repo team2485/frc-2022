@@ -12,31 +12,36 @@ import io.github.oblarg.oblog.annotations.Config;
 
 public class Feeder extends SubsystemBase implements Loggable {
   private WL_SparkMax m_spark = new WL_SparkMax(kHighIndexerSparkPort);
+
   private Servo m_servo = new Servo(1);
+  private double m_servoPositionSetpoint = 0;
 
   public Feeder() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kIndexerSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIndexerImmediateCurrentLimitAmps);
     m_spark.setIdleMode(IdleMode.kBrake);
-    m_spark.setInverted(true);
   }
 
-  @Config.NumberSlider(name = "Set percent output", min = -1, max = 1)
+  @Config.NumberSlider(name = "Set percent output high")
   public void setPercentOutput(double percentOutput) {
     m_spark.set(percentOutput);
   }
 
-  public void engageBelts(boolean engaged) {
+  public void setServo(double position) {
+    m_servoPositionSetpoint = position;
+  }
+
+  @Config.ToggleButton(name = "Set servo")
+  public void engageServo(boolean engaged) {
     if (engaged) {
-      m_servo.set(0);
+      m_servoPositionSetpoint = kServoEngagedPosition;
     } else {
-      m_servo.set(0.5);
+      m_servoPositionSetpoint = kServoDisengagedPosition;
     }
   }
 
-  @Config(name = "Set servo")
-  public void setServo(double position) {
-    m_servo.set(position);
+  public void periodic() {
+    m_servo.set(m_servoPositionSetpoint);
   }
 }

@@ -349,6 +349,9 @@ public final class Constants {
 
     public static final double kHighIndexerPercentOutputFeedToShooter = 0.7;
     public static final double kLowIndexerPercentOutputFeedToShooter = 0.5;
+
+    public static final double kServoDisengagedPosition = 0.37;
+    public static final double kServoEngagedPosition = 0;
   }
 
   public static final class IntakeConstants {
@@ -383,8 +386,8 @@ public final class Constants {
     public static final double kHoodBottomPositionRadians = 0.4363323; // from horizontal
     public static final double kHoodTopPositionRadians = 0.65;
 
-    public static final int kHoodSmartCurrentLimitAmps = 2;
-    public static final int kHoodImmediateCurrentLimitAmps = 5;
+    public static final int kHoodSmartCurrentLimitAmps = 5;
+    public static final int kHoodImmediateCurrentLimitAmps = 10;
 
     // Hood characterization constants
     public static final double kSHoodVolts = 0.13428;

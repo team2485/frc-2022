@@ -9,9 +9,9 @@ import static frc.robot.Constants.OIConstants.*;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 
@@ -39,19 +39,26 @@ public class RobotContainer {
 
   private void configureCargoHandlingCommands() {
     // Default commands for intake, intake arm, shooter, and indexers are to turn them off
-    m_feeder.setDefaultCommand(new RunCommand(() -> m_feeder.setPercentOutput(0), m_feeder));
+    // m_feeder.setDefaultCommand(new RunCommand(() -> m_feeder.setPercentOutput(0), m_feeder));
 
     m_driver
         .b()
         .whenHeld(
-            new InstantCommand(() -> m_feeder.engageBelts(true), m_feeder)
-                .andThen(
-                    new ConditionalCommand(
-                        new RunCommand(() -> m_feeder.setPercentOutput(0.5), m_feeder),
-                        new InstantCommand(() -> m_feeder.setPercentOutput(0), m_feeder),
-                        m_shooter::atSetpoint)));
+            new RunCommand(() -> m_feeder.setPercentOutput(0.5), m_feeder)
+                .alongWith(
+                    new WaitCommand(0.1)
+                        .andThen(new InstantCommand(() -> m_feeder.engageServo(false)))));
+    // m_driver
+    // .b()
+    // .whenHeld(
+    //     new InstantCommand(() -> m_feeder.engageBelts(true), m_feeder)
+    //         .andThen(
+    //             new ConditionalCommand(
+    //                 new RunCommand(() -> m_feeder.setPercentOutput(0.5), m_feeder),
+    //                 new InstantCommand(() -> m_feeder.setPercentOutput(0), m_feeder),
+    //                 m_shooter::atSetpoint)));
 
-    m_driver.a().whenPressed(new InstantCommand(() -> m_feeder.engageBelts(false), m_feeder));
+    // m_driver.a().whenPressed(new InstantCommand(() -> m_feeder.engageBelts(false), m_feeder));
   }
 
   /**
