@@ -10,12 +10,14 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoCommandBuilder;
 import frc.robot.subsystems.*;
@@ -24,6 +26,9 @@ import frc.robot.subsystems.cargoHandling.indexing.*;
 import frc.robot.subsystems.drive.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import io.github.oblarg.oblog.annotations.Log;
+import frc.robot.pit.*;
+import frc.robot.pit.PitManager.PitState;
+
 
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
@@ -39,6 +44,7 @@ public class RobotContainer {
   private final Hood m_hood = new Hood();
   private final Turret m_turret = new Turret();
   private final Drivetrain m_drivetrain = new Drivetrain(m_turret::getRotation2d);
+  private final PitManager m_pitManager = new PitManager();
 
   @Log(name = "Auto Chooser")
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
@@ -76,6 +82,7 @@ public class RobotContainer {
     this.configureDrivetrainCommands();
     this.configureVisionCommands();
     this.configureCargoHandlingCommands();
+    this.configurePitCommands();
   }
 
   private void configureDrivetrainCommands() {
@@ -152,6 +159,85 @@ public class RobotContainer {
         .whileHeld(
             CargoHandlingCommandBuilder.getIndexToShooterCommand(
                 m_lowIndexer, m_highIndexer, m_shooter));
+  }
+
+  private void configurePitCommands() {
+    //starts the zeroing process for the hood
+    m_driver.x()
+      .and(m_pitManager.getStateBoolean(PitState.kZeroHood))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(PitCommandBuilder.getZeroHoodCommand(m_hood));
+
+    m_driver.b()
+      .and(m_pitManager.getStateBoolean(PitState.kZeroHood))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(()->m_pitManager.setState(PitState.kZeroIntakeArm));
+    
+
+    //starts the zeroing process for the intake arm
+    m_driver.x()
+      .and(m_pitManager.getStateBoolean(PitState.kZeroIntakeArm))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(PitCommandBuilder.getZeroIntakeArmCommand(m_intakeArm));
+
+    m_driver.b()
+      .and(m_pitManager.getStateBoolean(PitState.kZeroIntakeArm))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(()->m_pitManager.setState(PitState.kZeroClimbElevator));
+    
+    
+    //starts the zeroing process for the climb elevator
+    m_driver.x()
+      .and(m_pitManager.getStateBoolean(PitState.kZeroClimbElevator))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(PitCommandBuilder.getZeroIntakeArmCommand(m_climbElevator));
+
+    m_driver.b()
+      .and(m_pitManager.getStateBoolean(PitState.kZeroClimbElevator))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(()->m_pitManager.setState(PitState.kZeroClimbArm));
+
+    //starts the zeroing process for the climb arm
+    m_driver.x()
+      .and(m_pitManager.getStateBoolean(PitState.kZeroClimbArm))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(PitCommandBuilder.getZeroIntakeArmCommand(m_climbArm));
+
+    m_driver.b()
+      .and(m_pitManager.getStateBoolean(PitState.kZeroClimbArm))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(()->m_pitManager.setState(PitState.kTestingMotorA));
+
+    //tests motor amps
+    m_driver.x()
+      .and(m_pitManager.getStateBoolean(PitState.kTestingMotorA))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(PitCommandBuilder.getMotorStateCommand());
+
+    m_driver.b()
+      .and(m_pitManager.getStateBoolean(PitState.kTestingMotorA))
+      .and(new Trigger(() -> {
+          return DriverStation.isTest();
+        }))
+      .whenActive(()->System.out.println("Yikes, look at all of those things that must be red - Preston Thu, Mar 3, 2022, 8:03 pm"));
   }
 
   /**

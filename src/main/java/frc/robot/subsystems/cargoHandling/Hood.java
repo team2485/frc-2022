@@ -91,6 +91,12 @@ public class Hood extends SubsystemBase implements Loggable {
     m_spark.set(percentOutput);
   }
 
+  public void resetAbsolutePosition(){
+
+    
+
+  }
+
   @Override
   public void periodic() {
     double feedbackOutputVoltage =

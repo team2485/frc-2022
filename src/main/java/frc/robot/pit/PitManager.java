@@ -12,7 +12,8 @@ public class PitManager implements Loggable {
     kZeroHood,
     kZeroIntakeArm,
     kZeroClimbElevator,
-    kZeroClimbArm;
+    kZeroClimbArm,
+    kTestingMotorA;//TODO: have state for each motor
 
     @Override
     public String toString() {
@@ -26,6 +27,7 @@ public class PitManager implements Loggable {
   }
 
   private PitState m_state;
+  //TODO: store that test is passed
 
   @Log(name = "Pit State", tabName = "Pit")
   private SendableChooser<PitState> m_pitStateChooser = new SendableChooser<PitState>();
