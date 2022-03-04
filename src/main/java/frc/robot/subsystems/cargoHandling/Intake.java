@@ -5,7 +5,6 @@ import static frc.robot.Constants.IntakeConstants.*;
 import com.revrobotics.CANSparkMax.IdleMode;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
@@ -16,13 +15,6 @@ import io.github.oblarg.oblog.annotations.Log;
 
 public class Intake extends SubsystemBase implements Loggable {
   private final WL_SparkMax m_spark = new WL_SparkMax(kIntakeSparkPort);
-
-  @Log(name = "Photo sensor")
-  private final DigitalInput m_photoSensor = new DigitalInput(kPhotoSensorPort);
-
-  private boolean m_lastPhotoSensorOutput = false;
-
-  private int m_numCargo = 0;
 
   private final SR_SimpleMotorFeedforward m_feedforward =
       new SR_SimpleMotorFeedforward(
@@ -35,6 +27,9 @@ public class Intake extends SubsystemBase implements Loggable {
 
   @Log(name = "Feedforward output")
   private double m_feedforwardOutput;
+
+  private boolean m_voltageOverride = false;
+  private double m_voltageSetpoint = 0;
 
   private DoubleLogEntry statorCurrentLog =
       new DoubleLogEntry(DataLogManager.getLog(), "/current/intake/statorCurrent");
@@ -61,6 +56,7 @@ public class Intake extends SubsystemBase implements Loggable {
    */
   @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
+    m_voltageOverride = false;
     m_velocitySetpointRotationsPerSecond = rotationsPerSecond;
   }
 
@@ -69,8 +65,10 @@ public class Intake extends SubsystemBase implements Loggable {
    *
    * @param voltage what voltage to apply
    */
+  @Config.NumberSlider(name = "Set Voltage", min = -12, max = 12)
   public void setVoltage(double voltage) {
-    m_spark.setVoltage(voltage);
+    m_voltageOverride = true;
+    m_voltageSetpoint = voltage;
   }
 
   @Log(name = "At setpoint")
@@ -79,40 +77,25 @@ public class Intake extends SubsystemBase implements Loggable {
         < kIntakeVelocityToleranceRotationsPerSecond;
   }
 
-  public boolean getPhotoSensor() {
-    return m_photoSensor.get();
-  }
-
-  public void setNumCargo(int num) {
-    m_numCargo = num;
-  }
-
-  public int getNumCargo() {
-    return m_numCargo;
-  }
-
   public void runControlLoop() {
     // Calculates voltage to apply.
+    if (m_voltageOverride) {
+      m_spark.setVoltage(m_voltageSetpoint);
+    } else {
+      double feedforwardOutput =
+          m_feedforward.calculate(
+              m_lastVelocitySetpoint, m_velocitySetpointRotationsPerSecond, kIntakeLoopTimeSeconds);
 
-    double feedforwardOutput =
-        m_feedforward.calculate(
-            m_lastVelocitySetpoint, m_velocitySetpointRotationsPerSecond, kIntakeLoopTimeSeconds);
+      m_spark.setVoltage(feedforwardOutput);
 
-    m_spark.setVoltage(feedforwardOutput);
+      m_feedforwardOutput = feedforwardOutput;
 
-    m_feedforwardOutput = feedforwardOutput;
-
-    statorCurrentLog.append(m_spark.getOutputCurrent());
-    supplyCurrentLog.append(m_spark.getSupplyCurrent());
+      statorCurrentLog.append(m_spark.getOutputCurrent());
+      supplyCurrentLog.append(m_spark.getSupplyCurrent());
+    }
   }
 
   public void periodic() {
     this.runControlLoop();
-
-    if (m_lastPhotoSensorOutput == true || m_photoSensor.get()) {
-      this.setNumCargo(this.getNumCargo() + 1);
-    }
-
-    m_lastPhotoSensorOutput = m_photoSensor.get();
   }
 }

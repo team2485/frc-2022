@@ -10,6 +10,7 @@ import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
@@ -23,9 +24,9 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   private final WL_SparkMax m_spark = new WL_SparkMax(kIntakeArmSparkPort);
   private final SparkMaxLimitSwitch m_topLimitSwitch =
-      m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+      m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
   private final SparkMaxLimitSwitch m_bottomSwitch =
-      m_spark.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+      m_spark.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
 
   private final SR_ProfiledPIDController m_pidController =
       new SR_ProfiledPIDController(
@@ -49,6 +50,12 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
+  @Log(name = "Feedforward Output")
+  private double m_feedforwardOutput = 0;
+
+  @Log(name = "Feedback Output")
+  private double m_feedbackOutput = 0;
+
   private DoubleLogEntry statorCurrentLog =
       new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/statorCurrent");
   private DoubleLogEntry supplyCurrentLog =
@@ -60,8 +67,12 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_spark.setSmartCurrentLimit(kIntakeArmSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIntakeArmImmediateCurrentLimitAmps);
 
-    m_topLimitSwitch.enableLimitSwitch(true);
-    m_bottomSwitch.enableLimitSwitch(true);
+    m_topLimitSwitch.enableLimitSwitch(false);
+    m_bottomSwitch.enableLimitSwitch(false);
+    this.resetAngleRadians(kIntakeArmBottomPositionRadians);
+
+    Shuffleboard.getTab("IntakeArm").add("controller", m_pidController);
+    Shuffleboard.getTab("IntakeArm").add("feedforward", m_feedforward);
   }
 
   /** @return current angle from horizontal */
@@ -72,6 +83,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   @Config(name = "Set angle (radians)", defaultValueNumeric = kIntakeArmBottomPositionRadians)
   public void setAngleRadians(double angle) {
+    m_voltageOverride = false;
     m_angleSetpointRadians =
         MathUtil.clamp(angle, kIntakeArmBottomPositionRadians, kIntakeArmTopPositionRadians);
   }
@@ -104,6 +116,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   public void runControlLoop() {
     if (m_voltageOverride) {
       m_spark.setVoltage(m_voltageSetpoint);
+      System.out.println("voltage");
     } else {
       double feedbackOutputVoltage =
           m_pidController.calculate(this.getAngleRadians(), m_angleSetpointRadians);
@@ -118,13 +131,16 @@ public class IntakeArm extends SubsystemBase implements Loggable {
       m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
 
       m_spark.setVoltage(feedbackOutputVoltage + feedforwardOutputVoltage);
+
+      m_feedbackOutput = feedbackOutputVoltage;
+      m_feedforwardOutput = feedforwardOutputVoltage;
     }
 
-    if (this.getBottomLimitSwitch()) {
-      this.resetAngleRadians(kIntakeArmBottomPositionRadians);
-    } else if (this.getTopLimitSwitch()) {
-      this.resetAngleRadians(kIntakeArmTopPositionRadians);
-    }
+    // if (this.getBottomLimitSwitch()) {
+    //   this.resetAngleRadians(kIntakeArmBottomPositionRadians);
+    // } else if (this.getTopLimitSwitch()) {
+    //   this.resetAngleRadians(kIntakeArmTopPositionRadians);
+    // }
 
     statorCurrentLog.append(m_spark.getOutputCurrent());
     supplyCurrentLog.append(m_spark.getSupplyCurrent());

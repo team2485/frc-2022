@@ -123,11 +123,11 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
     // practice carpet
-    public static final double ksDriveVolts = IDManager.getInstance().select(0.0, 0.54);
+    public static final double ksDriveVolts = IDManager.getInstance().select(0.54, 0.54);
     public static final double kvDriveVoltSecondsPerMeter =
-        IDManager.getInstance().select(0.0, 2.5856);
+        IDManager.getInstance().select(2.5856, 2.5856);
     public static final double kaDriveVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.0, 0.31789);
+        IDManager.getInstance().select(0.31789, 0.31789);
 
     public static final double kvMaxVelocity = 12 / kvDriveVoltSecondsPerMeter;
     public static final double kaMaxAcceleration = 12 / kaDriveVoltSecondsSquaredPerMeter;
@@ -307,9 +307,9 @@ public final class Constants {
     public static final double kIntakeDefaultTopWheelSpeedMetersPerSecond =
         kIntakeDefaultSpeedRotationsPerSecond * kIntakeTopWheelCircumferenceMeters;
 
-    public static final double kSIntakeVolts = 0.65884;
-    public static final double kVIntakeVoltSecondsPerMeter = 0.11065;
-    public static final double kAIntakeVoltSecondsSquaredPerMeter = 0.023167;
+    public static final double kSIntakeVolts = 0.14412;
+    public static final double kVIntakeVoltSecondsPerMeter = 0.525;
+    public static final double kAIntakeVoltSecondsSquaredPerMeter = 0.014604;
 
     public static final double kIntakeVelocityToleranceRotationsPerSecond = 1;
 
@@ -324,46 +324,46 @@ public final class Constants {
   }
 
   public static final class IntakeArmConstants {
-    public static final int kIntakeArmSparkPort = 21;
+    public static final int kIntakeArmSparkPort = 20;
     public static final double kIntakeArmLoopTimeSeconds = 0.020;
-    public static final int kIntakeArmSmartCurrentLimitAmps = 5;
-    public static final int kIntakeArmImmediateCurrentLimitAmps = 10;
+    public static final int kIntakeArmSmartCurrentLimitAmps = 20;
+    public static final int kIntakeArmImmediateCurrentLimitAmps = 25;
 
-    public static final double kIntakeArmGearRatio = 12.0;
+    public static final double kIntakeArmGearRatio = 75.0;
     public static final double kIntakeArmFreeSpeedRadiansPerSecond =
         kNeoFreeSpeedRotationsPerSecond / kIntakeArmGearRatio * (2 * Math.PI);
     public static final double kIntakeArmRadiansPerMotorRev =
         1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
-    public static final double kIntakeArmBottomPositionRadians = 0; // from horizontal
-    public static final double kIntakeArmTopPositionRadians = 1.6; // change later
+    public static final double kIntakeArmBottomPositionRadians = -0.2618; // from horizontal
+    public static final double kIntakeArmTopPositionRadians = 2.0071; // change later
 
     // Intake Arm characterization constants
-    public static final double kSIntakeArmVolts = 0;
-    public static final double kGIntakeArmVolts = 0;
-    public static final double kVIntakeArmVoltsSecondsPerRadian = 0;
-    public static final double kAIntakeArmVoltsSecondsSquaredPerRadian = 0;
+    public static final double kSIntakeArmVolts = 0.5;
+    public static final double kGIntakeArmVolts = 1.34;
+    public static final double kVIntakeArmVoltsSecondsPerRadian = 0.73;
+    public static final double kAIntakeArmVoltsSecondsSquaredPerRadian = 0.06;
 
-    public static final double kIntakeArmMaxSpeedRadiansPerSecond = 4;
-    public static final double kIntakeArmMaxAccelerationRadiansPerSecondSquared =
-        new ArmFeedforward(
-                kSIntakeArmVolts,
-                kGIntakeArmVolts,
-                kVIntakeArmVoltsSecondsPerRadian,
-                kAIntakeArmVoltsSecondsSquaredPerRadian)
-            .maxAchievableAcceleration(
-                kNominalVoltage,
-                kIntakeArmBottomPositionRadians,
-                kIntakeArmMaxSpeedRadiansPerSecond);
+    public static final double kIntakeArmMaxSpeedRadiansPerSecond = 1;
+    public static final double kIntakeArmMaxAccelerationRadiansPerSecondSquared = 0.5;
+    // new ArmFeedforward(
+    //         kSIntakeArmVolts,
+    //         kGIntakeArmVolts,
+    //         kVIntakeArmVoltsSecondsPerRadian,
+    //         kAIntakeArmVoltsSecondsSquaredPerRadian)
+    //     .maxAchievableAcceleration(
+    //         kNominalVoltage,
+    //         kIntakeArmBottomPositionRadians,
+    //         kIntakeArmMaxSpeedRadiansPerSecond);
 
     public static final SR_TrapezoidProfile.Constraints kIntakeArmMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
             kIntakeArmMaxSpeedRadiansPerSecond, kIntakeArmMaxAccelerationRadiansPerSecondSquared);
 
     // Intake Arm PID constants
-    public static final double kPIntakeArmVoltsPerRadian = 0;
+    public static final double kPIntakeArmVoltsPerRadian = 10;
     public static final double kDIntakeArmVoltSecondsPerRadian = 0;
-    public static final double kIntakeArmPositionToleranceRadians = 0.005;
+    public static final double kIntakeArmPositionToleranceRadians = 0.01;
   }
 
   public static final class IndexerConstants {
@@ -472,11 +472,11 @@ public final class Constants {
     public static final int kTurretSupplyCurrentThresholdTimeMs = 1;
 
     public static final int kTurretEncoderChannel = 0; // Analog channel
-    public static final double kTurretRangeOfMotion = 2 * Math.PI;
-    public static final double kTurretOffset = 0;
+    public static final double kTurretRangeOfMotion = Math.PI / 2.0;
+    public static final double kTurretOffset = Math.PI / 4;
 
-    public static final double kVTurretVoltSecondsPerMeter = 0;
-    public static final double kATurretVoltSecondsSquaredPerMeter = 0;
+    public static final double kVTurretVoltSecondsPerMeter = 0.01;
+    public static final double kATurretVoltSecondsSquaredPerMeter = 0.01;
     public static final double kSTurretVolts = 0;
 
     public static final double kTurretVelocityRMSE = 0;

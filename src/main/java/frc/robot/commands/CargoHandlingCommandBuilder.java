@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
+import frc.robot.subsystems.cargoHandling.BallCounter;
 import frc.robot.subsystems.cargoHandling.Feeder;
 import frc.robot.subsystems.cargoHandling.Hood;
 import frc.robot.subsystems.cargoHandling.Indexer;
@@ -31,7 +32,8 @@ public class CargoHandlingCommandBuilder {
 
   public CargoHandlingCommandBuilder() {}
 
-  public static Command getIntakeCommand(Intake intake, IntakeArm intakeArm, Indexer indexer) {
+  public static Command getIntakeCommand(
+      Intake intake, IntakeArm intakeArm, Indexer indexer, BallCounter counter) {
     return getIntakeArmDownCommand(intakeArm)
         .andThen(
             new RunCommand(
@@ -43,7 +45,7 @@ public class CargoHandlingCommandBuilder {
                 indexer))
         .until(
             () -> {
-              return intake.getNumCargo() == 2 || indexer.hasStopped();
+              return counter.getNumCargo() == 2 || indexer.hasStopped();
             });
   }
 
@@ -89,7 +91,7 @@ public class CargoHandlingCommandBuilder {
   }
 
   public static Command getIndexToShooterCommand(
-      Indexer indexer, Feeder feeder, Shooter shooter, DoubleSupplier numCargo) {
+      Indexer indexer, Feeder feeder, Shooter shooter, BallCounter counter) {
     return new ConditionalCommand(
         getIndexToShooterOnceCommand(indexer, feeder, shooter)
             .andThen(
@@ -99,9 +101,10 @@ public class CargoHandlingCommandBuilder {
                                 kIndexerDefaultSpeedRotationsPerSecond),
                         indexer)
                     .withTimeout(0.5)),
-        new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer),
+        new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer)
+            .alongWith(new InstantCommand(() -> shooter.setVelocityRotationsPerSecond(0))),
         () -> {
-          return numCargo.getAsDouble() > 0;
+          return counter.getNumCargo() > 0;
         });
   }
 

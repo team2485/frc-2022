@@ -10,6 +10,7 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -17,7 +18,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.*;
-import frc.robot.commands.auto.AutoCommandBuilder;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.climb.*;
@@ -30,7 +30,7 @@ public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
 
-  private final Vision m_vision = new Vision();
+  //   private final Vision m_vision = new Vision();
 
   private final IntakeArm m_intakeArm = new IntakeArm();
   private final Intake m_intake = new Intake();
@@ -38,8 +38,14 @@ public class RobotContainer {
   private final Feeder m_feeder = new Feeder();
   public final Shooter m_shooter = new Shooter();
   private final Hood m_hood = new Hood();
-  private final Turret m_turret = new Turret();
-  private final Drivetrain m_drivetrain = new Drivetrain(m_turret::getRotation2d);
+  //   private final Turret m_turret = new Turret();
+  private final BallCounter m_ballCounter = new BallCounter(m_shooter::hasDipped);
+
+  private final Drivetrain m_drivetrain =
+      new Drivetrain(
+          () -> {
+            return new Rotation2d();
+          });
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
@@ -50,25 +56,53 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
-    configureButtonBindings();
+    // m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
+    // configureButtonBindings();
 
-    m_autoChooser.setDefaultOption(
-        "2 Ball Right Side",
-        AutoCommandBuilder.get2BallAuto(
-            m_drivetrain, m_vision, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter));
-    m_autoChooser.addOption(
-        "3 Ball Right Side",
-        AutoCommandBuilder.get3BallAuto(
-            m_drivetrain, m_vision, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter));
-    m_autoChooser.addOption(
-        "4 Ball Right Side",
-        AutoCommandBuilder.get4BallAuto(
-            m_drivetrain, m_vision, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter));
-    m_autoChooser.addOption(
-        "5 Ball Right Side",
-        AutoCommandBuilder.get5BallAuto(
-            m_drivetrain, m_vision, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter));
+    // m_autoChooser.setDefaultOption(
+    //     "2 Ball Right Side",
+    //     AutoCommandBuilder.get2BallAuto(
+    //         m_drivetrain,
+    //         m_vision,
+    //         m_intake,
+    //         m_intakeArm,
+    //         m_indexer,
+    //         m_feeder,
+    //         m_shooter,
+    //         m_ballCounter));
+    // m_autoChooser.addOption(
+    //     "3 Ball Right Side",
+    //     AutoCommandBuilder.get3BallAuto(
+    //         m_drivetrain,
+    //         m_vision,
+    //         m_intake,
+    //         m_intakeArm,
+    //         m_indexer,
+    //         m_feeder,
+    //         m_shooter,
+    //         m_ballCounter));
+    // m_autoChooser.addOption(
+    //     "4 Ball Right Side",
+    //     AutoCommandBuilder.get4BallAuto(
+    //         m_drivetrain,
+    //         m_vision,
+    //         m_intake,
+    //         m_intakeArm,
+    //         m_indexer,
+    //         m_feeder,
+    //         m_shooter,
+    //         m_ballCounter));
+    // m_autoChooser.addOption(
+    //     "5 Ball Right Side",
+    //     AutoCommandBuilder.get5BallAuto(
+    //         m_drivetrain,
+    //         m_vision,
+    //         m_intake,
+    //         m_intakeArm,
+    //         m_indexer,
+    //         m_feeder,
+    //         m_shooter,
+    //         m_ballCounter));
   }
 
   /**
@@ -111,7 +145,7 @@ public class RobotContainer {
 
   private void configureVisionCommands() {
     // Cycle LED Mode when start button pressed
-    m_driver.start().whenPressed(new InstantCommand(m_vision::cycleLEDMode));
+    // m_driver.start().whenPressed(new InstantCommand(m_vision::cycleLEDMode));
   }
 
   private void configureCargoHandlingCommands() {
@@ -122,10 +156,10 @@ public class RobotContainer {
     m_indexer.setDefaultCommand(CargoHandlingCommandBuilder.getIndexerOffCommand(m_indexer));
     m_feeder.setDefaultCommand(CargoHandlingCommandBuilder.getFeederOffCommand(m_feeder));
 
-    // Default commands for turret and hood are to auto-aim based on robot pose/distance
-    m_turret.setDefaultCommand(
-        CargoHandlingCommandBuilder.getTurretAutoAimCommand(
-            m_turret, m_drivetrain::getPoseMeters, m_drivetrain::getVelocityMetersPerSecond));
+    // // Default commands for turret and hood are to auto-aim based on robot pose/distance
+    // m_turret.setDefaultCommand(
+    //     CargoHandlingCommandBuilder.getTurretAutoAimCommand(
+    //         m_turret, m_drivetrain::getPoseMeters, m_drivetrain::getVelocityMetersPerSecond));
 
     m_hood.setDefaultCommand(
         CargoHandlingCommandBuilder.getHoodAutoAimCommand(
@@ -139,7 +173,8 @@ public class RobotContainer {
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getIntakeCommand(m_intake, m_intakeArm, m_indexer))
+            CargoHandlingCommandBuilder.getIntakeCommand(
+                m_intake, m_intakeArm, m_indexer, m_ballCounter))
         .whenInactive(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
 
     // Set shooter on operator left trigger: based on distance to hub
@@ -158,7 +193,7 @@ public class RobotContainer {
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
             CargoHandlingCommandBuilder.getIndexToShooterCommand(
-                m_indexer, m_feeder, m_shooter, m_intake::getNumCargo));
+                m_indexer, m_feeder, m_shooter, m_ballCounter));
   }
 
   private void configureClimbCommands() {
@@ -366,7 +401,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return m_autoChooser.getSelected().andThen(AutoCommandBuilder.setLEDsAutoCommand(m_vision));
+    return null;
+    // return m_autoChooser.getSelected().andThen(AutoCommandBuilder.setLEDsAutoCommand(m_vision));
   }
 
   // whenever the robot is disabled, drive should be turned off

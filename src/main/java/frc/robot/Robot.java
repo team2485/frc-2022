@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.TurretConstants.*;
+
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -23,6 +25,8 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+
+  // private final AnalogPotentiometer m_potentiometer = new AnalogPotentiometer(0, 5, 0);
 
   public Robot() {
     DataLogManager.start();
@@ -65,6 +69,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     Logger.updateEntries();
     NetworkTableInstance.getDefault().flush();
+    // System.out.println("Potentiometer reading: " + m_potentiometer.get());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

@@ -23,11 +23,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Vision.TimestampedTranslation2d;
-import frc.team2485.WarlordsLib.CurrentLogger;
 import frc.team2485.WarlordsLib.PoseHistory;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -73,9 +73,6 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_frontLeftModule =
         new SwerveModule(
             kFLDriveTalonPort, kFLTurningTalonPort, kFLCANCoderPort, kFLCANCoderZero, "FL");
-
-    CurrentLogger.getInstance().register(m_frontLeftModule.m_driveMotor, "FL drive");
-    CurrentLogger.getInstance().register(m_frontLeftModule.m_turningMotor, "FR turning");
 
     m_frontRightModule =
         new SwerveModule(
@@ -415,7 +412,12 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_field.getObject("Pure Odometry").setPose(m_odometryWithoutVision.getPoseMeters());
 
     Pose2d robotPose = m_odometry.getPoseMeters();
-    Pose2d lastPose = m_poseHistory.getLatest().get().getPose();
+    Pose2d lastPose;
+    try {
+      lastPose = m_poseHistory.getLatest().get().getPose();
+    } catch (NoSuchElementException e) {
+      lastPose = robotPose;
+    }
     m_velocity = robotPose.getTranslation().minus(lastPose.getTranslation());
     m_poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
 

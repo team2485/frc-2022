@@ -34,9 +34,9 @@ public class Shooter extends SubsystemBase implements Loggable {
       new BangBangController(kVelocityTolerance);
 
   @Log(name = "Velocity Setpoint")
-  private double m_velocitySetpointRotationsPerSecond;
+  private double m_velocitySetpointRotationsPerSecond = 0;
 
-  private double m_lastVelocitySetpoint;
+  private double m_lastVelocitySetpoint = 0;
 
   @Log(name = "Feedback output")
   private double m_feedbackOutput;
@@ -44,7 +44,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   @Log(name = "Feedforward output")
   private double m_feedforwardOutput;
 
-  private double m_lastVelocity;
+  private double m_lastVelocity = 0;
 
   DoubleLogEntry statorCurrentLog;
   DoubleLogEntry supplyCurrentLog;
@@ -82,6 +82,7 @@ public class Shooter extends SubsystemBase implements Loggable {
    */
   @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
+    m_lastVelocitySetpoint = m_velocitySetpointRotationsPerSecond;
     m_velocitySetpointRotationsPerSecond = rotationsPerSecond;
   }
 
@@ -102,7 +103,8 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   public boolean hasDipped() {
     return m_lastVelocity - this.getVelocityRotationsPerSecond()
-        > kShooterVelocityDipThresholdRotationsPerSecond;
+            > kShooterVelocityDipThresholdRotationsPerSecond
+        && m_velocitySetpointRotationsPerSecond >= m_lastVelocitySetpoint;
   }
 
   // runs every 10 ms (run by Robot)
@@ -110,11 +112,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     // Calculates voltage to apply.
     // Feedforward is scaled down to prevent overshoot since bang-bang can't correct for overshoot.
     double feedforwardOutput =
-        kShooterFeedforwardScale
-            * m_feedforward.calculate(
-                m_lastVelocitySetpoint,
-                m_velocitySetpointRotationsPerSecond,
-                kShooterLoopTimeSeconds);
+        kShooterFeedforwardScale * m_feedforward.calculate(m_velocitySetpointRotationsPerSecond);
     double feedbackOutput =
         this.atSetpoint()
             ? 0

@@ -72,6 +72,7 @@ public class Hood extends SubsystemBase implements Loggable {
 
   @Config(name = "Set angle (radians)", defaultValueNumeric = kHoodBottomPositionRadians)
   public void setAngleRadians(double angle) {
+    m_voltageOverride = false;
     m_angleSetpointRadians =
         MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
   }
