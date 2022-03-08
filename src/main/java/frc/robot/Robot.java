@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.TurretConstants.*;
+
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -23,10 +26,22 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
+  // private final AnalogPotentiometer m_potentiometer = new AnalogPotentiometer(0, 5, 0);
+
   public Robot() {
-    CurrentLogger.getInstance().registerLogFolder(Constants.kCurrentLogFolder);
+    DataLogManager.start();
     m_robotContainer = new RobotContainer();
-    addPeriodic(() -> m_robotContainer.m_shooter.runShooterControlLoop(), 0.01);
+    addPeriodic(
+        () -> m_robotContainer.m_shooter.runControlLoop(),
+        Constants.ShooterConstants.kShooterLoopTimeSeconds);
+
+    addPeriodic(
+        () -> m_robotContainer.m_climbElevator.runControlLoop(),
+        Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
+
+    addPeriodic(
+        () -> m_robotContainer.m_climbArm.runControlLoop(),
+        Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
   }
 
   /**
@@ -37,6 +52,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate IDManager -- will read ID File
     IDManager.getInstance(Constants.kRobotIdFile);
+
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);
   }
@@ -53,6 +69,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     Logger.updateEntries();
     NetworkTableInstance.getDefault().flush();
+    // System.out.println("Potentiometer reading: " + m_potentiometer.get());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

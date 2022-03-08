@@ -1,10 +1,12 @@
 package frc.robot.subsystems.cargoHandling;
 
-import static frc.robot.Constants.IntakeConstants.*;
+import static frc.robot.Constants.*;
+import static frc.robot.Constants.FeederConstants.*;
 
 import com.revrobotics.CANSparkMax.IdleMode;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
@@ -13,12 +15,15 @@ import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
-public class Intake extends SubsystemBase implements Loggable {
-  private final WL_SparkMax m_spark = new WL_SparkMax(kIntakeSparkPort);
+public class Feeder extends SubsystemBase implements Loggable {
+  private final WL_SparkMax m_spark = new WL_SparkMax(kFeederSparkPort);
+
+  private final Servo m_servo = new Servo(kFeederServoPort);
+  private double m_servoPositionSetpoint = 0;
 
   private final SR_SimpleMotorFeedforward m_feedforward =
       new SR_SimpleMotorFeedforward(
-          kSIntakeVolts, kVIntakeVoltSecondsPerMeter, kAIntakeVoltSecondsSquaredPerMeter);
+          kSFeederVolts, kVFeederVoltSecondsPerMeter, kAFeederVoltSecondsSquaredPerMeter);
 
   @Log(name = "Velocity Setpoint")
   private double m_velocitySetpointRotationsPerSecond;
@@ -28,18 +33,15 @@ public class Intake extends SubsystemBase implements Loggable {
   @Log(name = "Feedforward output")
   private double m_feedforwardOutput;
 
-  private boolean m_voltageOverride = false;
-  private double m_voltageSetpoint = 0;
-
   private DoubleLogEntry statorCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/intake/statorCurrent");
+      new DoubleLogEntry(DataLogManager.getLog(), "/current/feeder/statorCurrent");
   private DoubleLogEntry supplyCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/intake/supplyCurrent");
+      new DoubleLogEntry(DataLogManager.getLog(), "/current/feeder/supplyCurrent");
 
-  public Intake() {
+  public Feeder() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
-    m_spark.setSmartCurrentLimit(kIntakeSmartCurrentLimitAmps);
-    m_spark.setSecondaryCurrentLimit(kIntakeImmediateCurrentLimitAmps);
+    m_spark.setSmartCurrentLimit(kFeederSmartCurrentLimitAmps);
+    m_spark.setSecondaryCurrentLimit(kFeederImmediateCurrentLimitAmps);
     m_spark.setIdleMode(IdleMode.kBrake);
   }
 
@@ -56,7 +58,6 @@ public class Intake extends SubsystemBase implements Loggable {
    */
   @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
-    m_voltageOverride = false;
     m_velocitySetpointRotationsPerSecond = rotationsPerSecond;
   }
 
@@ -65,36 +66,47 @@ public class Intake extends SubsystemBase implements Loggable {
    *
    * @param voltage what voltage to apply
    */
-  @Config.NumberSlider(name = "Set Voltage", min = -12, max = 12)
   public void setVoltage(double voltage) {
-    m_voltageOverride = true;
-    m_voltageSetpoint = voltage;
+    m_spark.setVoltage(voltage);
   }
 
   @Log(name = "At setpoint")
   public boolean atSetpoint() {
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
-        < kIntakeVelocityToleranceRotationsPerSecond;
+        < kFeederVelocityToleranceRotationsPerSecond;
+  }
+
+  public void setServo(double position) {
+    m_servoPositionSetpoint = position;
+  }
+
+  @Config.ToggleButton(name = "Set servo")
+  public void engageServo(boolean engaged) {
+    if (engaged) {
+      m_servoPositionSetpoint = kServoEngagedPosition;
+    } else {
+      m_servoPositionSetpoint = kServoDisengagedPosition;
+    }
   }
 
   public void runControlLoop() {
     // Calculates voltage to apply.
-    if (m_voltageOverride) {
-      m_spark.setVoltage(m_voltageSetpoint);
-    } else {
-      double feedforwardOutput =
-          m_feedforward.calculate(
-              m_lastVelocitySetpoint, m_velocitySetpointRotationsPerSecond, kIntakeLoopTimeSeconds);
 
-      m_spark.setVoltage(feedforwardOutput);
+    double feedforwardOutput =
+        m_feedforward.calculate(
+            m_lastVelocitySetpoint, m_velocitySetpointRotationsPerSecond, kFeederLoopTimeSeconds);
 
-      m_feedforwardOutput = feedforwardOutput;
+    m_spark.setVoltage(feedforwardOutput);
 
-      statorCurrentLog.append(m_spark.getOutputCurrent());
-      supplyCurrentLog.append(m_spark.getSupplyCurrent());
-    }
+    m_feedforwardOutput = feedforwardOutput;
+
+    statorCurrentLog.append(m_spark.getOutputCurrent());
+    supplyCurrentLog.append(m_spark.getSupplyCurrent());
+
+    m_servo.set(m_servoPositionSetpoint);
   }
 
+  @Override
   public void periodic() {
     this.runControlLoop();
   }

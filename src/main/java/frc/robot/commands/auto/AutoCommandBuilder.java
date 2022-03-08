@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.CargoHandlingCommandBuilder;
 import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.cargoHandling.*;
-import frc.robot.subsystems.cargoHandling.indexing.*;
 import frc.robot.subsystems.drive.*;
 
 public class AutoCommandBuilder {
@@ -14,9 +13,10 @@ public class AutoCommandBuilder {
       Vision vision,
       Intake intake,
       IntakeArm intakeArm,
-      LowIndexer lowIndexer,
-      HighIndexer highIndexer,
-      Shooter shooter) {
+      Indexer lowIndexer,
+      Feeder highIndexer,
+      Shooter shooter,
+      BallCounter counter) {
 
     WL_SwerveControllerCommand backUpPath =
         PathCommandBuilder.getPathCommand(drivetrain, "2 ball right");
@@ -28,7 +28,7 @@ public class AutoCommandBuilder {
             });
 
     Command intakeBalls =
-        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer);
+        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
             shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
@@ -48,22 +48,24 @@ public class AutoCommandBuilder {
       Vision vision,
       Intake intake,
       IntakeArm intakeArm,
-      LowIndexer lowIndexer,
-      HighIndexer highIndexer,
-      Shooter shooter) {
+      Indexer lowIndexer,
+      Feeder highIndexer,
+      Shooter shooter,
+      BallCounter counter) {
 
     WL_SwerveControllerCommand thirdBallPath =
         PathCommandBuilder.getPathCommand(drivetrain, "2 to 3 ball right");
 
     Command intakeBalls =
-        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer);
+        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
             shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
-    return get2BallAuto(drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter)
+    return get2BallAuto(
+            drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter, counter)
         .andThen(thirdBallPath.alongWith(intakeBalls, setShooter), feedToShooterOnce);
   }
 
@@ -72,22 +74,24 @@ public class AutoCommandBuilder {
       Vision vision,
       Intake intake,
       IntakeArm intakeArm,
-      LowIndexer lowIndexer,
-      HighIndexer highIndexer,
-      Shooter shooter) {
+      Indexer lowIndexer,
+      Feeder highIndexer,
+      Shooter shooter,
+      BallCounter counter) {
 
     WL_SwerveControllerCommand thirdAndFourthBallPath =
         PathCommandBuilder.getPathCommand(drivetrain, "2 to 4 ball right");
 
     Command intakeBalls =
-        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer);
+        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
             shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
-    return get2BallAuto(drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter)
+    return get2BallAuto(
+            drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter, counter)
         .andThen(
             thirdAndFourthBallPath.alongWith(intakeBalls, setShooter),
             feedToShooterOnce,
@@ -99,22 +103,24 @@ public class AutoCommandBuilder {
       Vision vision,
       Intake intake,
       IntakeArm intakeArm,
-      LowIndexer lowIndexer,
-      HighIndexer highIndexer,
-      Shooter shooter) {
+      Indexer lowIndexer,
+      Feeder highIndexer,
+      Shooter shooter,
+      BallCounter counter) {
 
     WL_SwerveControllerCommand thirdAndFourthBallPath =
         PathCommandBuilder.getPathCommand(drivetrain, "2 to 4 ball right");
 
     Command intakeBalls =
-        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer);
+        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
             shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
-    return get2BallAuto(drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter)
+    return get2BallAuto(
+            drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter, counter)
         .andThen(
             thirdAndFourthBallPath.alongWith(intakeBalls, setShooter),
             feedToShooterOnce,

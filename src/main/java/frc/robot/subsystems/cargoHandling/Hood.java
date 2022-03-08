@@ -5,6 +5,8 @@ import static frc.robot.Constants.HoodConstants.*;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -18,14 +20,14 @@ public class Hood extends SubsystemBase implements Loggable {
 
   private final WL_SparkMax m_spark = new WL_SparkMax(kHoodSparkPort);
   private SparkMaxLimitSwitch m_limitSwitch =
-      m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+      m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
 
   private final SR_ProfiledPIDController m_pidController =
       new SR_ProfiledPIDController(kPHood, 0, kDHood, kHoodMotionProfileConstraints);
 
   private final SR_ArmFeedforward m_feedforward =
       new SR_ArmFeedforward(
-          kSHoodVolts, kGHoodVolts, kVHoodVoltSecondsPerRadian, kAHoodVoltSecondsSquaredPerRadian);
+          ksHoodVolts, kgHoodVolts, kvHoodVoltSecondsPerRadian, kaHoodVoltSecondsSquaredPerRadian);
 
   @Log(name = "angle setpoint radians")
   private double m_angleSetpointRadians = kHoodBottomPositionRadians;
@@ -34,6 +36,14 @@ public class Hood extends SubsystemBase implements Loggable {
 
   @Log(name = "zeroed")
   private boolean m_isZeroed = false;
+
+  private boolean m_voltageOverride = false;
+  private double m_voltageSetpoint = 0;
+
+  private DoubleLogEntry statorCurrentLog =
+      new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/statorCurrent");
+  private DoubleLogEntry supplyCurrentLog =
+      new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/supplyCurrent");
 
   public Hood() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
@@ -46,7 +56,7 @@ public class Hood extends SubsystemBase implements Loggable {
 
     m_limitSwitch.enableLimitSwitch(true);
 
-    m_pidController.setTolerance(kHoodControllerPositionTolerance);
+    m_pidController.setTolerance(kHoodPositionToleranceRadians);
 
     this.resetAngleRadians(kHoodBottomPositionRadians);
 
@@ -62,20 +72,18 @@ public class Hood extends SubsystemBase implements Loggable {
 
   @Config(name = "Set angle (radians)", defaultValueNumeric = kHoodBottomPositionRadians)
   public void setAngleRadians(double angle) {
+    m_voltageOverride = false;
     m_angleSetpointRadians =
         MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
-
-    m_pidController.setGoal(
-        m_angleSetpointRadians); // need to do this here because otherwise atGoal will return true
-    // briefly before the new goal is set in periodic
   }
 
   public void resetAngleRadians(double angle) {
     m_spark.getEncoder().setPosition(angle / kHoodRadiansPerMotorRev);
   }
 
+  @Log(name = "At goal")
   public boolean atGoal() {
-    return m_pidController.atGoal();
+    return this.getAngleRadians() - m_angleSetpointRadians < kHoodPositionToleranceRadians;
   }
 
   public void zeroAngle() {
@@ -87,36 +95,48 @@ public class Hood extends SubsystemBase implements Loggable {
     return m_limitSwitch.isPressed();
   }
 
-  public void setPercentOutput(double percentOutput) {
-    m_spark.set(percentOutput);
-  }
-
   public void resetAbsolutePosition(){
 
-    
+    m_spark.getEncoder().setPosition(0);
 
   }
 
-  @Override
-  public void periodic() {
-    double feedbackOutputVoltage =
-        m_pidController.calculate(
-            this.getAngleRadians()); // feedback controller already has goal from setAngleRadians
-    // method
 
-    double feedforwardOutputVoltage =
-        m_feedforward.calculate(
-            m_angleSetpointRadians,
-            m_lastVelocitySetpoint,
-            m_pidController.getSetpoint().velocity,
-            Constants.kTimestepSeconds);
+  @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
+  public void setVoltage(double voltage) {
+    m_voltageOverride = true;
+    m_voltageSetpoint = voltage;
+  }
 
-    m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
+  public void runControlLoop() {
+    if (m_voltageOverride) {
+      m_spark.setVoltage(m_voltageSetpoint);
+    } else {
+      double feedbackOutputVoltage =
+          m_pidController.calculate(this.getAngleRadians(), m_angleSetpointRadians);
 
-    m_spark.setVoltage(feedbackOutputVoltage + feedforwardOutputVoltage);
+      double feedforwardOutputVoltage =
+          m_feedforward.calculate(
+              m_angleSetpointRadians,
+              m_lastVelocitySetpoint,
+              m_pidController.getSetpoint().velocity,
+              kHoodLoopTimeSeconds);
+
+      m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
+
+      m_spark.setVoltage(feedbackOutputVoltage + feedforwardOutputVoltage);
+    }
 
     if (this.getBottomLimitSwitch()) {
       zeroAngle();
     }
+
+    statorCurrentLog.append(m_spark.getOutputCurrent());
+    supplyCurrentLog.append(m_spark.getSupplyCurrent());
+  }
+
+  @Override
+  public void periodic() {
+    this.runControlLoop();
   }
 }
