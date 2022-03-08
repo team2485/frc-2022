@@ -37,14 +37,14 @@ public class RobotContainer {
 
   //   private final Vision m_vision = new Vision();
 
-  private final IntakeArm m_intakeArm = new IntakeArm();
+  //   private final IntakeArm m_intakeArm = new IntakeArm();
   private final Intake m_intake = new Intake();
   private final Indexer m_indexer = new Indexer();
   private final Feeder m_feeder = new Feeder();
   public final Shooter m_shooter = new Shooter();
   private final Hood m_hood = new Hood();
   private final PitManager m_pitManager = new PitManager();
-  //   private final Turret m_turret = new Turret();
+  private final Turret m_turret = new Turret();
   private final BallCounter m_ballCounter = new BallCounter(m_shooter::hasDipped);
 
   private final Drivetrain m_drivetrain =
@@ -120,8 +120,8 @@ public class RobotContainer {
   private void configureButtonBindings() {
     this.configureDrivetrainCommands();
     this.configureVisionCommands();
-    this.configureCargoHandlingCommands();
     this.configurePitCommands();
+    this.configureCargoHandlingCommands();
     this.configureClimbCommands();
   }
 
@@ -159,7 +159,7 @@ public class RobotContainer {
     // Default commands for intake, intake arm, shooter, and indexers are to turn them off
     m_shooter.setDefaultCommand(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
     m_intake.setDefaultCommand(CargoHandlingCommandBuilder.getIntakeOffCommand(m_intake));
-    m_intakeArm.setDefaultCommand(CargoHandlingCommandBuilder.getIntakeArmOffCommand(m_intakeArm));
+    // m_intakeArm.setDefaultCommand(CargoHandlingCommandBuilder.getIntakeArmOffCommand(m_intakeArm));
     m_indexer.setDefaultCommand(CargoHandlingCommandBuilder.getIndexerOffCommand(m_indexer));
     m_feeder.setDefaultCommand(CargoHandlingCommandBuilder.getFeederOffCommand(m_feeder));
 
@@ -172,17 +172,17 @@ public class RobotContainer {
         CargoHandlingCommandBuilder.getHoodAutoAimCommand(
             m_hood,
             m_drivetrain::getDistanceToHubMeters,
-            m_drivetrain::getVelocityMetersPerSecond));
+            m_drivetrain::getFieldRelativeVelocityMetersPerSecond));
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer (until
     // stopped by hitting high indexer path)
-    m_driver
-        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getIntakeCommand(
-                m_intake, m_intakeArm, m_indexer, m_ballCounter))
-        .whenInactive(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
+    // m_driver
+    //     .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    //     .whileActiveContinuous(
+    //         CargoHandlingCommandBuilder.getIntakeCommand(
+    //             m_intake, m_intakeArm, m_indexer, m_ballCounter))
+    //     .whenInactive(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
 
     // Set shooter on operator left trigger: based on distance to hub
     m_operator
@@ -192,7 +192,7 @@ public class RobotContainer {
             CargoHandlingCommandBuilder.getShooterAutoSetCommand(
                 m_shooter,
                 m_drivetrain::getDistanceToHubMeters,
-                m_drivetrain::getVelocityMetersPerSecond));
+                m_drivetrain::getFieldRelativeVelocityMetersPerSecond));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
     m_operator

@@ -3,6 +3,7 @@ package frc.robot.subsystems.cargoHandling;
 import static frc.robot.Constants.IntakeConstants.*;
 
 import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,12 +42,15 @@ public class Intake extends SubsystemBase implements Loggable {
     m_spark.setSmartCurrentLimit(kIntakeSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIntakeImmediateCurrentLimitAmps);
     m_spark.setIdleMode(IdleMode.kBrake);
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 200); // default 10
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 200); // default 20
   }
 
   /** @return the current velocity in rotations per second. */
   @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
-    return m_spark.getEncoder().getVelocity() / 60.0;
+    return m_spark.getEncoder().getVelocity() / (60.0 * kIntakeGearRatio);
   }
 
   /**

@@ -227,7 +227,11 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     return m_odometry.getPoseMeters();
   }
 
-  public Translation2d getVelocityMetersPerSecond() {
+  public Translation2d getFieldRelativeVelocityMetersPerSecond() {
+    return m_velocity;
+  }
+
+  public Translation2d getRobotRelativeVelocityMetersPerSecond() {
     return m_velocity;
   }
 

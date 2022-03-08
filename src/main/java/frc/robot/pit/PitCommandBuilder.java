@@ -4,13 +4,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.cargoHandling.Hood;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
+import frc.robot.subsystems.climb.ClimbArm;
+import frc.robot.subsystems.climb.ClimbElevator;
 
 public class PitCommandBuilder {
     
 
     public static Command getZeroHoodCommand(Hood hood){
 
-        return new RunCommand(() -> hood.setPercentOutput(-0.1), hood)
+        return new RunCommand(() -> hood.setVoltage(-3), hood)
 			.until(hood::getBottomLimitSwitch).andThen(hood::resetAbsolutePosition);
 
     }
@@ -18,7 +20,7 @@ public class PitCommandBuilder {
     public static Command getZeroIntakeArmCommand(IntakeArm intakeArm){
 		//TODO: make sure methods are accurate
 
-        return new RunCommand(() -> intakeArm.setPercentOutput(-0.1), intakeArm)
+        return new RunCommand(() -> intakeArm.setVoltage(-3), intakeArm)
 			.until(intakeArm::getBottomLimitSwitch).andThen(intakeArm::resetAbsolutePosition);
     }
 
@@ -35,9 +37,7 @@ public class PitCommandBuilder {
 
     }
 
-    public static Command getMotorStateCommand(){
 
-    }
     
   
 }
