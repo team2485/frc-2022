@@ -41,7 +41,9 @@ public class CargoHandlingCommandBuilder {
                 intake))
         .alongWith(
             new RunCommand(
-                () -> indexer.setVelocityRotationsPerSecond(kIndexerDefaultSpeedRotationsPerSecond),
+                () ->
+                    indexer.setVelocityRotationsPerSecond(
+                        kIndexerIntakeSpeedRatio * kIntakeDefaultSpeedRotationsPerSecond),
                 indexer))
         .until(
             () -> {

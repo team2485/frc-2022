@@ -24,9 +24,9 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   private final WL_SparkMax m_spark = new WL_SparkMax(kIntakeArmSparkPort);
   private final SparkMaxLimitSwitch m_topLimitSwitch =
-      m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+      m_spark.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
   private final SparkMaxLimitSwitch m_bottomSwitch =
-      m_spark.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+      m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
 
   private final SR_ProfiledPIDController m_pidController =
       new SR_ProfiledPIDController(
@@ -56,6 +56,21 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   @Log(name = "Feedback Output")
   private double m_feedbackOutput = 0;
 
+  @Log(name = "Setpoint position")
+  private boolean m_armSetpointPosition = false; // true up, false down
+
+  @Log(name = "Current position")
+  private boolean m_armPosition = false;
+
+  private double m_lastStatorCurrent = 0;
+
+  private enum ArmMovePhase {
+    kLifting,
+    kDropping
+  }
+
+  private ArmMovePhase m_phase = ArmMovePhase.kLifting;
+
   private DoubleLogEntry statorCurrentLog =
       new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/statorCurrent");
   private DoubleLogEntry supplyCurrentLog =
@@ -67,8 +82,8 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_spark.setSmartCurrentLimit(kIntakeArmSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIntakeArmImmediateCurrentLimitAmps);
 
-    m_topLimitSwitch.enableLimitSwitch(false);
-    m_bottomSwitch.enableLimitSwitch(false);
+    m_topLimitSwitch.enableLimitSwitch(true);
+    m_bottomSwitch.enableLimitSwitch(true);
     this.resetAngleRadians(kIntakeArmBottomPositionRadians);
 
     Shuffleboard.getTab("IntakeArm").add("controller", m_pidController);
@@ -92,6 +107,11 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_spark.getEncoder().setPosition(angle / kIntakeArmRadiansPerMotorRev);
   }
 
+  @Log(name = "Stator Current")
+  public double getStatorCurrent() {
+    return m_spark.getOutputCurrent();
+  }
+
   @Log(name = "At goal")
   public boolean atGoal() {
     return this.getAngleRadians() - m_angleSetpointRadians < kIntakeArmPositionToleranceRadians;
@@ -113,10 +133,20 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_voltageSetpoint = voltage;
   }
 
+  @Config.ToggleSwitch(name = "Set arm position", defaultValue = true)
+  public void setPosition(boolean top) {
+    m_voltageOverride = false;
+    m_armSetpointPosition = top;
+  }
+
+  @Log(name = "Spark Output Voltage")
+  public double getVoltageOutput() {
+    return m_spark.getAppliedOutput() * 12;
+  }
+
   public void runControlLoop() {
     if (m_voltageOverride) {
       m_spark.setVoltage(m_voltageSetpoint);
-      System.out.println("voltage");
     } else {
       double feedbackOutputVoltage =
           m_pidController.calculate(this.getAngleRadians(), m_angleSetpointRadians);
@@ -146,8 +176,48 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     supplyCurrentLog.append(m_spark.getSupplyCurrent());
   }
 
+  public void runCurrentBasedControlLoop() {
+    if (m_voltageOverride) {
+      m_spark.setVoltage(m_voltageSetpoint);
+    } else {
+      if (m_armSetpointPosition && !m_armPosition) {
+        System.out.println("Going up, phase: " + m_phase);
+        if (m_phase == ArmMovePhase.kLifting) {
+          m_spark.setVoltage(4);
+          if (m_lastStatorCurrent > 10 && this.getStatorCurrent() < 5) {
+            m_phase = ArmMovePhase.kDropping;
+            ;
+          }
+        } else if (m_phase == ArmMovePhase.kDropping) {
+          m_spark.setVoltage(-2);
+          if (this.getTopLimitSwitch()) {
+            m_armPosition = true;
+            m_phase = ArmMovePhase.kLifting;
+            m_spark.setVoltage(0);
+          }
+        }
+      } else if (!m_armSetpointPosition && m_armPosition) {
+        System.out.println("Going down, phase: " + m_phase);
+        if (m_phase == ArmMovePhase.kLifting) {
+          m_spark.setVoltage(-4);
+          if (m_lastStatorCurrent > 10 && this.getStatorCurrent() < 2) {
+            m_phase = ArmMovePhase.kDropping;
+          }
+        } else if (m_phase == ArmMovePhase.kDropping) {
+          m_spark.setVoltage(2);
+          if (this.getBottomLimitSwitch()) {
+            m_armPosition = false;
+            m_phase = ArmMovePhase.kLifting;
+            m_spark.setVoltage(0);
+          }
+        }
+      }
+      m_lastStatorCurrent = this.getStatorCurrent();
+    }
+  }
+
   @Override
   public void periodic() {
-    this.runControlLoop();
+    this.runCurrentBasedControlLoop();
   }
 }

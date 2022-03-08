@@ -8,7 +8,6 @@ import static java.util.Map.entry;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -61,6 +60,8 @@ public final class Constants {
 
   public static final double kNeoFreeSpeedRotationsPerSecond = 5676.0 / 60.0;
   public static final double kNeo550FreeSpeedRotationsPerSecond = 11000.0 / 60.0;
+
+  public static final double k775FreeSpeedRotationsPerSecond = 18730.0 / 60.0;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -291,29 +292,27 @@ public final class Constants {
   public static final class IntakeConstants {
     public static final int kIntakeSparkPort = 21;
     public static final double kIntakeLoopTimeSeconds = 0.02;
-    public static final int kIntakeSmartCurrentLimitAmps = 5;
-    public static final int kIntakeImmediateCurrentLimitAmps = 10;
+    public static final int kIntakeSmartCurrentLimitAmps = 20;
+    public static final int kIntakeImmediateCurrentLimitAmps = 25;
 
     public static final double kIntakeGearRatio = 4; // motor turns : output/full hood turns
 
     public static final double kIntakeFreeSpeedRotationsPerSecond =
         kNeo550FreeSpeedRotationsPerSecond / kIntakeGearRatio;
 
-    public static final double kIntakeTopWheelCircumferenceMeters = 0.1016 * Math.PI; // 4 inches
-
+    public static final double kIntakeTopWheelDiameterMeters = 0.1016; // 4 in
+    public static final double kIntakeBottomWheelDiameterMeters = 0.1524; // 6 in
+    public static final double kIntakeBottomWheelCircumferenceMeters = 0.1524 * Math.PI;
     public static final double kIntakeDefaultSpeedRotationsPerSecond =
         kIntakeFreeSpeedRotationsPerSecond * 0.5;
 
-    public static final double kIntakeDefaultTopWheelSpeedMetersPerSecond =
-        kIntakeDefaultSpeedRotationsPerSecond * kIntakeTopWheelCircumferenceMeters;
-
-    public static final double kSIntakeVolts = 0.14412;
-    public static final double kVIntakeVoltSecondsPerMeter = 0.525;
-    public static final double kAIntakeVoltSecondsSquaredPerMeter = 0.014604;
+    public static final double kSIntakeVolts = 0;
+    public static final double kVIntakeVoltSecondsPerMeter = 0.1;
+    public static final double kAIntakeVoltSecondsSquaredPerMeter = 0.01;
 
     public static final double kIntakeVelocityToleranceRotationsPerSecond = 1;
 
-    public static final int kPhotoSensorPort = 3; // dio port
+    public static final int kPhotoSensorPort = 5; // dio port
 
     public static final I2C.Port kI2CPort = I2C.Port.kOnboard;
 
@@ -329,7 +328,7 @@ public final class Constants {
     public static final int kIntakeArmSmartCurrentLimitAmps = 20;
     public static final int kIntakeArmImmediateCurrentLimitAmps = 25;
 
-    public static final double kIntakeArmGearRatio = 75.0;
+    public static final double kIntakeArmGearRatio = 125.0;
     public static final double kIntakeArmFreeSpeedRadiansPerSecond =
         kNeoFreeSpeedRotationsPerSecond / kIntakeArmGearRatio * (2 * Math.PI);
     public static final double kIntakeArmRadiansPerMotorRev =
@@ -369,23 +368,25 @@ public final class Constants {
   public static final class IndexerConstants {
     public static final int kIndexerSparkPort = 22;
     public static final double kIndexerLoopTimeSeconds = 0.02;
-    public static final int kIndexerSmartCurrentLimitAmps = 5;
-    public static final int kIndexerImmediateCurrentLimitAmps = 7;
+    public static final int kIndexerSmartCurrentLimitAmps = 20;
+    public static final int kIndexerImmediateCurrentLimitAmps = 25;
 
     public static final double kIndexerGearRatio = 4; // motor turns : output/full hood turns
 
     public static final double kIndexerFreeSpeedRotationsPerSecond =
         kNeoFreeSpeedRotationsPerSecond / kIndexerGearRatio;
 
-    public static final double kIndexerWheelCircumferenceMeters = 0.0762 * Math.PI; // 3 inches
+    public static final double kIndexerEntryWheelDiameterMeters = 0.0508; // 2 inches
+
+    public static final double kIndexerIntakeSpeedRatio =
+        IntakeConstants.kIntakeTopWheelDiameterMeters / kIndexerEntryWheelDiameterMeters;
 
     public static final double kIndexerDefaultSpeedRotationsPerSecond =
-        IntakeConstants.kIntakeDefaultTopWheelSpeedMetersPerSecond
-            / kIndexerWheelCircumferenceMeters;
+        kIndexerFreeSpeedRotationsPerSecond * 0.5;
 
-    public static final double kSIndexerVolts = 0.65884;
-    public static final double kVIndexerVoltSecondsPerMeter = 0.11065;
-    public static final double kAIndexerVoltSecondsSquaredPerMeter = 0.023167;
+    public static final double kSIndexerVolts = 0.1;
+    public static final double kVIndexerVoltSecondsPerMeter = 0.1;
+    public static final double kAIndexerVoltSecondsSquaredPerMeter = 0.005;
 
     public static final double kIndexerVelocityToleranceRotationsPerSecond = 1;
   }
@@ -417,7 +418,7 @@ public final class Constants {
     public static final double kFeederVelocityToleranceRotationsPerSecond = 1;
 
     public static final int kFeederServoPort = 1;
-    public static final double kServoDisengagedPosition = 0.37;
+    public static final double kServoDisengagedPosition = 0.4;
     public static final double kServoEngagedPosition = 0;
   }
 
@@ -471,40 +472,36 @@ public final class Constants {
     public static final int kTurretSupplyCurrentThresholdAmps = 10;
     public static final int kTurretSupplyCurrentThresholdTimeMs = 1;
 
-    public static final int kTurretEncoderChannel = 0; // Analog channel
-    public static final double kTurretRangeOfMotion = Math.PI / 2.0;
-    public static final double kTurretOffset = Math.PI / 4;
+    public static final int kTurretCCWSlotSensorPort = 2;
+    public static final int kTurretCWSlotSensorPort = 3;
 
-    public static final double kVTurretVoltSecondsPerMeter = 0.01;
-    public static final double kATurretVoltSecondsSquaredPerMeter = 0.01;
-    public static final double kSTurretVolts = 0;
+    public static final int kTurretPotentiometerChannel = 0; // Analog channel
+    public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
+    public static final double kTurretPotentiometerOffset = -Math.PI - 0.235 - 0.1275;
 
-    public static final double kTurretVelocityRMSE = 0;
-    public static final double kTurretAcclerationRMSE = 0;
+    public static final double kTurretGearing = 462;
 
-    public static final double kTurretPotentiometerStdDev =
-        0; // find voltage noise under ordinary operation
+    public static final double kTurretFreeSpeedRadiansPerSecond =
+        k775FreeSpeedRotationsPerSecond / kTurretGearing * 2 * Math.PI;
 
-    // Q elements
-    public static final double kTurretPositionToleranceRadians = Units.degreesToRadians(1.0);
-    public static final double kTurretVelocityToleranceRadiansPerSecond =
-        Units.degreesToRadians(10.0);
+    public static final double kVTurretVoltSecondsPerRadian = 1;
+    public static final double kATurretVoltSecondsSquaredPerRadian = 0.1;
+    public static final double kSTurretVolts = 0.9;
 
-    // R elements
-    public static final double kTurretVoltageTolerance = 12.0;
+    public static final double kPTurretVoltsPerRadian = 8;
+    public static final double kDTurretVoltSecondsPerRadian = 2;
 
-    public static final double kTurretMaxVelocityRadiansPerSecond = 0;
-    public static final double kTurretMaxAccelerationRadiansPerSecondSquared =
-        new SimpleMotorFeedforward(
-                kSTurretVolts, kVTurretVoltSecondsPerMeter, kATurretVoltSecondsSquaredPerMeter)
-            .maxAchievableAcceleration(kNominalVoltage, kTurretMaxVelocityRadiansPerSecond);
+    public static final double kTurretPositionTolerance = 0.005;
+
+    public static final double kTurretMaxVelocityRadiansPerSecond = 4;
+    public static final double kTurretMaxAccelerationRadiansPerSecondSquared = 8;
 
     public static final SR_TrapezoidProfile.Constraints kTurretMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
             kTurretMaxVelocityRadiansPerSecond, kTurretMaxAccelerationRadiansPerSecondSquared);
 
-    public static final double kMinPositionRadians = 0;
-    public static final double kMaxPositionRadians = 0;
+    public static final double kTurretMinPositionRadians = -Math.PI / 4;
+    public static final double kTurretMaxPositionRadians = Math.PI / 4;
 
     public static final double kBufferSizeRadians = Math.toRadians(25);
   }

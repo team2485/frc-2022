@@ -31,7 +31,9 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
+            shooter,
+            drivetrain::getDistanceToHubMeters,
+            drivetrain::getFieldRelativeVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
@@ -60,7 +62,9 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
+            shooter,
+            drivetrain::getDistanceToHubMeters,
+            drivetrain::getFieldRelativeVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
@@ -86,7 +90,9 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
+            shooter,
+            drivetrain::getDistanceToHubMeters,
+            drivetrain::getFieldRelativeVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
@@ -115,7 +121,9 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter, drivetrain::getDistanceToHubMeters, drivetrain::getVelocityMetersPerSecond);
+            shooter,
+            drivetrain::getDistanceToHubMeters,
+            drivetrain::getFieldRelativeVelocityMetersPerSecond);
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
 
