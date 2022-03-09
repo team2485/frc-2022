@@ -96,9 +96,7 @@ public class Hood extends SubsystemBase implements Loggable {
   }
 
   public void resetAbsolutePosition(){
-
     m_spark.getEncoder().setPosition(0);
-
   }
 
 

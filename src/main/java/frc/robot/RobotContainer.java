@@ -39,6 +39,7 @@ public class RobotContainer {
 
   //   private final IntakeArm m_intakeArm = new IntakeArm();
   private final Intake m_intake = new Intake();
+  private final IntakeArm m_intakeArm = new IntakeArm();
   private final Indexer m_indexer = new Indexer();
   private final Feeder m_feeder = new Feeder();
   public final Shooter m_shooter = new Shooter();
@@ -406,80 +407,63 @@ public class RobotContainer {
     //starts the zeroing process for the hood
     m_driver.x()
       .and(m_pitManager.getStateBoolean(PitState.kZeroHood))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
+      .and(new Trigger(() -> DriverStation.isTest()))
       .whenActive(PitCommandBuilder.getZeroHoodCommand(m_hood));
 
     m_driver.b()
       .and(m_pitManager.getStateBoolean(PitState.kZeroHood))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
+      .and(new Trigger(() -> DriverStation.isTest()))
       .whenActive(()->m_pitManager.setState(PitState.kZeroIntakeArm));
     
-
     //starts the zeroing process for the intake arm
     m_driver.x()
       .and(m_pitManager.getStateBoolean(PitState.kZeroIntakeArm))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
+      .and(new Trigger(() -> DriverStation.isTest()))
       .whenActive(PitCommandBuilder.getZeroIntakeArmCommand(m_intakeArm));
 
     m_driver.b()
       .and(m_pitManager.getStateBoolean(PitState.kZeroIntakeArm))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
+      .and(new Trigger(() -> DriverStation.isTest()))
       .whenActive(()->m_pitManager.setState(PitState.kZeroClimbElevator));
-    
     
     //starts the zeroing process for the climb elevator
     m_driver.x()
       .and(m_pitManager.getStateBoolean(PitState.kZeroClimbElevator))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
-      .whenActive(PitCommandBuilder.getZeroIntakeArmCommand(m_climbElevator));
+      .and(new Trigger(() -> DriverStation.isTest()))
+      .whenActive(PitCommandBuilder.getZeroClimbElevatorCommand(m_climbElevator));
 
     m_driver.b()
       .and(m_pitManager.getStateBoolean(PitState.kZeroClimbElevator))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
+      .and(new Trigger(() -> DriverStation.isTest()))
       .whenActive(()->m_pitManager.setState(PitState.kZeroClimbArm));
 
     //starts the zeroing process for the climb arm
-    m_driver.x()
-      .and(m_pitManager.getStateBoolean(PitState.kZeroClimbArm))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
-      .whenActive(PitCommandBuilder.getZeroIntakeArmCommand(m_climbArm));
+    // m_driver.x()
+    //   .and(m_pitManager.getStateBoolean(PitState.kZeroClimbArm))
+    //   .and(new Trigger(() -> DriverStation.isTest()))
+    //   .whenActive(PitCommandBuilder.getZeroClimbArmCommand(m_climbArm));
 
-    m_driver.b()
-      .and(m_pitManager.getStateBoolean(PitState.kZeroClimbArm))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
-      .whenActive(()->m_pitManager.setState(PitState.kTestingMotorA));
-
-    //tests motor amps
-    m_driver.x()
-      .and(m_pitManager.getStateBoolean(PitState.kTestingMotorA))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
-      .whenActive(PitCommandBuilder.getMotorStateCommand());
-
-    m_driver.b()
-      .and(m_pitManager.getStateBoolean(PitState.kTestingMotorA))
-      .and(new Trigger(() -> {
-          return DriverStation.isTest();
-        }))
-      .whenActive(()->System.out.println("Yikes, look at all of those things that must be red - Preston Thu, Mar 3, 2022, 8:03 pm"));
+    // m_driver.b()
+    //   .and(m_pitManager.getStateBoolean(PitState.kZeroClimbArm))
+    //   .and(new Trigger(() -> DriverStation.isTest()))
+    //   .whenActive(()->m_pitManager.setState(PitState.kTestingMotorA));
   }
+
+  //   //tests motor amps
+  //   m_driver.x()
+  //     .and(m_pitManager.getStateBoolean(PitState.kTestingMotorA))
+  //     .and(new Trigger(() -> {
+  //         return DriverStation.isTest();
+  //       }))
+  //     .whenActive(PitCommandBuilder.getMotorStateCommand());
+
+  //   m_driver.b()
+  //     .and(m_pitManager.getStateBoolean(PitState.kTestingMotorA))
+  //     .and(new Trigger(() -> {
+  //         return DriverStation.isTest();
+  //       }))
+  //     .whenActive(()->System.out.println("Yikes, look at all of those things that must be red - Preston Thu, Mar 3, 2022, 8:03 pm"));
+  // }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
