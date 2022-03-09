@@ -5,6 +5,8 @@ import static frc.robot.Constants.HoodConstants.*;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -22,6 +24,7 @@ public class Hood extends SubsystemBase implements Loggable {
   private SparkMaxLimitSwitch m_limitSwitch =
       m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
 
+  private final Debouncer m_limitDebounce = new Debouncer(0.1, DebounceType.kBoth);
   private final SR_ProfiledPIDController m_pidController =
       new SR_ProfiledPIDController(kPHood, 0, kDHood, kHoodMotionProfileConstraints);
 
@@ -39,6 +42,12 @@ public class Hood extends SubsystemBase implements Loggable {
 
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
+
+  @Log(name = "Feedforward Output")
+  private double m_feedforwardOutput;
+
+  @Log(name = "Feedback Output")
+  private double m_feedbackOutput;
 
   private DoubleLogEntry statorCurrentLog =
       new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/statorCurrent");
@@ -91,8 +100,9 @@ public class Hood extends SubsystemBase implements Loggable {
     m_isZeroed = true;
   }
 
+  @Log(name = "Bottom Limit Switchs")
   public boolean getBottomLimitSwitch() {
-    return m_limitSwitch.isPressed();
+    return m_limitDebounce.calculate(m_limitSwitch.isPressed());
   }
 
   @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
@@ -115,6 +125,8 @@ public class Hood extends SubsystemBase implements Loggable {
               m_pidController.getSetpoint().velocity,
               kHoodLoopTimeSeconds);
 
+      m_feedbackOutput = feedbackOutputVoltage;
+      m_feedforwardOutput = feedforwardOutputVoltage;
       m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
 
       m_spark.setVoltage(feedbackOutputVoltage + feedforwardOutputVoltage);

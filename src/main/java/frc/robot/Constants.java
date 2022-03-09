@@ -6,7 +6,6 @@ package frc.robot;
 
 import static java.util.Map.entry;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -435,8 +434,9 @@ public final class Constants {
     public static final double kHoodFreeSpeedRadiansPerSecond =
         kNeoFreeSpeedRotationsPerSecond / kHoodGearRatio * (2 * Math.PI);
 
-    public static final double kHoodBottomPositionRadians = 0.4399; // from horizontal (25.21 deg)
-    public static final double kHoodTopPositionRadians = 0.7341; // (42.06 deg)
+    public static final double kHoodBottomPositionRadians =
+        0.4363323; // from horizontal (25.21 deg)
+    public static final double kHoodTopPositionRadians = 0.634; //
 
     // Hood characterization constants
     public static final double ksHoodVolts = 0.13428;
@@ -444,15 +444,8 @@ public final class Constants {
     public static final double kvHoodVoltSecondsPerRadian = 0.99111;
     public static final double kaHoodVoltSecondsSquaredPerRadian = 0.12369;
 
-    public static final double kHoodMaxSpeedRadiansPerSecond = 0.7 * kHoodFreeSpeedRadiansPerSecond;
-    public static final double kHoodMaxAccelerationRadiansPerSecondSquared =
-        new ArmFeedforward(
-                ksHoodVolts,
-                kgHoodVolts,
-                kvHoodVoltSecondsPerRadian,
-                kaHoodVoltSecondsSquaredPerRadian)
-            .maxAchievableAcceleration(
-                kNominalVoltage, kHoodBottomPositionRadians, kHoodMaxSpeedRadiansPerSecond);
+    public static final double kHoodMaxSpeedRadiansPerSecond = 2;
+    public static final double kHoodMaxAccelerationRadiansPerSecondSquared = 10;
 
     public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
@@ -477,7 +470,7 @@ public final class Constants {
 
     public static final int kTurretPotentiometerChannel = 0; // Analog channel
     public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
-    public static final double kTurretPotentiometerOffset = -Math.PI - 0.235 - 0.1275;
+    public static final double kTurretPotentiometerOffset = -Math.PI - 0.3625;
 
     public static final double kTurretGearing = 462;
 

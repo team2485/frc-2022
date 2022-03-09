@@ -38,7 +38,7 @@ public class RobotContainer {
   private final Feeder m_feeder = new Feeder();
   public final Shooter m_shooter = new Shooter();
   private final Hood m_hood = new Hood();
-  private final Turret m_turret = new Turret();
+  //   private final Turret m_turret = new Turret();
   private final BallCounter m_ballCounter = new BallCounter(m_shooter::hasDipped);
 
   private final Drivetrain m_drivetrain =
@@ -161,11 +161,11 @@ public class RobotContainer {
     //     CargoHandlingCommandBuilder.getTurretAutoAimCommand(
     //         m_turret, m_drivetrain::getPoseMeters, m_drivetrain::getVelocityMetersPerSecond));
 
-    m_hood.setDefaultCommand(
-        CargoHandlingCommandBuilder.getHoodAutoAimCommand(
-            m_hood,
-            m_drivetrain::getDistanceToHubMeters,
-            m_drivetrain::getFieldRelativeVelocityMetersPerSecond));
+    // m_hood.setDefaultCommand(
+    //     CargoHandlingCommandBuilder.getHoodAutoAimCommand(
+    //         m_hood,
+    //         m_drivetrain::getDistanceToHubMeters,
+    //         m_drivetrain::getFieldRelativeVelocityMetersPerSecond));
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer (until
     // stopped by hitting high indexer path)

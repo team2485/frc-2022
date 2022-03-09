@@ -8,6 +8,8 @@ import static frc.robot.Constants.IntakeArmConstants.*;
 
 import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -25,9 +27,11 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   private final WL_SparkMax m_spark = new WL_SparkMax(kIntakeArmSparkPort);
   private final SparkMaxLimitSwitch m_topLimitSwitch =
       m_spark.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
-  private final SparkMaxLimitSwitch m_bottomSwitch =
+  private final SparkMaxLimitSwitch m_bottomLimitSwitch =
       m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
 
+  private final Debouncer m_topLimitDebounce = new Debouncer(0.1, DebounceType.kBoth);
+  private final Debouncer m_bottomLimitDebounce = new Debouncer(0.1, DebounceType.kBoth);
   private final SR_ProfiledPIDController m_pidController =
       new SR_ProfiledPIDController(
           kPIntakeArmVoltsPerRadian,
@@ -57,12 +61,15 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   private double m_feedbackOutput = 0;
 
   @Log(name = "Setpoint position")
-  private boolean m_armSetpointPosition = false; // true up, false down
+  private boolean m_armSetpointPosition = true; // true up, false down
 
   @Log(name = "Current position")
-  private boolean m_armPosition = false;
+  private boolean m_armPosition = true;
 
   private double m_lastStatorCurrent = 0;
+
+  @Log(name = "Output Voltage")
+  private double m_outputVoltage = 0;
 
   private enum ArmMovePhase {
     kLifting,
@@ -83,8 +90,8 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_spark.setSecondaryCurrentLimit(kIntakeArmImmediateCurrentLimitAmps);
 
     m_topLimitSwitch.enableLimitSwitch(true);
-    m_bottomSwitch.enableLimitSwitch(true);
-    this.resetAngleRadians(kIntakeArmBottomPositionRadians);
+    m_bottomLimitSwitch.enableLimitSwitch(true);
+    this.resetAngleRadians(kIntakeArmTopPositionRadians);
 
     Shuffleboard.getTab("IntakeArm").add("controller", m_pidController);
     Shuffleboard.getTab("IntakeArm").add("feedforward", m_feedforward);
@@ -119,12 +126,12 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   @Log(name = "Top Limit Switch")
   public boolean getTopLimitSwitch() {
-    return m_topLimitSwitch.isPressed();
+    return m_topLimitDebounce.calculate(m_topLimitSwitch.isPressed());
   }
 
   @Log(name = "Bottom Limit Switch")
   public boolean getBottomLimitSwitch() {
-    return m_bottomSwitch.isPressed();
+    return m_bottomLimitDebounce.calculate(m_bottomLimitSwitch.isPressed());
   }
 
   @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
@@ -137,11 +144,6 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   public void setPosition(boolean top) {
     m_voltageOverride = false;
     m_armSetpointPosition = top;
-  }
-
-  @Log(name = "Spark Output Voltage")
-  public double getVoltageOutput() {
-    return m_spark.getAppliedOutput() * 12;
   }
 
   public void runControlLoop() {
@@ -180,38 +182,42 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     if (m_voltageOverride) {
       m_spark.setVoltage(m_voltageSetpoint);
     } else {
+      double outputVoltage = 0;
       if (m_armSetpointPosition && !m_armPosition) {
         System.out.println("Going up, phase: " + m_phase);
         if (m_phase == ArmMovePhase.kLifting) {
-          m_spark.setVoltage(4);
-          if (m_lastStatorCurrent > 10 && this.getStatorCurrent() < 5) {
+          outputVoltage = 4;
+          if (m_lastStatorCurrent - this.getStatorCurrent() > 8) {
             m_phase = ArmMovePhase.kDropping;
             ;
           }
         } else if (m_phase == ArmMovePhase.kDropping) {
-          m_spark.setVoltage(-2);
+          outputVoltage = -2;
           if (this.getTopLimitSwitch()) {
             m_armPosition = true;
             m_phase = ArmMovePhase.kLifting;
-            m_spark.setVoltage(0);
+            outputVoltage = 0;
           }
         }
       } else if (!m_armSetpointPosition && m_armPosition) {
         System.out.println("Going down, phase: " + m_phase);
         if (m_phase == ArmMovePhase.kLifting) {
-          m_spark.setVoltage(-4);
-          if (m_lastStatorCurrent > 10 && this.getStatorCurrent() < 2) {
+          outputVoltage = -4;
+          if (m_lastStatorCurrent - this.getStatorCurrent() > 8) {
             m_phase = ArmMovePhase.kDropping;
           }
         } else if (m_phase == ArmMovePhase.kDropping) {
-          m_spark.setVoltage(2);
+          outputVoltage = 1;
           if (this.getBottomLimitSwitch()) {
             m_armPosition = false;
             m_phase = ArmMovePhase.kLifting;
-            m_spark.setVoltage(0);
+            outputVoltage = 0;
           }
         }
       }
+
+      m_spark.setVoltage(outputVoltage);
+      m_outputVoltage = outputVoltage;
       m_lastStatorCurrent = this.getStatorCurrent();
     }
   }
