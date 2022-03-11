@@ -58,6 +58,8 @@ public class Turret extends SubsystemBase implements Loggable {
   @Log(name = "Feedforward output")
   private double m_feedforwardOutput = 0;
 
+  private double m_lastOutputVoltage = 0;
+
   @Log(name = "filtered angle")
   private double m_filteredPotentiometerAngle;
 
@@ -131,8 +133,9 @@ public class Turret extends SubsystemBase implements Loggable {
 
     m_lastAngleRadians = currentAngleRadians;
 
+    double outputVoltage = 0;
     if (m_voltageOverride) {
-      m_talon.set(ControlMode.PercentOutput, m_voltageSetpoint / Constants.kNominalVoltage);
+      outputVoltage = m_voltageSetpoint;
     } else {
       double feedbackOutputVoltage =
           m_pidController.calculate(currentAngleRadians, m_angleSetpointRadians);
@@ -149,11 +152,17 @@ public class Turret extends SubsystemBase implements Loggable {
       m_feedforwardOutput = feedforwardOutputVoltage;
 
       if (!this.atGoal()) {
-        m_talon.set(
-            ControlMode.PercentOutput,
-            (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage);
+        outputVoltage = feedbackOutputVoltage + feedforwardOutputVoltage;
+      } else {
+        m_talon.set(ControlMode.PercentOutput, 0);
       }
     }
+
+    if (outputVoltage != m_lastOutputVoltage) {
+      m_talon.set(ControlMode.PercentOutput, outputVoltage / Constants.kNominalVoltage);
+    }
+
+    m_lastOutputVoltage = outputVoltage;
   }
 
   public void periodic() {

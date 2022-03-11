@@ -37,6 +37,8 @@ public class Feeder extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
+  private double m_lastOutputVoltage = 0;
+
   private DoubleLogEntry statorCurrentLog =
       new DoubleLogEntry(DataLogManager.getLog(), "/current/feeder/statorCurrent");
   private DoubleLogEntry supplyCurrentLog =
@@ -102,20 +104,27 @@ public class Feeder extends SubsystemBase implements Loggable {
 
   public void runControlLoop() {
     // Calculates voltage to apply.
+    double outputVoltage = 0;
     if (m_voltageOverride) {
-      m_spark.setVoltage(m_voltageSetpoint);
+      outputVoltage = m_voltageSetpoint;
     } else {
       double feedforwardOutput =
           m_feedforward.calculate(
               m_lastVelocitySetpoint, m_velocitySetpointRotationsPerSecond, kFeederLoopTimeSeconds);
 
-      m_spark.setVoltage(feedforwardOutput);
+      outputVoltage = feedforwardOutput;
 
       m_feedforwardOutput = feedforwardOutput;
 
       statorCurrentLog.append(m_spark.getOutputCurrent());
       supplyCurrentLog.append(m_spark.getSupplyCurrent());
     }
+    if (outputVoltage != m_lastOutputVoltage) {
+      m_spark.setVoltage(outputVoltage);
+    }
+
+    m_lastOutputVoltage = outputVoltage;
+
     m_servo.set(m_servoPositionSetpoint);
   }
 

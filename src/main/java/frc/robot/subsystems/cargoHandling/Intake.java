@@ -32,6 +32,8 @@ public class Intake extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
+  private double m_lastOutputVoltage = 0;
+
   private DoubleLogEntry statorCurrentLog =
       new DoubleLogEntry(DataLogManager.getLog(), "/current/intake/statorCurrent");
   private DoubleLogEntry supplyCurrentLog =
@@ -83,20 +85,25 @@ public class Intake extends SubsystemBase implements Loggable {
 
   public void runControlLoop() {
     // Calculates voltage to apply.
+    double outputVoltage = 0;
     if (m_voltageOverride) {
-      m_spark.setVoltage(m_voltageSetpoint);
+      outputVoltage = m_voltageSetpoint;
     } else {
       double feedforwardOutput =
           m_feedforward.calculate(
               m_lastVelocitySetpoint, m_velocitySetpointRotationsPerSecond, kIntakeLoopTimeSeconds);
 
-      m_spark.setVoltage(feedforwardOutput);
-
+      outputVoltage = feedforwardOutput;
       m_feedforwardOutput = feedforwardOutput;
 
       statorCurrentLog.append(m_spark.getOutputCurrent());
       supplyCurrentLog.append(m_spark.getSupplyCurrent());
     }
+
+    if (outputVoltage != m_lastOutputVoltage) {
+      m_spark.setVoltage(outputVoltage);
+    }
+    m_lastOutputVoltage = outputVoltage;
   }
 
   public void periodic() {

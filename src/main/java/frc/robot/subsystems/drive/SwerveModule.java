@@ -56,6 +56,7 @@ public class SwerveModule implements Loggable {
     m_driveMotor.setNeutralMode(NeutralMode.Brake);
     m_driveMotor.setStatusFramePeriod(1, 255);
     m_driveMotor.setStatusFramePeriod(2, 255);
+    m_driveMotor.setInverted(true);
 
     // Turning motor configuration
     // -- voltage compensation, current limiting, P D F terms, motion magic, brake mode
@@ -74,8 +75,8 @@ public class SwerveModule implements Loggable {
     m_turningMotor.configSelectedFeedbackSensor(
         TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.kCANTimeoutMs);
     m_turningMotor.setNeutralMode(NeutralMode.Brake);
-    m_driveMotor.setStatusFramePeriod(1, 255);
-    m_driveMotor.setStatusFramePeriod(2, 255);
+    m_turningMotor.setStatusFramePeriod(1, 255);
+    m_turningMotor.setStatusFramePeriod(2, 255);
 
     // Turning encoder configuration
     // -- configures offset and sensor range to +-180
@@ -124,7 +125,7 @@ public class SwerveModule implements Loggable {
    * @return heading as Rotation2d
    */
   private Rotation2d getHeading() {
-    return Rotation2d.fromDegrees(m_turningEncoder.getPosition());
+    return Rotation2d.fromDegrees(m_turningEncoder.getAbsolutePosition());
   }
 
   /**

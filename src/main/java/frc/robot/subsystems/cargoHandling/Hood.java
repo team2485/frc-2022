@@ -49,6 +49,9 @@ public class Hood extends SubsystemBase implements Loggable {
   @Log(name = "Feedback Output")
   private double m_feedbackOutput;
 
+  @Log(name = "Output voltage")
+  private double m_lastOutputVoltage = 0;
+
   private DoubleLogEntry statorCurrentLog =
       new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/statorCurrent");
   private DoubleLogEntry supplyCurrentLog =
@@ -82,6 +85,10 @@ public class Hood extends SubsystemBase implements Loggable {
   @Config(name = "Set angle (radians)", defaultValueNumeric = kHoodBottomPositionRadians)
   public void setAngleRadians(double angle) {
     m_voltageOverride = false;
+    if (angle > kHoodBottomPositionRadians && angle != m_angleSetpointRadians) {
+      m_isZeroed = false;
+    }
+
     m_angleSetpointRadians =
         MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
   }
@@ -92,7 +99,8 @@ public class Hood extends SubsystemBase implements Loggable {
 
   @Log(name = "At goal")
   public boolean atGoal() {
-    return this.getAngleRadians() - m_angleSetpointRadians < kHoodPositionToleranceRadians;
+    return Math.abs(this.getAngleRadians() - m_angleSetpointRadians)
+        < kHoodPositionToleranceRadians;
   }
 
   public void zeroAngle() {
@@ -115,25 +123,38 @@ public class Hood extends SubsystemBase implements Loggable {
     if (m_voltageOverride) {
       m_spark.setVoltage(m_voltageSetpoint);
     } else {
-      double feedbackOutputVoltage =
-          m_pidController.calculate(this.getAngleRadians(), m_angleSetpointRadians);
+      double outputVoltage = 0;
+      if (m_angleSetpointRadians <= kHoodBottomPositionRadians || !m_isZeroed) {
+        if (!this.getBottomLimitSwitch()) {
+          outputVoltage = -3;
+        }
+      } else {
+        double feedbackOutputVoltage =
+            m_pidController.calculate(this.getAngleRadians(), m_angleSetpointRadians);
 
-      double feedforwardOutputVoltage =
-          m_feedforward.calculate(
-              m_angleSetpointRadians,
-              m_lastVelocitySetpoint,
-              m_pidController.getSetpoint().velocity,
-              kHoodLoopTimeSeconds);
+        double feedforwardOutputVoltage =
+            m_feedforward.calculate(
+                m_angleSetpointRadians,
+                m_lastVelocitySetpoint,
+                m_pidController.getSetpoint().velocity,
+                kHoodLoopTimeSeconds);
 
-      m_feedbackOutput = feedbackOutputVoltage;
-      m_feedforwardOutput = feedforwardOutputVoltage;
-      m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
+        m_feedbackOutput = feedbackOutputVoltage;
+        m_feedforwardOutput = feedforwardOutputVoltage;
+        m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
 
-      m_spark.setVoltage(feedbackOutputVoltage + feedforwardOutputVoltage);
+        if (!this.atGoal()) {
+          outputVoltage = m_feedbackOutput + m_feedforwardOutput;
+        }
+      }
+      if (outputVoltage != m_lastOutputVoltage) {
+        m_spark.setVoltage(outputVoltage);
+      }
+      m_lastOutputVoltage = outputVoltage;
     }
-
     if (this.getBottomLimitSwitch()) {
       zeroAngle();
+      m_isZeroed = true;
     }
 
     statorCurrentLog.append(m_spark.getOutputCurrent());

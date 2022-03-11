@@ -59,6 +59,8 @@ public class ClimbArm extends SubsystemBase implements Loggable {
 
   private boolean m_loaded;
 
+  private boolean m_enabled = false;
+
   public ClimbArm() {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     talonConfig.voltageCompSaturation = Constants.kNominalVoltage;
@@ -151,37 +153,50 @@ public class ClimbArm extends SubsystemBase implements Loggable {
     return m_pidControllerTranslation.atGoal();
   }
 
-  public void runControlLoop() {
-
-    if (m_voltageOverride) {
-      m_talon.set(ControlMode.PercentOutput, m_voltageSetpoint / Constants.kNominalVoltage);
+  public void enable(boolean enabled) {
+    m_enabled = enabled;
+    if (enabled) {
+      m_talon.setStatusFramePeriod(1, 10);
+      m_talon.setStatusFramePeriod(2, 20);
     } else {
-      double feedbackOutputVoltage =
-          m_pidControllerTranslation.calculate(getTranslationMeters(), m_translationSetpointMeters);
+      m_talon.setStatusFramePeriod(1, 255);
+      m_talon.setStatusFramePeriod(2, 255);
+    }
+  }
 
-      double feedforwardOutputVoltage = 0;
-      if (m_loaded) {
-        feedforwardOutputVoltage =
-            m_feedforwardTranslation.calculate(
-                m_lastVelocitySetpointTranslation,
-                m_pidControllerTranslation.getSetpoint().velocity,
-                kArmControlLoopTimeSeconds);
+  public void runControlLoop() {
+    if (m_enabled) {
+      if (m_voltageOverride) {
+        m_talon.set(ControlMode.PercentOutput, m_voltageSetpoint / Constants.kNominalVoltage);
       } else {
-        feedforwardOutputVoltage =
-            m_feedforwardUnloaded.calculate(
-                m_lastVelocitySetpointTranslation,
-                m_pidControllerTranslation.getSetpoint().velocity,
-                kArmControlLoopTimeSeconds);
+        double feedbackOutputVoltage =
+            m_pidControllerTranslation.calculate(
+                getTranslationMeters(), m_translationSetpointMeters);
+
+        double feedforwardOutputVoltage = 0;
+        if (m_loaded) {
+          feedforwardOutputVoltage =
+              m_feedforwardTranslation.calculate(
+                  m_lastVelocitySetpointTranslation,
+                  m_pidControllerTranslation.getSetpoint().velocity,
+                  kArmControlLoopTimeSeconds);
+        } else {
+          feedforwardOutputVoltage =
+              m_feedforwardUnloaded.calculate(
+                  m_lastVelocitySetpointTranslation,
+                  m_pidControllerTranslation.getSetpoint().velocity,
+                  kArmControlLoopTimeSeconds);
+        }
+
+        double outputPercentage =
+            (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
+
+        m_feedbackOutput = feedbackOutputVoltage;
+        m_feedforwardOutput = feedforwardOutputVoltage;
+        m_talon.set(ControlMode.PercentOutput, outputPercentage);
+
+        m_lastVelocitySetpointTranslation = m_pidControllerTranslation.getSetpoint().velocity;
       }
-
-      double outputPercentage =
-          (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
-
-      m_feedbackOutput = feedbackOutputVoltage;
-      m_feedforwardOutput = feedforwardOutputVoltage;
-      m_talon.set(ControlMode.PercentOutput, outputPercentage);
-
-      m_lastVelocitySetpointTranslation = m_pidControllerTranslation.getSetpoint().velocity;
     }
   }
 

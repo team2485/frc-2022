@@ -6,12 +6,14 @@ package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.IntakeArmConstants.*;
 
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -30,6 +32,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   private final SparkMaxLimitSwitch m_bottomLimitSwitch =
       m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
 
+  private final DutyCycleEncoder m_encoder = new DutyCycleEncoder(4);
   private final Debouncer m_topLimitDebounce = new Debouncer(0.1, DebounceType.kBoth);
   private final Debouncer m_bottomLimitDebounce = new Debouncer(0.1, DebounceType.kBoth);
   private final SR_ProfiledPIDController m_pidController =
@@ -69,7 +72,10 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   private double m_lastStatorCurrent = 0;
 
   @Log(name = "Output Voltage")
-  private double m_outputVoltage = 0;
+  private double m_lastOutputVoltage = 0;
+
+  @Log(name = "Filtered Encoder Angle")
+  private double m_filteredEncoderAngle = kIntakeArmBottomPositionRadians;
 
   private enum ArmMovePhase {
     kLifting,
@@ -88,9 +94,9 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kIntakeArmSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIntakeArmImmediateCurrentLimitAmps);
-
     m_topLimitSwitch.enableLimitSwitch(true);
     m_bottomLimitSwitch.enableLimitSwitch(true);
+    m_spark.setIdleMode(IdleMode.kBrake);
     this.resetAngleRadians(kIntakeArmTopPositionRadians);
 
     Shuffleboard.getTab("IntakeArm").add("controller", m_pidController);
@@ -100,7 +106,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   /** @return current angle from horizontal */
   @Log(name = "Current angle (radians)")
   public double getAngleRadians() {
-    return m_spark.getEncoder().getPosition() * kIntakeArmRadiansPerMotorRev;
+    return -m_encoder.getAbsolutePosition() * 2 * Math.PI + 5.44 - 0.2618;
   }
 
   @Config(name = "Set angle (radians)", defaultValueNumeric = kIntakeArmBottomPositionRadians)
@@ -147,83 +153,41 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   }
 
   public void runControlLoop() {
+
     if (m_voltageOverride) {
       m_spark.setVoltage(m_voltageSetpoint);
     } else {
-      double feedbackOutputVoltage =
-          m_pidController.calculate(this.getAngleRadians(), m_angleSetpointRadians);
+      double outputVoltage = 0;
+      if (m_armSetpointPosition && this.getAngleRadians() < 2.1) {
+        // System.out.println("Going up");
+        if (this.getAngleRadians() > 1.75) {
+          outputVoltage = 2;
+        } else {
+          outputVoltage = 3;
+        }
+      } else if (!m_armSetpointPosition && this.getAngleRadians() > 0.05) {
+        // System.out.println("Going down");
 
-      double feedforwardOutputVoltage =
-          m_feedforward.calculate(
-              m_angleSetpointRadians,
-              m_lastVelocitySetpoint,
-              m_pidController.getSetpoint().velocity,
-              kIntakeArmLoopTimeSeconds);
+        if (this.getAngleRadians() > 1.75) {
+          outputVoltage = -3;
+        } else {
+          outputVoltage = -2;
+        }
+      }
 
-      m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
-
-      m_spark.setVoltage(feedbackOutputVoltage + feedforwardOutputVoltage);
-
-      m_feedbackOutput = feedbackOutputVoltage;
-      m_feedforwardOutput = feedforwardOutputVoltage;
+      if (outputVoltage != m_lastOutputVoltage) {
+        m_spark.setVoltage(outputVoltage);
+      }
+      m_lastOutputVoltage = outputVoltage;
     }
-
-    // if (this.getBottomLimitSwitch()) {
-    //   this.resetAngleRadians(kIntakeArmBottomPositionRadians);
-    // } else if (this.getTopLimitSwitch()) {
-    //   this.resetAngleRadians(kIntakeArmTopPositionRadians);
-    // }
 
     statorCurrentLog.append(m_spark.getOutputCurrent());
     supplyCurrentLog.append(m_spark.getSupplyCurrent());
   }
 
-  public void runCurrentBasedControlLoop() {
-    if (m_voltageOverride) {
-      m_spark.setVoltage(m_voltageSetpoint);
-    } else {
-      double outputVoltage = 0;
-      if (m_armSetpointPosition && !m_armPosition) {
-        System.out.println("Going up, phase: " + m_phase);
-        if (m_phase == ArmMovePhase.kLifting) {
-          outputVoltage = 4;
-          if (m_lastStatorCurrent - this.getStatorCurrent() > 8) {
-            m_phase = ArmMovePhase.kDropping;
-            ;
-          }
-        } else if (m_phase == ArmMovePhase.kDropping) {
-          outputVoltage = -2;
-          if (this.getTopLimitSwitch()) {
-            m_armPosition = true;
-            m_phase = ArmMovePhase.kLifting;
-            outputVoltage = 0;
-          }
-        }
-      } else if (!m_armSetpointPosition && m_armPosition) {
-        System.out.println("Going down, phase: " + m_phase);
-        if (m_phase == ArmMovePhase.kLifting) {
-          outputVoltage = -4;
-          if (m_lastStatorCurrent - this.getStatorCurrent() > 8) {
-            m_phase = ArmMovePhase.kDropping;
-          }
-        } else if (m_phase == ArmMovePhase.kDropping) {
-          outputVoltage = 1;
-          if (this.getBottomLimitSwitch()) {
-            m_armPosition = false;
-            m_phase = ArmMovePhase.kLifting;
-            outputVoltage = 0;
-          }
-        }
-      }
-
-      m_spark.setVoltage(outputVoltage);
-      m_outputVoltage = outputVoltage;
-      m_lastStatorCurrent = this.getStatorCurrent();
-    }
-  }
-
   @Override
   public void periodic() {
-    this.runCurrentBasedControlLoop();
+    this.runControlLoop();
+    m_filteredEncoderAngle += (this.getAngleRadians() - m_filteredEncoderAngle) * 0.05;
   }
 }

@@ -29,6 +29,8 @@ public class Robot extends TimedRobot {
   // private final AnalogPotentiometer m_potentiometer = new AnalogPotentiometer(0, 5, 0);
 
   public Robot() {
+    IDManager.getInstance(Constants.kRobotIdFile);
+
     DataLogManager.start();
     m_robotContainer = new RobotContainer();
     addPeriodic(
@@ -50,8 +52,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    // Instantiate IDManager -- will read ID File
-    IDManager.getInstance(Constants.kRobotIdFile);
 
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);

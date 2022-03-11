@@ -105,7 +105,7 @@ public final class Constants {
     public static final double kWheelDiameterMeters = 0.1016;
     public static final double kWheelCircumferenceMeters = 0.1016 * Math.PI;
     public static final double kDriveGearRatio =
-        IDManager.getInstance().select(6.75, 8.16); // motor turns per wheel turns
+        IDManager.getInstance().select(6.75, 6.86); // motor turns per wheel turns
     public static final double kDriveDistMetersPerMotorRev =
         kWheelCircumferenceMeters / kDriveGearRatio;
     public static final double kDriveDistMetersPerPulse = kDriveDistMetersPerMotorRev / kFalconCPR;
@@ -123,19 +123,19 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
     // practice carpet
-    public static final double ksDriveVolts = IDManager.getInstance().select(0.54, 0.54);
+    public static final double ksDriveVolts = IDManager.getInstance().select(0.0, 0.73658);
     public static final double kvDriveVoltSecondsPerMeter =
-        IDManager.getInstance().select(2.5856, 2.5856);
+        IDManager.getInstance().select(0.0, 2.2729);
     public static final double kaDriveVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.31789, 0.31789);
+        IDManager.getInstance().select(0.0, 0.37446);
 
     public static final double kvMaxVelocity = 12 / kvDriveVoltSecondsPerMeter;
     public static final double kaMaxAcceleration = 12 / kaDriveVoltSecondsSquaredPerMeter;
 
     //// Drive PID constants
-    public static final double kPDrive = 0.05;
+    public static final double kPDrive = 0.1;
     // Turning control constants
-    public static final double kTurningCurrentLimitAmps = 5;
+    public static final double kTurningCurrentLimitAmps = 10;
 
     //// Turning mechanism/encoder constants
     public static final double kTurningGearRatio = 12.8; // motor turns per shaft turns
@@ -209,9 +209,8 @@ public final class Constants {
     public static final double kTeleopMaxAngularSpeedRadiansPerSecond =
         kTeleopMaxSpeedMetersPerSecond / kTurningRadiusMeters; // radians per second
 
-    public static final double kTeleopMaxAccelerationMetersPerSecondSquared = 1;
-    public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared =
-        kTeleopMaxAccelerationMetersPerSecondSquared / kTurningRadiusMeters;
+    public static final double kTeleopMaxAccelerationMetersPerSecondSquared = 3;
+    public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared = 2 * Math.PI;
 
     // Vision pose estimation constants
     public static final double kVisionWeightPerSec =
@@ -470,7 +469,7 @@ public final class Constants {
 
     public static final int kTurretPotentiometerChannel = 0; // Analog channel
     public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
-    public static final double kTurretPotentiometerOffset = -Math.PI - 0.3625;
+    public static final double kTurretPotentiometerOffset = -Math.PI - 0.3625 - 0.48 + 0.053;
 
     public static final double kTurretGearing = 462;
 
@@ -482,12 +481,12 @@ public final class Constants {
     public static final double kSTurretVolts = 0.9;
 
     public static final double kPTurretVoltsPerRadian = 8;
-    public static final double kDTurretVoltSecondsPerRadian = 2;
+    public static final double kDTurretVoltSecondsPerRadian = 4;
 
-    public static final double kTurretPositionTolerance = 0.005;
+    public static final double kTurretPositionTolerance = 0.01;
 
-    public static final double kTurretMaxVelocityRadiansPerSecond = 4;
-    public static final double kTurretMaxAccelerationRadiansPerSecondSquared = 8;
+    public static final double kTurretMaxVelocityRadiansPerSecond = 2;
+    public static final double kTurretMaxAccelerationRadiansPerSecondSquared = 2;
 
     public static final SR_TrapezoidProfile.Constraints kTurretMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
@@ -516,9 +515,9 @@ public final class Constants {
         kFalconFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
 
     // shooter wood prototype gains
-    public static final double kSShooterVolts = 0.65884;
-    public static final double kVShooterVoltSecondsPerMeter = 0.11065;
-    public static final double kAShooterVoltSecondsSquaredPerMeter = 0.023167;
+    public static final double kSShooterVolts = 0.59077;
+    public static final double kVShooterVoltSecondsPerMeter = 0.10773;
+    public static final double kAShooterVoltSecondsSquaredPerMeter = 0.0091575;
 
     public static final double kShooterFeedforwardScale = 0.95;
 
