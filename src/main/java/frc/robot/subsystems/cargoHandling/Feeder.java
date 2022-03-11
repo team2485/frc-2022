@@ -13,8 +13,6 @@ import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.Config;
-import io.github.oblarg.oblog.annotations.Log;
 
 public class Feeder extends SubsystemBase implements Loggable {
   private final WL_SparkMax m_spark = new WL_SparkMax(kFeederSparkPort);
@@ -26,12 +24,12 @@ public class Feeder extends SubsystemBase implements Loggable {
       new SR_SimpleMotorFeedforward(
           kSFeederVolts, kVFeederVoltSecondsPerMeter, kAFeederVoltSecondsSquaredPerMeter);
 
-  @Log(name = "Velocity Setpoint")
+  // @Log(name = "Velocity Setpoint")
   private double m_velocitySetpointRotationsPerSecond;
 
   private double m_lastVelocitySetpoint;
 
-  @Log(name = "Feedforward output")
+  // @Log(name = "Feedforward output")
   private double m_feedforwardOutput;
 
   private boolean m_voltageOverride = false;
@@ -55,7 +53,7 @@ public class Feeder extends SubsystemBase implements Loggable {
   }
 
   /** @return the current velocity in rotations per second. */
-  @Log(name = "Current velocity (RPS)")
+  // @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
     return m_spark.getEncoder().getVelocity() / 60.0;
   }
@@ -65,7 +63,7 @@ public class Feeder extends SubsystemBase implements Loggable {
    *
    * @param rotationsPerSecond velocity setpoint
    */
-  @Config(name = "Set Velocity (RPS)")
+  // @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
     m_voltageOverride = false;
 
@@ -77,13 +75,13 @@ public class Feeder extends SubsystemBase implements Loggable {
    *
    * @param voltage what voltage to apply
    */
-  @Config.NumberSlider(name = "Set Voltage", min = -12, max = 12)
+  // @Config.NumberSlider(name = "Set Voltage", min = -12, max = 12)
   public void setVoltage(double voltage) {
     m_voltageOverride = true;
     m_voltageSetpoint = voltage;
   }
 
-  @Log(name = "At setpoint")
+  // @Log(name = "At setpoint")
   public boolean atSetpoint() {
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
         < kFeederVelocityToleranceRotationsPerSecond;
@@ -93,7 +91,7 @@ public class Feeder extends SubsystemBase implements Loggable {
     m_servoPositionSetpoint = position;
   }
 
-  @Config.ToggleButton(name = "Set servo")
+  // @Config.ToggleButton(name = "Set servo")
   public void engageServo(boolean engaged) {
     if (engaged) {
       m_servoPositionSetpoint = kServoEngagedPosition;

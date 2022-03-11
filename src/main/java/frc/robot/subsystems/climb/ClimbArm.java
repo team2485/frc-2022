@@ -8,7 +8,6 @@ import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.sendableRichness.SR_ElevatorFeedforward;
@@ -46,13 +45,13 @@ public class ClimbArm extends SubsystemBase implements Loggable {
           kvArmUnloadedVoltSecondsPerMeter,
           kaArmUnloadedVoltSecondsSquaredPerMeter);
 
-  @Log(name = "feedback output")
+  // @Log(name = "feedback output")
   private double m_feedbackOutput = 0;
 
-  @Log(name = "feedforward output")
+  // @Log(name = "feedforward output")
   private double m_feedforwardOutput = 0;
 
-  @Log(name = "Translation setpoint")
+  // @Log(name = "Translation setpoint")
   private double m_translationSetpointMeters = 0;
 
   private double m_lastVelocitySetpointTranslation = 0;
@@ -89,31 +88,31 @@ public class ClimbArm extends SubsystemBase implements Loggable {
 
     m_loaded = true;
 
-    Shuffleboard.getTab("ClimbArm").add("Controller Translation", m_pidControllerTranslation);
-    Shuffleboard.getTab("ClimbArm").add("FF Translation", m_feedforwardTranslation);
-    Shuffleboard.getTab("ClimbArm").add("FF Unloaded", m_feedforwardUnloaded);
+    // Shuffleboard.getTab("ClimbArm").add("Controller Translation", m_pidControllerTranslation);
+    // Shuffleboard.getTab("ClimbArm").add("FF Translation", m_feedforwardTranslation);
+    // Shuffleboard.getTab("ClimbArm").add("FF Unloaded", m_feedforwardUnloaded);
   }
 
   public void setMode(boolean loaded) {
     m_loaded = loaded;
   }
 
-  @Config(name = "Reset absolute rotation")
+  // @Config(name = "Reset absolute rotation")
   public void resetAbsoluteRotation(double rotations) {
     m_talon.setSelectedSensorPosition(rotations / kArmRotationsPerPulse);
   }
 
-  @Log(name = "Current absolute rotation")
+  // @Log(name = "Current absolute rotation")
   public double getAbsoluteRotation() {
     return m_talon.getSelectedSensorPosition() * kArmRotationsPerPulse;
   }
 
-  @Log(name = "Current translation")
+  // @Log(name = "Current translation")
   public double getTranslationMeters() {
     return this.getAbsoluteRotation() * kSprocketCircumferenceMeters;
   }
 
-  @Config(name = "Set translation")
+  // @Config(name = "Set translation")
   public void setTranslationMeters(double translation) {
     m_voltageOverride = false;
     m_translationSetpointMeters = translation;
@@ -124,12 +123,12 @@ public class ClimbArm extends SubsystemBase implements Loggable {
   //   m_talon.set(ControlMode.Current, amps * 1000);
   // }
 
-  @Log(name = "Stator current (amps)")
+  // @Log(name = "Stator current (amps)")
   public double getStatorCurrentAmps() {
     return m_talon.getStatorCurrent();
   }
 
-  @Log(name = "Supply current (amps)")
+  // @Log(name = "Supply current (amps)")
   public double getSupplyCurrentAmps() {
     return m_talon.getSupplyCurrent();
   }
@@ -138,12 +137,12 @@ public class ClimbArm extends SubsystemBase implements Loggable {
     return this.getStatorCurrentAmps() > threshold;
   }
 
-  @Log(name = "current above 15")
+  // @Log(name = "current above 15")
   public boolean getStatorCurrentSpike15() {
     return this.getStatorCurrentAmps() > 10;
   }
 
-  @Config(name = "Set voltage")
+  // @Config(name = "Set voltage")
   public void setVoltage(double voltage) {
     m_voltageOverride = true;
     m_voltageSetpoint = voltage;

@@ -47,11 +47,11 @@ public class DriveFacingHub extends CommandBase {
     SmartDashboard.putNumber("xbox left x", m_ySpeedSupplier.getAsDouble());
 
     final double xSpeed =
-        -Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband)
+        Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband)
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double ySpeed =
-        -Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband)
+        Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband)
             * kTeleopMaxSpeedMetersPerSecond;
 
     // Find hub position relative to the robot. The rotation of the hub relative to the robot is

@@ -6,9 +6,9 @@ package frc.robot;
 
 import static frc.robot.Constants.TurretConstants.*;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.team2485.WarlordsLib.CurrentLogger;
@@ -32,6 +32,8 @@ public class Robot extends TimedRobot {
     IDManager.getInstance(Constants.kRobotIdFile);
 
     DataLogManager.start();
+
+    LiveWindow.disableAllTelemetry();
     m_robotContainer = new RobotContainer();
     addPeriodic(
         () -> m_robotContainer.m_shooter.runControlLoop(),
@@ -68,7 +70,6 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     Logger.updateEntries();
-    NetworkTableInstance.getDefault().flush();
     // System.out.println("Potentiometer reading: " + m_potentiometer.get());
   }
 

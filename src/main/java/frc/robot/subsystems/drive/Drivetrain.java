@@ -56,10 +56,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Log private double m_desiredXSpeed;
   @Log private double m_desiredYSpeed;
 
-  @Log(name = "Drive Neutral")
+  // @Log(name = "Drive Neutral")
   private SendableChooser<NeutralMode> m_driveNeutralChooser = new SendableChooser<NeutralMode>();
 
-  @Log(name = "Turning Neutral")
+  // @Log(name = "Turning Neutral")
   private SendableChooser<NeutralMode> m_turningNeutralChooser = new SendableChooser<NeutralMode>();
 
   public final Field2d m_field = new Field2d();
@@ -136,8 +136,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
       m_frontLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
       m_frontRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-      m_backRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+      m_backRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
     } else {
       SwerveModuleState[] states =
           kDriveKinematics.toSwerveModuleStates(

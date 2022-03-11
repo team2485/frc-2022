@@ -10,17 +10,17 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
+import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.LayoutType;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_TalonFX;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.Config;
-import io.github.oblarg.oblog.annotations.Log;
 
 public class SwerveModule implements Loggable {
 
@@ -56,7 +56,6 @@ public class SwerveModule implements Loggable {
     m_driveMotor.setNeutralMode(NeutralMode.Brake);
     m_driveMotor.setStatusFramePeriod(1, 255);
     m_driveMotor.setStatusFramePeriod(2, 255);
-    m_driveMotor.setInverted(true);
 
     // Turning motor configuration
     // -- voltage compensation, current limiting, P D F terms, motion magic, brake mode
@@ -74,7 +73,11 @@ public class SwerveModule implements Loggable {
     m_turningMotor.enableVoltageCompensation(true);
     m_turningMotor.configSelectedFeedbackSensor(
         TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.kCANTimeoutMs);
+    m_turningMotor.configIntegratedSensorAbsoluteRange(
+        AbsoluteSensorRange.Signed_PlusMinus180, Constants.kCANTimeoutMs);
     m_turningMotor.setNeutralMode(NeutralMode.Brake);
+    m_turningMotor.configAllowableClosedloopError(
+        0, Units.degreesToRadians(1) / kTurningRadiansPerPulse, Constants.kCANTimeoutMs);
     m_turningMotor.setStatusFramePeriod(1, 255);
     m_turningMotor.setStatusFramePeriod(2, 255);
 
@@ -87,6 +90,16 @@ public class SwerveModule implements Loggable {
         SensorInitializationStrategy.BootToAbsolutePosition;
     m_turningEncoder = new CANCoder(turningEncoderID);
     m_turningEncoder.configAllSettings(turningEncoderConfig);
+    m_turningEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 255);
+
+    try {
+      Thread.sleep(255);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    double absolutePosition = m_turningEncoder.getAbsolutePosition();
+    m_turningMotor.setSelectedSensorPosition(
+        Units.degreesToRadians(absolutePosition) / kTurningRadiansPerPulse, 0, 1000);
   }
 
   /**
@@ -95,7 +108,7 @@ public class SwerveModule implements Loggable {
    * @param desiredState
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-    SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getHeading());
+    SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getIntegratedHeading());
     this.setSpeedMetersPerSecond(state.speedMetersPerSecond);
     this.setHeading(state.angle);
   }
@@ -106,7 +119,7 @@ public class SwerveModule implements Loggable {
    * @return current state
    */
   public SwerveModuleState getState() {
-    return new SwerveModuleState(this.getSpeedMetersPerSecond(), this.getHeading());
+    return new SwerveModuleState(this.getSpeedMetersPerSecond(), this.getIntegratedHeading());
   }
 
   /**
@@ -114,9 +127,9 @@ public class SwerveModule implements Loggable {
    *
    * @return current heading in degrees
    */
-  @Log(name = "current rotation")
-  private double getHeadingDegrees() {
-    return getHeading().getDegrees();
+  // @Log(name = "current rotation (integrated)")
+  private double getIntegratedHeadingDegrees() {
+    return getIntegratedHeading().getDegrees();
   }
 
   /**
@@ -124,7 +137,22 @@ public class SwerveModule implements Loggable {
    *
    * @return heading as Rotation2d
    */
-  private Rotation2d getHeading() {
+  private Rotation2d getIntegratedHeading() {
+    return new Rotation2d(
+        convertToSteeringRange(
+            m_turningMotor.getSelectedSensorPosition() * kTurningRadiansPerPulse));
+  }
+
+  // @Log(name = "Integrated sensor Pulses")
+  private double getIntegratedSensorPosition() {
+    return m_turningMotor.getSelectedSensorPosition();
+  }
+
+  private double getCANCoderHeadingDegrees() {
+    return getCANCoderHeading().getDegrees();
+  }
+
+  private Rotation2d getCANCoderHeading() {
     return Rotation2d.fromDegrees(m_turningEncoder.getAbsolutePosition());
   }
 
@@ -133,9 +161,9 @@ public class SwerveModule implements Loggable {
    *
    * @param desiredRotationDegrees desired heading in degrees
    */
-  @Config(name = "set rotation")
+  // @Config(name = "set rotation")
   public void setHeadingDegrees(double desiredRotationDegrees) {
-    Rotation2d currentRotation = this.getHeading();
+    Rotation2d currentRotation = this.getIntegratedHeading();
     // use WPILib's swervemodulestate optimization to minimize change in heading
     Rotation2d optimizedDesiredRotation =
         SwerveModuleState.optimize(
@@ -151,15 +179,7 @@ public class SwerveModule implements Loggable {
    * @param optimizedDesiredRotation desired headiing as Rotation2d
    */
   public void setHeading(Rotation2d optimizedDesiredRotation) {
-    Rotation2d currentRotation = this.getHeading();
-    double optimizedRotationRadians = optimizedDesiredRotation.getRadians();
-    double currentRotationRadians = currentRotation.getRadians();
-
-    double deltaRadians = optimizedRotationRadians - currentRotationRadians;
-    double deltaPulses = deltaRadians / kTurningRadiansPerPulse;
-
-    double currentPulses = m_turningMotor.getSelectedSensorPosition();
-    double referencePulses = currentPulses + deltaPulses;
+    double referencePulses = optimizedDesiredRotation.getRadians() / kTurningRadiansPerPulse;
 
     m_turningMotor.set(ControlMode.MotionMagic, referencePulses);
   }
@@ -169,7 +189,7 @@ public class SwerveModule implements Loggable {
    *
    * @return speed in meters per second
    */
-  @Log(name = "Speed meters per second")
+  // @Log(name = "Speed meters per second")
   private double getSpeedMetersPerSecond() {
     return m_driveMotor.getSelectedSensorVelocity() * kDriveDistMetersPerPulse * 10;
   }
@@ -179,7 +199,7 @@ public class SwerveModule implements Loggable {
    *
    * @param desiredSpeed desired speed in meters per second
    */
-  @Config(name = "Set speed meters per second")
+  // @Config(name = "Set speed meters per second")
   public void setSpeedMetersPerSecond(double desiredSpeed) {
     m_driveMotor.set(
         ControlMode.Velocity,
@@ -209,6 +229,15 @@ public class SwerveModule implements Loggable {
    */
   public void setTurningNeutralMode(NeutralMode mode) {
     m_turningMotor.setNeutralMode(mode);
+  }
+
+  public static double convertToSteeringRange(double angleRadians) {
+
+    double value = (angleRadians) % (2 * Math.PI);
+    if (value > Math.PI) {
+      value -= 2 * Math.PI;
+    }
+    return value;
   }
 
   @Override

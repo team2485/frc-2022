@@ -127,9 +127,6 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_feedforwardOutput = feedforwardOutput;
 
     m_lastVelocity = this.getVelocityRotationsPerSecond();
-
-    statorCurrentLog.append(m_talon.getStatorCurrent());
-    supplyCurrentLog.append(m_talon.getSupplyCurrent());
   }
 
   @Override
