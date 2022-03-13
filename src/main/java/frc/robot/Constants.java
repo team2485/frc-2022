@@ -44,14 +44,17 @@ public final class Constants {
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
           Map.ofEntries(
-              entry(2.13, new ShotParameter(67, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(2.67, new ShotParameter(75, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(3.16, new ShotParameter(78.5, 0.45, 0)),
-              entry(3.62, new ShotParameter(80.5, 0.46, 0)),
-              entry(4.17, new ShotParameter(82.5, 0.47, 0)),
-              entry(4.64, new ShotParameter(87.5, 0.485, 0)),
-              entry(5.13, new ShotParameter(90, 0.495, 0)),
-              entry(5.63, new ShotParameter(92.5, 0.515, 0))));
+              entry(1.45, new ShotParameter(33, 0.47, 0)),
+              entry(1.989, new ShotParameter(45, 0.45, 0)),
+              entry(1.99, new ShotParameter(62, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(2.12, new ShotParameter(65, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(2.52, new ShotParameter(75, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(3.29, new ShotParameter(78, 0.46, 0)),
+              entry(3.67, new ShotParameter(80, 0.46, 0)),
+              entry(4.15, new ShotParameter(81.5, 0.47, 0)),
+              entry(4.68, new ShotParameter(86.5, 0.48, 0)),
+              entry(5.2, new ShotParameter(89, 0.5, 0)),
+              entry(5.72, new ShotParameter(91, 0.52, 0))));
 
   public static final double kRIOLoopTime = 0.02;
 
@@ -244,8 +247,8 @@ public final class Constants {
     public static final Pose2d kHubCenterPosition =
         new Pose2d(kHubCenterTranslation, new Rotation2d(0));
 
-    public static final double kRobotBumperLengthMeters = 0.982;
-    public static final double kRobotBumperWidthMeters = 0.855;
+    public static final double kRobotBumperLengthMeters = 0.97;
+    public static final double kRobotBumperWidthMeters = 0.84;
   }
 
   public static final class VisionConstants {
@@ -423,7 +426,7 @@ public final class Constants {
 
     public static final int kFeederServoPort = 1;
     public static final double kServoDisengagedPosition = 0.45;
-    public static final double kServoEngagedPosition = 0.18;
+    public static final double kServoEngagedPosition = 0.15;
   }
 
   public static final class HoodConstants {
@@ -478,7 +481,7 @@ public final class Constants {
     public static final int kTurretPotentiometerChannel = 0; // Analog channel
     public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
     public static final double kTurretPotentiometerOffset =
-        -Math.PI - 0.3625 - 0.48 + 0.053 - 0.16 - 1.37 + 1.196;
+        -Math.PI - 0.3625 - 0.48 + 0.053 - 0.16 - 1.37 + 1.196 - 0.225;
 
     public static final double kTurretGearing = 462;
 
@@ -501,8 +504,8 @@ public final class Constants {
         new SR_TrapezoidProfile.Constraints(
             kTurretMaxVelocityRadiansPerSecond, kTurretMaxAccelerationRadiansPerSecondSquared);
 
-    public static final double kTurretMinPositionRadians = -Math.PI / 4;
-    public static final double kTurretMaxPositionRadians = Math.PI / 4;
+    public static final double kTurretMinPositionRadians = -0.4;
+    public static final double kTurretMaxPositionRadians = 0.4;
 
     public static final double kBufferSizeRadians = Math.toRadians(25);
   }
@@ -537,7 +540,7 @@ public final class Constants {
 
     public static final double kShooterControlVelocityTolerance = 0.5;
 
-    public static final double kShooterFeedVelocityTolerance = 1.5;
+    public static final double kShooterFeedVelocityTolerance = 2.5;
 
     public static final double kShooterVelocityDipThresholdRotationsPerSecond = 3;
   }

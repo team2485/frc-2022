@@ -3,6 +3,7 @@ package frc.robot.subsystems.cargoHandling;
 import static frc.robot.Constants.HoodConstants.*;
 
 import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -49,6 +50,8 @@ public class Hood extends SubsystemBase implements Loggable {
 
   @Log(name = "Output voltage")
   private double m_lastOutputVoltage = 0;
+
+  private boolean m_enabled = true;
 
   public Hood() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
@@ -113,42 +116,60 @@ public class Hood extends SubsystemBase implements Loggable {
     m_voltageSetpoint = voltage;
   }
 
-  public void runControlLoop() {
-    if (m_voltageOverride) {
-      m_spark.setVoltage(m_voltageSetpoint);
+  public void enable(boolean enabled) {
+    m_enabled = enabled;
+    if (m_enabled) {
+      m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10); // default 10
+      m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20); // default 20
+      m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20); // default 20
     } else {
-      double outputVoltage = 0;
-      if (m_angleSetpointRadians <= kHoodBottomPositionRadians || !m_isZeroed) {
-        if (!this.getBottomLimitSwitch()) {
-          outputVoltage = -3;
-        }
+      m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
+      m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
+      m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20
+    }
+  }
+
+  public void runControlLoop() {
+    double outputVoltage = 0;
+    if (m_enabled) {
+      if (m_voltageOverride) {
+        outputVoltage = m_voltageSetpoint;
       } else {
-        double feedbackOutputVoltage =
-            m_pidController.calculate(this.getAngleRadians(), m_angleSetpointRadians);
+        if (m_angleSetpointRadians <= kHoodBottomPositionRadians || !m_isZeroed) {
+          if (!this.getBottomLimitSwitch()) {
+            outputVoltage = -3;
+          }
+        } else {
+          double feedbackOutputVoltage =
+              m_pidController.calculate(this.getAngleRadians(), m_angleSetpointRadians);
 
-        double feedforwardOutputVoltage =
-            m_feedforward.calculate(
-                m_angleSetpointRadians,
-                m_lastVelocitySetpoint,
-                m_pidController.getSetpoint().velocity,
-                kHoodLoopTimeSeconds);
+          double feedforwardOutputVoltage =
+              m_feedforward.calculate(
+                  m_angleSetpointRadians,
+                  m_lastVelocitySetpoint,
+                  m_pidController.getSetpoint().velocity,
+                  kHoodLoopTimeSeconds);
 
-        m_feedbackOutput = feedbackOutputVoltage;
-        m_feedforwardOutput = feedforwardOutputVoltage;
-        m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
+          m_feedbackOutput = feedbackOutputVoltage;
+          m_feedforwardOutput = feedforwardOutputVoltage;
+          m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
 
-        if (!this.atGoal()) {
-          outputVoltage = m_feedbackOutput + m_feedforwardOutput;
+          if (!this.atGoal()) {
+            outputVoltage = m_feedbackOutput + m_feedforwardOutput;
+          }
         }
       }
-      m_spark.setVoltage(outputVoltage);
+      if (this.getBottomLimitSwitch()) {
+        zeroAngle();
+        m_isZeroed = true;
+      }
+    }
 
-      m_lastOutputVoltage = outputVoltage;
+    if (outputVoltage != m_lastOutputVoltage) {
+      m_spark.setVoltage(outputVoltage);
     }
-    if (this.getBottomLimitSwitch()) {
-      zeroAngle();
-      m_isZeroed = true;
-    }
+
+    m_lastOutputVoltage = outputVoltage;
   }
 
   @Override

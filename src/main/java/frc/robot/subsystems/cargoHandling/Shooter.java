@@ -45,6 +45,10 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   private double m_lastVelocity = 0;
 
+  private boolean m_enabled = true;
+
+  private double m_lastOutputVoltage = 0;
+
   /** Creates a new Shooter. Controlled with a feedforward and a bang bang controlller. */
   public Shooter() {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -106,24 +110,69 @@ public class Shooter extends SubsystemBase implements Loggable {
         && m_velocitySetpointRotationsPerSecond >= m_lastVelocitySetpoint;
   }
 
+  public void enable(boolean enabled) {
+    m_enabled = enabled;
+    if (enabled) {
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 10);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
+    } else {
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
+    }
+  }
+
   // runs every 10 ms (run by Robot)
   public void runControlLoop() {
     // Calculates voltage to apply.
     // Feedforward is scaled down to prevent overshoot since bang-bang can't correct for overshoot.
-    double feedforwardOutput =
-        kShooterFeedforwardScale * m_feedforward.calculate(m_velocitySetpointRotationsPerSecond);
-    double feedbackOutput =
-        this.atSetpoint()
-            ? 0
-            : m_bangBangController.calculate(
-                    this.getVelocityRotationsPerSecond(), m_velocitySetpointRotationsPerSecond)
-                * kNominalVoltage;
+    double outputVoltage = 0;
+    if (m_enabled) {
+      double feedforwardOutput =
+          kShooterFeedforwardScale * m_feedforward.calculate(m_velocitySetpointRotationsPerSecond);
+      double feedbackOutput =
+          this.atSetpoint()
+              ? 0
+              : m_bangBangController.calculate(
+                      this.getVelocityRotationsPerSecond(), m_velocitySetpointRotationsPerSecond)
+                  * kNominalVoltage;
 
-    double outputVoltage = feedforwardOutput + feedbackOutput;
-    m_talon.set(ControlMode.PercentOutput, outputVoltage / kNominalVoltage);
+      outputVoltage = feedforwardOutput + feedbackOutput;
 
-    m_feedbackOutput = feedbackOutput;
-    m_feedforwardOutput = feedforwardOutput;
+      m_feedbackOutput = feedbackOutput;
+      m_feedforwardOutput = feedforwardOutput;
+    }
+
+    if (outputVoltage != m_lastOutputVoltage) {
+      m_talon.set(ControlMode.PercentOutput, outputVoltage / Constants.kNominalVoltage);
+    }
+
+    m_lastOutputVoltage = outputVoltage;
   }
 
   @Override
