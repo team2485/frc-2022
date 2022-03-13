@@ -7,6 +7,7 @@ import static frc.robot.Constants.TurretConstants.*;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.math.MathUtil;
@@ -74,15 +75,29 @@ public class Turret extends SubsystemBase implements Loggable {
     m_talon.configAllSettings(talonConfig);
     m_talon.enableVoltageCompensation(true);
     m_talon.setNeutralMode(NeutralMode.Brake);
-    m_talon.setStatusFramePeriod(1, 255);
-    m_talon.setStatusFramePeriod(2, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_4_AinTempVbat, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_6_Misc, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_7_CommStatus, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_10_Targets, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_12_Feedback1, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_13_Base_PIDF0, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_15_FirmwareApiStatus, 255);
+    m_talon.setStatusFramePeriod(StatusFrame.Status_17_Targets1, 255);
 
-    m_filteredPotentiometerAngle = this.getAngleRadians();
+    m_talon.setInverted(true);
+
+    m_filteredPotentiometerAngle = this.getUnfilteredAngleRadians();
 
     Shuffleboard.getTab("Turret").add("Turret controller", m_pidController);
     Shuffleboard.getTab("Hood").add("Turret feedforward", m_feedforward);
   }
 
+  // ccw + cw-, 0 straight forward
   @Config(name = "Set angle (radians)")
   public void setAngleRadians(double angle) {
     m_voltageOverride = false;
@@ -90,13 +105,17 @@ public class Turret extends SubsystemBase implements Loggable {
         MathUtil.clamp(angle % (2 * Math.PI), kTurretMinPositionRadians, kTurretMaxPositionRadians);
   }
 
-  @Log(name = "Current angle (radians)")
-  public double getAngleRadians() {
-    return m_potentiometer.get() % (2 * Math.PI);
+  @Log(name = "Current unfiltered angle (radians)")
+  public double getUnfilteredAngleRadians() {
+    return -m_potentiometer.get() % (2 * Math.PI);
+  }
+
+  public double getFilteredAngleRadians() {
+    return m_filteredPotentiometerAngle;
   }
 
   public Rotation2d getRotation2d() {
-    return new Rotation2d(this.getAngleRadians());
+    return new Rotation2d(this.getUnfilteredAngleRadians());
   }
 
   @Log(name = "Velocity (radps)")
@@ -127,7 +146,7 @@ public class Turret extends SubsystemBase implements Loggable {
   }
 
   public void runControlLoop() {
-    double currentAngleRadians = m_filteredPotentiometerAngle;
+    double currentAngleRadians = this.getFilteredAngleRadians();
     m_velocityRadiansPerSecond =
         (currentAngleRadians - m_lastAngleRadians) / kTurretLoopTimeSeconds;
 
@@ -167,6 +186,7 @@ public class Turret extends SubsystemBase implements Loggable {
 
   public void periodic() {
     this.runControlLoop();
-    m_filteredPotentiometerAngle += (this.getAngleRadians() - m_filteredPotentiometerAngle) * 0.5;
+    m_filteredPotentiometerAngle +=
+        (this.getUnfilteredAngleRadians() - m_filteredPotentiometerAngle) * 0.5;
   }
 }

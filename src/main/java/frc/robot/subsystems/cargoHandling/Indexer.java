@@ -4,13 +4,12 @@ import static frc.robot.Constants.IndexerConstants.*;
 
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Indexer extends SubsystemBase implements Loggable {
@@ -35,20 +34,15 @@ public class Indexer extends SubsystemBase implements Loggable {
 
   private double m_lastOutputVoltage = 0;
 
-  private DoubleLogEntry statorCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/indexer/statorCurrent");
-  private DoubleLogEntry supplyCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/indexer/supplyCurrent");
-
   public Indexer() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kIndexerSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIndexerImmediateCurrentLimitAmps);
     m_spark.setIdleMode(IdleMode.kBrake);
     m_spark.setInverted(true);
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 200); // default 10
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200); // default 20
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 200); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20
   }
 
   /** @return the current velocity in rotations per second. */
@@ -62,7 +56,7 @@ public class Indexer extends SubsystemBase implements Loggable {
    *
    * @param rotationsPerSecond velocity setpoint
    */
-  // @Config(name = "Set Velocity (RPS)")
+  @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
     m_voltageOverride = false;
     m_velocitySetpointRotationsPerSecond = rotationsPerSecond;
@@ -73,20 +67,21 @@ public class Indexer extends SubsystemBase implements Loggable {
    *
    * @param voltage what voltage to apply
    */
-  // @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
+  @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
   public void setVoltage(double voltage) {
     m_voltageOverride = true;
     m_voltageSetpoint = voltage;
+  }
+
+  @Log(name = "Stator current")
+  public double getStatorCurrent() {
+    return m_spark.getOutputCurrent();
   }
 
   @Log(name = "At setpoint")
   public boolean atSetpoint() {
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
         < kIndexerVelocityToleranceRotationsPerSecond;
-  }
-
-  public boolean hasStopped() {
-    return this.getVelocityRotationsPerSecond() == 0 && m_lastVelocity > 0;
   }
 
   public void runControlLoop() {
@@ -104,9 +99,6 @@ public class Indexer extends SubsystemBase implements Loggable {
       outputVoltage = feedforwardOutput;
 
       m_feedforwardOutput = feedforwardOutput;
-
-      statorCurrentLog.append(m_spark.getOutputCurrent());
-      supplyCurrentLog.append(m_spark.getSupplyCurrent());
     }
 
     if (outputVoltage != m_lastOutputVoltage) {

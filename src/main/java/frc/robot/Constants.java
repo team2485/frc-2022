@@ -44,9 +44,15 @@ public final class Constants {
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
           Map.ofEntries(
-              entry(5.0, new ShotParameter(0.45, 60, 3)),
-              entry(6.0, new ShotParameter(0.4, 65, 4)),
-              entry(7.0, new ShotParameter(0.35, 70, 5))));
+              entry(2.13, new ShotParameter(67, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(2.67, new ShotParameter(75, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(3.16, new ShotParameter(78.5, 0.45, 0)),
+              entry(3.62, new ShotParameter(80.5, 0.46, 0)),
+              entry(4.17, new ShotParameter(82.5, 0.47, 0)),
+              entry(4.64, new ShotParameter(87.5, 0.485, 0)),
+              entry(5.13, new ShotParameter(90, 0.495, 0)),
+              entry(5.63, new ShotParameter(92.5, 0.515, 0))));
+
   public static final double kRIOLoopTime = 0.02;
 
   // motor constants
@@ -237,6 +243,9 @@ public final class Constants {
     public static final Translation2d kHubCenterTranslation = new Translation2d(8.2296, 4.1148);
     public static final Pose2d kHubCenterPosition =
         new Pose2d(kHubCenterTranslation, new Rotation2d(0));
+
+    public static final double kRobotBumperLengthMeters = 0.982;
+    public static final double kRobotBumperWidthMeters = 0.855;
   }
 
   public static final class VisionConstants {
@@ -276,9 +285,7 @@ public final class Constants {
     public static final double kBlinkLengthSecs = 0.5;
 
     public static final Transform2d kRobotToTurretCenterMeters =
-        new Transform2d(
-            new Translation2d(0.4, 0), // in meters
-            new Rotation2d());
+        new Transform2d(new Translation2d(0.0508, 0), new Rotation2d()); // in meters
 
     public static final Translation2d kTurretCentertoCameraMeters = new Translation2d(0, 0);
   }
@@ -396,6 +403,9 @@ public final class Constants {
     public static final double kFeederFreeSpeedRotationsPerSecond =
         kNeo550FreeSpeedRotationsPerSecond / kFeederGearRatio;
 
+    public static final double kFeederDefaultSpeedRotationsPerSecond =
+        kFeederFreeSpeedRotationsPerSecond / 2;
+
     public static final double kFeederPulleyCircumferenceMeters = 0.0191008 * Math.PI;
 
     public static final double kFeederSurfaceFreeSpeedMetersPerSecond =
@@ -412,14 +422,14 @@ public final class Constants {
     public static final double kFeederVelocityToleranceRotationsPerSecond = 1;
 
     public static final int kFeederServoPort = 1;
-    public static final double kServoDisengagedPosition = 0.4;
-    public static final double kServoEngagedPosition = 0;
+    public static final double kServoDisengagedPosition = 0.45;
+    public static final double kServoEngagedPosition = 0.18;
   }
 
   public static final class HoodConstants {
     public static final int kHoodSparkPort = 31;
-    public static final int kHoodSmartCurrentLimitAmps = 2;
-    public static final int kHoodImmediateCurrentLimitAmps = 5;
+    public static final int kHoodSmartCurrentLimitAmps = 5;
+    public static final int kHoodImmediateCurrentLimitAmps = 10;
 
     public static final double kHoodLoopTimeSeconds = 0.02;
 
@@ -431,7 +441,7 @@ public final class Constants {
 
     public static final double kHoodBottomPositionRadians =
         0.4363323; // from horizontal (25.21 deg)
-    public static final double kHoodTopPositionRadians = 0.634; //
+    public static final double kHoodTopPositionRadians = 0.525; //
 
     // Hood characterization constants
     public static final double ksHoodVolts = 0.13428;
@@ -450,6 +460,8 @@ public final class Constants {
     public static final double kDHood = 0;
     public static final double kHoodPositionToleranceRadians = 0.005;
 
+    public static final double kHoodSetpointDeadbandRadians = 0.001;
+
     public static final double kHoodZeroingVoltage = -0.5;
   }
 
@@ -465,7 +477,8 @@ public final class Constants {
 
     public static final int kTurretPotentiometerChannel = 0; // Analog channel
     public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
-    public static final double kTurretPotentiometerOffset = -Math.PI - 0.3625 - 0.48 + 0.053;
+    public static final double kTurretPotentiometerOffset =
+        -Math.PI - 0.3625 - 0.48 + 0.053 - 0.16 - 1.37 + 1.196;
 
     public static final double kTurretGearing = 462;
 
@@ -479,9 +492,9 @@ public final class Constants {
     public static final double kPTurretVoltsPerRadian = 8;
     public static final double kDTurretVoltSecondsPerRadian = 4;
 
-    public static final double kTurretPositionTolerance = 0.01;
+    public static final double kTurretPositionTolerance = 0.02;
 
-    public static final double kTurretMaxVelocityRadiansPerSecond = 2;
+    public static final double kTurretMaxVelocityRadiansPerSecond = 4;
     public static final double kTurretMaxAccelerationRadiansPerSecondSquared = 2;
 
     public static final SR_TrapezoidProfile.Constraints kTurretMotionProfileConstraints =
@@ -507,8 +520,9 @@ public final class Constants {
     public static final double kShooterRotationsPerPulse = 1.0 / kFalconPulsesPerRevolution;
 
     public static final double kShooterCircumferenceMeters = 0.1524 * Math.PI;
+    public static final double kShooterFreeSpeedRotationsPerSecond = 93.2;
     public static final double kShooterSurfaceFreeSpeedMetersPerSecond =
-        kFalconFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
+        kShooterFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
 
     // shooter wood prototype gains
     public static final double kSShooterVolts = 0.59077;
@@ -521,9 +535,11 @@ public final class Constants {
     public static final double kP = 1;
     public static final double kD = 0;
 
-    public static final double kVelocityTolerance = 0.5;
+    public static final double kShooterControlVelocityTolerance = 0.5;
 
-    public static final double kShooterVelocityDipThresholdRotationsPerSecond = 5;
+    public static final double kShooterFeedVelocityTolerance = 1.5;
+
+    public static final double kShooterVelocityDipThresholdRotationsPerSecond = 3;
   }
 
   public static final class ClimbElevatorConstants {

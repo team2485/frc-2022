@@ -7,8 +7,6 @@ import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -52,16 +50,10 @@ public class Hood extends SubsystemBase implements Loggable {
   @Log(name = "Output voltage")
   private double m_lastOutputVoltage = 0;
 
-  private DoubleLogEntry statorCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/statorCurrent");
-  private DoubleLogEntry supplyCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/supplyCurrent");
-
   public Hood() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
-    m_spark.setSmartCurrentLimit(kHoodSmartCurrentLimitAmps);
-    m_spark.setSecondaryCurrentLimit(kHoodImmediateCurrentLimitAmps);
-
+    m_spark.setSmartCurrentLimit(10);
+    m_spark.setSecondaryCurrentLimit(15);
     m_spark.setInverted(true);
 
     m_spark.setIdleMode(IdleMode.kBrake);
@@ -85,12 +77,14 @@ public class Hood extends SubsystemBase implements Loggable {
   @Config(name = "Set angle (radians)", defaultValueNumeric = kHoodBottomPositionRadians)
   public void setAngleRadians(double angle) {
     m_voltageOverride = false;
-    if (angle > kHoodBottomPositionRadians && angle != m_angleSetpointRadians) {
-      m_isZeroed = false;
-    }
 
-    m_angleSetpointRadians =
-        MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
+    if (Math.abs(angle - m_angleSetpointRadians) >= kHoodSetpointDeadbandRadians) {
+      m_angleSetpointRadians =
+          MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
+      if (angle > kHoodBottomPositionRadians && angle != m_angleSetpointRadians) {
+        m_isZeroed = false;
+      }
+    }
   }
 
   public void resetAngleRadians(double angle) {
@@ -147,18 +141,14 @@ public class Hood extends SubsystemBase implements Loggable {
           outputVoltage = m_feedbackOutput + m_feedforwardOutput;
         }
       }
-      if (outputVoltage != m_lastOutputVoltage) {
-        m_spark.setVoltage(outputVoltage);
-      }
+      m_spark.setVoltage(outputVoltage);
+
       m_lastOutputVoltage = outputVoltage;
     }
     if (this.getBottomLimitSwitch()) {
       zeroAngle();
       m_isZeroed = true;
     }
-
-    statorCurrentLog.append(m_spark.getOutputCurrent());
-    supplyCurrentLog.append(m_spark.getSupplyCurrent());
   }
 
   @Override

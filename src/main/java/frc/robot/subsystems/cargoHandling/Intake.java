@@ -44,9 +44,9 @@ public class Intake extends SubsystemBase implements Loggable {
     m_spark.setSmartCurrentLimit(kIntakeSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIntakeImmediateCurrentLimitAmps);
     m_spark.setIdleMode(IdleMode.kBrake);
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 200); // default 10
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200); // default 20
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 200); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20
   }
 
   /** @return the current velocity in rotations per second. */
@@ -95,9 +95,6 @@ public class Intake extends SubsystemBase implements Loggable {
 
       outputVoltage = feedforwardOutput;
       m_feedforwardOutput = feedforwardOutput;
-
-      statorCurrentLog.append(m_spark.getOutputCurrent());
-      supplyCurrentLog.append(m_spark.getSupplyCurrent());
     }
 
     if (outputVoltage != m_lastOutputVoltage) {

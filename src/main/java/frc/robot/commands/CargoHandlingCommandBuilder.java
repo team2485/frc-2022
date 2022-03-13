@@ -13,11 +13,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
-import frc.robot.subsystems.cargoHandling.BallCounter;
+import frc.robot.subsystems.cargoHandling.FeedServo;
 import frc.robot.subsystems.cargoHandling.Feeder;
 import frc.robot.subsystems.cargoHandling.Hood;
 import frc.robot.subsystems.cargoHandling.Indexer;
@@ -33,45 +34,71 @@ public class CargoHandlingCommandBuilder {
   public CargoHandlingCommandBuilder() {}
 
   public static Command getIntakeCommand(
-      Intake intake, IntakeArm intakeArm, Indexer indexer, BallCounter counter) {
+      Intake intake, IntakeArm intakeArm, Indexer indexer, FeedServo servo) {
     return getIntakeArmDownCommand(intakeArm)
         .andThen(
             new RunCommand(
-                () -> intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond),
-                intake))
-        .alongWith(
-            new RunCommand(
-                () ->
-                    indexer.setVelocityRotationsPerSecond(
-                        kIndexerIntakeSpeedRatio * kIntakeDefaultSpeedRotationsPerSecond),
-                indexer))
-        .until(
-            () -> {
-              return counter.getNumCargo() == 2 || indexer.hasStopped();
-            });
+                    () ->
+                        intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond),
+                    intake)
+                .alongWith(
+                    new RunCommand(
+                        () ->
+                            indexer.setVelocityRotationsPerSecond(
+                                kIndexerIntakeSpeedRatio * kIntakeDefaultSpeedRotationsPerSecond),
+                        indexer),
+                    new InstantCommand(() -> servo.engage(false), servo)));
   }
 
+  public static Command getStopIntakeCommand(Intake intake, IntakeArm intakeArm, Indexer indexer) {
+    return getIntakeArmUpCommand(intakeArm)
+        .alongWith(
+            new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer),
+            new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0), intake));
+  }
+
+  // .raceWith(
+  //     new WaitUntilCommand(
+  //             () -> {
+  //               return counter.getNumCargo() == 2;
+  //             })
+  //         .andThen(new WaitCommand(1)));
+
   public static Command getIntakeArmUpCommand(IntakeArm intakeArm) {
-    return new RunCommand(() -> intakeArm.setAngleRadians(kIntakeArmTopPositionRadians), intakeArm)
-        .withInterrupt(intakeArm::atGoal);
+    return new RunCommand(() -> intakeArm.setPosition(true), intakeArm)
+        .withInterrupt(() -> intakeArm.atPosition(true));
   }
 
   public static Command getIntakeArmDownCommand(IntakeArm intakeArm) {
-    return new RunCommand(
-            () -> intakeArm.setAngleRadians(kIntakeArmBottomPositionRadians), intakeArm)
-        .withInterrupt(intakeArm::atGoal);
+    return new RunCommand(() -> intakeArm.setPosition(false), intakeArm)
+        .withInterrupt(() -> intakeArm.atPosition(false));
   }
 
   public static Command getTurretAutoAimCommand(
       Turret turret, Supplier<Pose2d> robotPose, Supplier<Translation2d> robotVelocity) {
-    return new RunCommand(
-        () ->
-            turret.setAngleRadians(
-                Math.atan(
-                        (robotPose.get().getX() - kHubCenterPosition.getX())
-                            / (robotPose.get().getX() - kHubCenterPosition.getY()))
-                    - robotPose.get().getRotation().getRadians()),
-        turret);
+    return new RunCommand(() -> turret.setAngleRadians(findTurretAimAngle(robotPose)), turret);
+  }
+
+  public static double findTurretAimAngle(Supplier<Pose2d> robotPose) {
+    double uncorrectedAngle =
+        Math.atan(
+                (kHubCenterPosition.getY() - robotPose.get().getY())
+                    / (kHubCenterPosition.getX() - robotPose.get().getX()))
+            - robotPose.get().getRotation().getRadians();
+    if (robotPose.get().getX() <= kHubCenterPosition.getX()) {
+      return uncorrectedAngle;
+    } else {
+      return uncorrectedAngle + Math.PI;
+    }
+  }
+
+  public static Command getHoodShooterAutoAimCommand(
+      Hood hood,
+      Shooter shooter,
+      DoubleSupplier distanceToHub,
+      Supplier<Translation2d> robotVelocity) {
+    return getHoodAutoAimCommand(hood, distanceToHub, robotVelocity)
+        .alongWith(getShooterAutoSetCommand(shooter, distanceToHub, robotVelocity));
   }
 
   public static Command getHoodAutoAimCommand(
@@ -92,43 +119,51 @@ public class CargoHandlingCommandBuilder {
         shooter);
   }
 
-  public static Command getIndexToShooterCommand(
-      Indexer indexer, Feeder feeder, Shooter shooter, BallCounter counter) {
-    return new ConditionalCommand(
-        getIndexToShooterOnceCommand(indexer, feeder, shooter)
-            .andThen(
-                new RunCommand(
-                        () ->
-                            indexer.setVelocityRotationsPerSecond(
-                                kIndexerDefaultSpeedRotationsPerSecond),
-                        indexer)
-                    .withTimeout(0.5)),
-        new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer)
-            .alongWith(new InstantCommand(() -> shooter.setVelocityRotationsPerSecond(0))),
-        () -> {
-          return counter.getNumCargo() > 0;
-        });
-  }
+  // public static Command getIndexToShooterCommand(
+  //     Indexer indexer, Feeder feeder, Shooter shooter, BallCounter counter) {
+  //   return new ConditionalCommand(
+  //       getIndexToShooterOnceCommand(indexer, feeder, shooter)
+  //           .andThen(
+  //               new RunCommand(
+  //                       () ->
+  //                           indexer.setVelocityRotationsPerSecond(
+  //                               kIndexerDefaultSpeedRotationsPerSecond),
+  //                       indexer)
+  //                   .withTimeout(0.5)),
+  //       new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer)
+  //           .alongWith(new InstantCommand(() -> shooter.setVelocityRotationsPerSecond(0))),
+  //       () -> {
+  //         return counter.getNumCargo() > 0;
+  //       });
+  // }
 
   public static Command getIndexToShooterOnceCommand(
-      Indexer indexer, Feeder feeder, Shooter shooter) {
-    return new WaitUntilCommand(shooter::atSetpoint)
+      Indexer indexer, Feeder feeder, FeedServo servo, Shooter shooter) {
+    return new WaitUntilCommand(() -> shooter.withinTolerance(kShooterFeedVelocityTolerance))
         .andThen(
-            new RunCommand(
+            new ParallelRaceGroup(
+                new RunCommand(
                     () ->
-                        feeder.setVelocityRotationsPerSecond(
-                            shooter.getVelocityRotationsPerSecond()
-                                * kShooterCircumferenceMeters
-                                * kFeederShooterSurfaceSpeedRatio
-                                / kFeederPulleyCircumferenceMeters),
-                    feeder)
-                .alongWith(
-                    new WaitCommand(0.1)
-                        .andThen(new InstantCommand(() -> feeder.engageServo(true), feeder)))
-                .until(shooter::hasDipped)
-                .andThen(
-                    getFeederOffCommand(feeder)
-                        .alongWith(new InstantCommand(() -> feeder.engageServo(false), feeder))));
+                        feeder.setVelocityRotationsPerSecond(kFeederDefaultSpeedRotationsPerSecond),
+                    feeder),
+                new WaitCommand(0.2)
+                    .andThen(
+                        new InstantCommand(() -> servo.engage(true), servo), new WaitCommand(1))),
+            new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder)
+                .alongWith(new InstantCommand(() -> servo.engage(false), servo)),
+            new WaitCommand(0.5),
+            new InstantCommand(
+                () -> indexer.setVelocityRotationsPerSecond(kIndexerDefaultSpeedRotationsPerSecond),
+                indexer),
+            new WaitCommand(0.5),
+            new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer));
+  }
+
+  public static Command getStopFeedCommand(Indexer indexer, Feeder feeder, FeedServo servo) {
+    return new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer)
+        .alongWith(
+            new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder),
+            new InstantCommand(() -> servo.engage(false), servo));
   }
 
   public static Command getZeroHoodCommand(Hood hood) {
@@ -138,23 +173,27 @@ public class CargoHandlingCommandBuilder {
         hood::getBottomLimitSwitch);
   }
 
+  public static Command getHoodDownCommand(Hood hood) {
+    return new InstantCommand(() -> hood.setAngleRadians(kHoodBottomPositionRadians));
+  }
+
   public static Command getShooterOffCommand(Shooter shooter) {
-    return new InstantCommand(() -> shooter.setVelocityRotationsPerSecond(0), shooter);
+    return new RunCommand(() -> shooter.setVelocityRotationsPerSecond(0), shooter);
   }
 
   public static Command getIndexerOffCommand(Indexer indexer) {
-    return new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer);
+    return new RunCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer);
   }
 
   public static Command getFeederOffCommand(Feeder feeder) {
-    return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder);
+    return new RunCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder);
   }
 
   public static Command getIntakeOffCommand(Intake intake) {
-    return new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0), intake);
+    return new RunCommand(() -> intake.setVelocityRotationsPerSecond(0), intake);
   }
 
   public static Command getIntakeArmOffCommand(IntakeArm intakeArm) {
-    return new InstantCommand(() -> intakeArm.setVoltage(0), intakeArm);
+    return new RunCommand(() -> intakeArm.setVoltage(0), intakeArm);
   }
 }

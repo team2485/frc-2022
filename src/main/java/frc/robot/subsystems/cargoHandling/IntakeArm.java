@@ -7,6 +7,7 @@ package frc.robot.subsystems.cargoHandling;
 import static frc.robot.Constants.IntakeArmConstants.*;
 
 import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -97,7 +98,10 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_topLimitSwitch.enableLimitSwitch(true);
     m_bottomLimitSwitch.enableLimitSwitch(true);
     m_spark.setIdleMode(IdleMode.kBrake);
-    this.resetAngleRadians(kIntakeArmTopPositionRadians);
+
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20
 
     Shuffleboard.getTab("IntakeArm").add("controller", m_pidController);
     Shuffleboard.getTab("IntakeArm").add("feedforward", m_feedforward);
@@ -114,15 +118,6 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_voltageOverride = false;
     m_angleSetpointRadians =
         MathUtil.clamp(angle, kIntakeArmBottomPositionRadians, kIntakeArmTopPositionRadians);
-  }
-
-  public void resetAngleRadians(double angle) {
-    m_spark.getEncoder().setPosition(angle / kIntakeArmRadiansPerMotorRev);
-  }
-
-  @Log(name = "Stator Current")
-  public double getStatorCurrent() {
-    return m_spark.getOutputCurrent();
   }
 
   @Log(name = "At goal")
@@ -152,6 +147,14 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_armSetpointPosition = top;
   }
 
+  public boolean atPosition(boolean top) {
+    if (top) {
+      return this.getAngleRadians() >= 2.1;
+    } else {
+      return this.getAngleRadians() <= 0.05;
+    }
+  }
+
   public void runControlLoop() {
 
     if (m_voltageOverride) {
@@ -163,26 +166,22 @@ public class IntakeArm extends SubsystemBase implements Loggable {
         if (this.getAngleRadians() > 1.75) {
           outputVoltage = 2;
         } else {
-          outputVoltage = 3;
+          outputVoltage = 4;
         }
       } else if (!m_armSetpointPosition && this.getAngleRadians() > 0.05) {
         // System.out.println("Going down");
 
         if (this.getAngleRadians() > 1.75) {
-          outputVoltage = -3;
+          outputVoltage = -5;
         } else {
-          outputVoltage = -2;
+          outputVoltage = -4;
         }
       }
-
       if (outputVoltage != m_lastOutputVoltage) {
         m_spark.setVoltage(outputVoltage);
       }
       m_lastOutputVoltage = outputVoltage;
     }
-
-    statorCurrentLog.append(m_spark.getOutputCurrent());
-    supplyCurrentLog.append(m_spark.getSupplyCurrent());
   }
 
   @Override

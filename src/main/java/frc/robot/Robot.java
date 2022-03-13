@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.team2485.WarlordsLib.CurrentLogger;
 import frc.team2485.WarlordsLib.IDManager;
 import io.github.oblarg.oblog.Logger;
 
@@ -33,19 +32,18 @@ public class Robot extends TimedRobot {
 
     DataLogManager.start();
 
-    LiveWindow.disableAllTelemetry();
     m_robotContainer = new RobotContainer();
     addPeriodic(
         () -> m_robotContainer.m_shooter.runControlLoop(),
         Constants.ShooterConstants.kShooterLoopTimeSeconds);
 
-    addPeriodic(
-        () -> m_robotContainer.m_climbElevator.runControlLoop(),
-        Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
+    // addPeriodic(
+    //     () -> m_robotContainer.m_climbElevator.runControlLoop(),
+    //     Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
 
-    addPeriodic(
-        () -> m_robotContainer.m_climbArm.runControlLoop(),
-        Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
+    // addPeriodic(
+    //     () -> m_robotContainer.m_climbArm.runControlLoop(),
+    //     Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
   }
 
   /**
@@ -54,7 +52,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-
+    LiveWindow.disableAllTelemetry();
+    // CameraServer.startAutomaticCapture();
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);
   }
@@ -114,7 +113,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // m_robotContainer.teleopPeriodic();
-    CurrentLogger.getInstance().log();
   }
 
   @Override

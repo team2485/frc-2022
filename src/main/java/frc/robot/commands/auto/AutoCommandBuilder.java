@@ -15,8 +15,8 @@ public class AutoCommandBuilder {
       IntakeArm intakeArm,
       Indexer lowIndexer,
       Feeder highIndexer,
-      Shooter shooter,
-      BallCounter counter) {
+      FeedServo servo,
+      Shooter shooter) {
 
     WL_SwerveControllerCommand backUpPath =
         PathCommandBuilder.getPathCommand(drivetrain, "2 ball right");
@@ -28,14 +28,15 @@ public class AutoCommandBuilder {
             });
 
     Command intakeBalls =
-        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
+        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, servo);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
             shooter,
-            drivetrain::getDistanceToHubMeters,
+            drivetrain::getTurretCenterDistanceToHubMeters,
             drivetrain::getFieldRelativeVelocityMetersPerSecond);
     Command feedToShooterOnce =
-        CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
+        CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
+            lowIndexer, highIndexer, servo, shooter);
 
     Command turnLEDsOn = new InstantCommand(() -> vision.setForceLeds(true));
 
@@ -52,90 +53,94 @@ public class AutoCommandBuilder {
       IntakeArm intakeArm,
       Indexer lowIndexer,
       Feeder highIndexer,
-      Shooter shooter,
-      BallCounter counter) {
+      FeedServo servo,
+      Shooter shooter) {
 
     WL_SwerveControllerCommand thirdBallPath =
         PathCommandBuilder.getPathCommand(drivetrain, "2 to 3 ball right");
 
     Command intakeBalls =
-        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
+        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, servo);
     Command setShooter =
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
             shooter,
-            drivetrain::getDistanceToHubMeters,
+            drivetrain::getTurretCenterDistanceToHubMeters,
             drivetrain::getFieldRelativeVelocityMetersPerSecond);
     Command feedToShooterOnce =
-        CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
+        CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
+            lowIndexer, highIndexer, servo, shooter);
 
     return get2BallAuto(
-            drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter, counter)
+            drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, servo, shooter)
         .andThen(thirdBallPath.alongWith(intakeBalls, setShooter), feedToShooterOnce);
   }
 
-  public static Command get4BallAuto(
-      Drivetrain drivetrain,
-      Vision vision,
-      Intake intake,
-      IntakeArm intakeArm,
-      Indexer lowIndexer,
-      Feeder highIndexer,
-      Shooter shooter,
-      BallCounter counter) {
+  //       Drivetrain drivetrain,
+  //       Vision vision,
+  //       Intake intake,
+  //       IntakeArm intakeArm,
+  //       Indexer lowIndexer,
+  //       Feeder highIndexer,
+  //       Shooter shooter,
+  //       BallCounter counter) {
 
-    WL_SwerveControllerCommand thirdAndFourthBallPath =
-        PathCommandBuilder.getPathCommand(drivetrain, "2 to 4 ball right");
+  //     WL_SwerveControllerCommand thirdAndFourthBallPath =
+  //         PathCommandBuilder.getPathCommand(drivetrain, "2 to 4 ball right");
 
-    Command intakeBalls =
-        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
-    Command setShooter =
-        CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter,
-            drivetrain::getDistanceToHubMeters,
-            drivetrain::getFieldRelativeVelocityMetersPerSecond);
-    Command feedToShooterOnce =
-        CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
+  //     Command intakeBalls =
+  //         CargoHandlingCommandBuilder.getIntakeCommand(
+  //             intake, intakeArm, lowIndexer, highIndexer, counter);
+  //     Command setShooter =
+  //         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
+  //             shooter,
+  //             drivetrain::getDistanceToHubMeters,
+  //             drivetrain::getFieldRelativeVelocityMetersPerSecond);
+  //     Command feedToShooterOnce =
+  //         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer,
+  // shooter);
 
-    return get2BallAuto(
-            drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter, counter)
-        .andThen(
-            thirdAndFourthBallPath.alongWith(intakeBalls, setShooter),
-            feedToShooterOnce,
-            feedToShooterOnce);
-  }
+  //     return get2BallAuto(
+  //             drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter, counter)
+  //         .andThen(
+  //             thirdAndFourthBallPath.alongWith(intakeBalls, setShooter),
+  //             feedToShooterOnce,
+  //             feedToShooterOnce);
+  //   }
 
-  public static Command get5BallAuto(
-      Drivetrain drivetrain,
-      Vision vision,
-      Intake intake,
-      IntakeArm intakeArm,
-      Indexer lowIndexer,
-      Feeder highIndexer,
-      Shooter shooter,
-      BallCounter counter) {
+  //   public static Command get5BallAuto(
+  //       Drivetrain drivetrain,
+  //       Vision vision,
+  //       Intake intake,
+  //       IntakeArm intakeArm,
+  //       Indexer lowIndexer,
+  //       Feeder highIndexer,
+  //       Shooter shooter,
+  //       BallCounter counter) {
 
-    WL_SwerveControllerCommand thirdAndFourthBallPath =
-        PathCommandBuilder.getPathCommand(drivetrain, "2 to 4 ball right");
+  //     WL_SwerveControllerCommand thirdAndFourthBallPath =
+  //         PathCommandBuilder.getPathCommand(drivetrain, "2 to 4 ball right");
 
-    Command intakeBalls =
-        CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, lowIndexer, counter);
-    Command setShooter =
-        CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-            shooter,
-            drivetrain::getDistanceToHubMeters,
-            drivetrain::getFieldRelativeVelocityMetersPerSecond);
-    Command feedToShooterOnce =
-        CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer, shooter);
+  //     Command intakeBalls =
+  //         CargoHandlingCommandBuilder.getIntakeCommand(
+  //             intake, intakeArm, lowIndexer, highIndexer, counter);
+  //     Command setShooter =
+  //         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
+  //             shooter,
+  //             drivetrain::getDistanceToHubMeters,
+  //             drivetrain::getFieldRelativeVelocityMetersPerSecond);
+  //     Command feedToShooterOnce =
+  //         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(lowIndexer, highIndexer,
+  // shooter);
 
-    return get2BallAuto(
-            drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter, counter)
-        .andThen(
-            thirdAndFourthBallPath.alongWith(intakeBalls, setShooter),
-            feedToShooterOnce,
-            feedToShooterOnce,
-            intakeBalls.alongWith(setShooter),
-            feedToShooterOnce);
-  }
+  //     return get2BallAuto(
+  //             drivetrain, vision, intake, intakeArm, lowIndexer, highIndexer, shooter, counter)
+  //         .andThen(
+  //             thirdAndFourthBallPath.alongWith(intakeBalls, setShooter),
+  //             feedToShooterOnce,
+  //             feedToShooterOnce,
+  //             intakeBalls.alongWith(setShooter),
+  //             feedToShooterOnce);
+  //   }
 
   public static Command setLEDsAutoCommand(Vision vision) {
     return new InstantCommand(() -> vision.setForceLeds(false));

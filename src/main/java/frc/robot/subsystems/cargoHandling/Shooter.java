@@ -12,9 +12,8 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -31,7 +30,7 @@ public class Shooter extends SubsystemBase implements Loggable {
           kSShooterVolts, kVShooterVoltSecondsPerMeter, kAShooterVoltSecondsSquaredPerMeter);
 
   private final BangBangController m_bangBangController =
-      new BangBangController(kVelocityTolerance);
+      new BangBangController(kShooterControlVelocityTolerance);
 
   @Log(name = "Velocity Setpoint")
   private double m_velocitySetpointRotationsPerSecond = 0;
@@ -46,25 +45,18 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   private double m_lastVelocity = 0;
 
-  DoubleLogEntry statorCurrentLog;
-  DoubleLogEntry supplyCurrentLog;
-
   /** Creates a new Shooter. Controlled with a feedforward and a bang bang controlller. */
   public Shooter() {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     talonConfig.supplyCurrLimit.currentLimit = kShooterTalonCurrentLimit;
     talonConfig.supplyCurrLimit.enable = true;
     talonConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    talonConfig.peakOutputReverse = 0;
     m_talon.configAllSettings(talonConfig);
 
     m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
     m_talon.setNeutralMode(NeutralMode.Coast);
     m_talon.enableVoltageCompensation(true);
-
-    statorCurrentLog =
-        new DoubleLogEntry(DataLogManager.getLog(), "/current/shooter/statorCurrent");
-    supplyCurrentLog =
-        new DoubleLogEntry(DataLogManager.getLog(), "/current/shooter/supplyCurrent");
 
     Shuffleboard.getTab("Shooter").add("Feedforward", m_feedforward);
   }
@@ -80,10 +72,11 @@ public class Shooter extends SubsystemBase implements Loggable {
    *
    * @param rotationsPerSecond velocity setpoint
    */
-  @Config(name = "Set Velocity (RPS)")
+  @Config.NumberSlider(name = "Set Velocity (RPS)", min = 0, max = 100)
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
     m_lastVelocitySetpoint = m_velocitySetpointRotationsPerSecond;
-    m_velocitySetpointRotationsPerSecond = rotationsPerSecond;
+    m_velocitySetpointRotationsPerSecond =
+        MathUtil.clamp(rotationsPerSecond, 0, kShooterFreeSpeedRotationsPerSecond);
   }
 
   /**
@@ -98,9 +91,15 @@ public class Shooter extends SubsystemBase implements Loggable {
   @Log(name = "At setpoint")
   public boolean atSetpoint() {
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
-        < kVelocityTolerance;
+        < kShooterControlVelocityTolerance;
   }
 
+  public boolean withinTolerance(double tolerance) {
+    return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
+        < tolerance;
+  }
+
+  @Log(name = "Has Dipped")
   public boolean hasDipped() {
     return m_lastVelocity - this.getVelocityRotationsPerSecond()
             > kShooterVelocityDipThresholdRotationsPerSecond
@@ -125,10 +124,10 @@ public class Shooter extends SubsystemBase implements Loggable {
 
     m_feedbackOutput = feedbackOutput;
     m_feedforwardOutput = feedforwardOutput;
-
-    m_lastVelocity = this.getVelocityRotationsPerSecond();
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    m_lastVelocity = this.getVelocityRotationsPerSecond();
+  }
 }

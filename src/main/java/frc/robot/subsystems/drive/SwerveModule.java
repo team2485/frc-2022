@@ -5,6 +5,7 @@ import static frc.robot.Constants.ModuleConstants.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
@@ -54,9 +55,21 @@ public class SwerveModule implements Loggable {
     m_driveMotor.configAllSettings(driveMotorConfig);
     m_driveMotor.enableVoltageCompensation(true);
     m_driveMotor.setNeutralMode(NeutralMode.Brake);
-    m_driveMotor.setStatusFramePeriod(1, 255);
-    m_driveMotor.setStatusFramePeriod(2, 255);
-
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+    m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
     // Turning motor configuration
     // -- voltage compensation, current limiting, P D F terms, motion magic, brake mode
     TalonFXConfiguration turningMotorConfig = new TalonFXConfiguration();
@@ -78,8 +91,21 @@ public class SwerveModule implements Loggable {
     m_turningMotor.setNeutralMode(NeutralMode.Brake);
     m_turningMotor.configAllowableClosedloopError(
         0, Units.degreesToRadians(1) / kTurningRadiansPerPulse, Constants.kCANTimeoutMs);
-    m_turningMotor.setStatusFramePeriod(1, 255);
-    m_turningMotor.setStatusFramePeriod(2, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+    m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
     // Turning encoder configuration
     // -- configures offset and sensor range to +-180
@@ -91,6 +117,7 @@ public class SwerveModule implements Loggable {
     m_turningEncoder = new CANCoder(turningEncoderID);
     m_turningEncoder.configAllSettings(turningEncoderConfig);
     m_turningEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 255);
+    m_turningEncoder.setStatusFramePeriod(CANCoderStatusFrame.VbatAndFaults, 255);
 
     try {
       Thread.sleep(255);
@@ -191,7 +218,7 @@ public class SwerveModule implements Loggable {
    */
   // @Log(name = "Speed meters per second")
   private double getSpeedMetersPerSecond() {
-    return m_driveMotor.getSelectedSensorVelocity() * kDriveDistMetersPerPulse * 10;
+    return -m_driveMotor.getSelectedSensorVelocity() * kDriveDistMetersPerPulse * 10;
   }
 
   /**

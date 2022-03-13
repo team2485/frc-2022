@@ -5,26 +5,22 @@ import static frc.robot.Constants.FeederConstants.*;
 
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Config;
+import io.github.oblarg.oblog.annotations.Log;
 
 public class Feeder extends SubsystemBase implements Loggable {
   private final WL_SparkMax m_spark = new WL_SparkMax(kFeederSparkPort);
-
-  private final Servo m_servo = new Servo(kFeederServoPort);
-  private double m_servoPositionSetpoint = 0;
 
   private final SR_SimpleMotorFeedforward m_feedforward =
       new SR_SimpleMotorFeedforward(
           kSFeederVolts, kVFeederVoltSecondsPerMeter, kAFeederVoltSecondsSquaredPerMeter);
 
-  // @Log(name = "Velocity Setpoint")
+  @Log(name = "Velocity Setpoint")
   private double m_velocitySetpointRotationsPerSecond;
 
   private double m_lastVelocitySetpoint;
@@ -37,19 +33,14 @@ public class Feeder extends SubsystemBase implements Loggable {
 
   private double m_lastOutputVoltage = 0;
 
-  private DoubleLogEntry statorCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/feeder/statorCurrent");
-  private DoubleLogEntry supplyCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/feeder/supplyCurrent");
-
   public Feeder() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kFeederSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kFeederImmediateCurrentLimitAmps);
     m_spark.setIdleMode(IdleMode.kBrake);
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 200); // default 10
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200); // default 20
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 200); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20
   }
 
   /** @return the current velocity in rotations per second. */
@@ -75,7 +66,7 @@ public class Feeder extends SubsystemBase implements Loggable {
    *
    * @param voltage what voltage to apply
    */
-  // @Config.NumberSlider(name = "Set Voltage", min = -12, max = 12)
+  @Config.NumberSlider(name = "Set Voltage", min = -12, max = 12)
   public void setVoltage(double voltage) {
     m_voltageOverride = true;
     m_voltageSetpoint = voltage;
@@ -85,19 +76,6 @@ public class Feeder extends SubsystemBase implements Loggable {
   public boolean atSetpoint() {
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
         < kFeederVelocityToleranceRotationsPerSecond;
-  }
-
-  public void setServo(double position) {
-    m_servoPositionSetpoint = position;
-  }
-
-  // @Config.ToggleButton(name = "Set servo")
-  public void engageServo(boolean engaged) {
-    if (engaged) {
-      m_servoPositionSetpoint = kServoEngagedPosition;
-    } else {
-      m_servoPositionSetpoint = kServoDisengagedPosition;
-    }
   }
 
   public void runControlLoop() {
@@ -113,17 +91,12 @@ public class Feeder extends SubsystemBase implements Loggable {
       outputVoltage = feedforwardOutput;
 
       m_feedforwardOutput = feedforwardOutput;
-
-      statorCurrentLog.append(m_spark.getOutputCurrent());
-      supplyCurrentLog.append(m_spark.getSupplyCurrent());
     }
     if (outputVoltage != m_lastOutputVoltage) {
       m_spark.setVoltage(outputVoltage);
     }
 
     m_lastOutputVoltage = outputVoltage;
-
-    m_servo.set(m_servoPositionSetpoint);
   }
 
   @Override

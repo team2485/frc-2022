@@ -27,7 +27,6 @@ import frc.team2485.WarlordsLib.PoseHistory;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -92,11 +91,17 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_odometryWithoutVision =
         new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometry.resetPosition(
-        new Pose2d(new Translation2d(0, 0), new Rotation2d(0)),
-        Rotation2d.fromDegrees(m_pigeon.getYaw()));
+        new Pose2d(
+            new Translation2d(
+                8.2296 - kRobotBumperLengthMeters / 2, 0.47 + kRobotBumperWidthMeters / 2),
+            new Rotation2d(0)),
+        new Rotation2d());
     m_odometryWithoutVision.resetPosition(
-        new Pose2d(new Translation2d(0, 0), new Rotation2d(0)),
-        Rotation2d.fromDegrees(m_pigeon.getYaw()));
+        new Pose2d(
+            new Translation2d(
+                8.2296 - kRobotBumperLengthMeters / 2, 0.47 + kRobotBumperWidthMeters / 2),
+            new Rotation2d(0)),
+        new Rotation2d());
     // m_odometryWithoutVision.resetPosition(
     //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
     //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
@@ -240,8 +245,21 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   }
 
   @Log(name = "Distance to hub (meters)")
-  public double getDistanceToHubMeters() {
-    return getPoseMeters().getTranslation().getDistance(kHubCenterTranslation);
+  public double getTurretCenterDistanceToHubMeters() {
+    return getPoseMeters()
+        .plus(
+            kRobotToTurretCenterMeters.plus(
+                new Transform2d(new Translation2d(0, 0), this.getHeading())))
+        .getTranslation()
+        .getDistance(kHubCenterTranslation);
+  }
+
+  @Log(name = "Robot to turret center")
+  public double getRobotToTurretCenterMeters() {
+    return kRobotToTurretCenterMeters
+        .plus(new Transform2d(new Translation2d(0, 0), this.getHeading()))
+        .getTranslation()
+        .getDistance(kHubCenterTranslation);
   }
 
   /**
@@ -256,7 +274,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_odometry.resetPosition(pose, Rotation2d.fromDegrees(m_pigeon.getYaw()));
   }
 
-  @Log(name = "Pigeon Heading")
+  // @Log(name = "Pigeon Heading")
   public double getPigeonHeadingDegrees() {
     return m_pigeon.getYaw();
   }
@@ -266,7 +284,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     return m_odometry.getPoseMeters().getRotation();
   }
 
-  @Log(name = "Heading Radians")
+  // @Log(name = "Heading Radians")
   public double getHeadingRadians() {
     return this.getHeading().getRadians();
   }
@@ -410,30 +428,30 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         m_frontRightModule.getState(),
         m_backRightModule.getState());
 
-    m_odometryWithoutVision.update(
-        Rotation2d.fromDegrees(m_pigeon.getYaw()),
-        m_frontLeftModule.getState(),
-        m_backRightModule.getState(),
-        m_frontRightModule.getState(),
-        m_backRightModule.getState());
+    // m_odometryWithoutVision.update(
+    //     Rotation2d.fromDegrees(m_pigeon.getYaw()),
+    //     m_frontLeftModule.getState(),
+    //     m_backRightModule.getState(),
+    //     m_frontRightModule.getState(),
+    //     m_backRightModule.getState());
 
-    m_field.getObject("Pure Odometry").setPose(m_odometryWithoutVision.getPoseMeters());
+    // m_field.getObject("Pure Odometry").setPose(m_odometryWithoutVision.getPoseMeters());
 
     Pose2d robotPose = m_odometry.getPoseMeters();
-    Pose2d lastPose;
-    try {
-      lastPose = m_poseHistory.getLatest().get().getPose();
-    } catch (NoSuchElementException e) {
-      lastPose = robotPose;
-    }
-    m_velocity = robotPose.getTranslation().minus(lastPose.getTranslation());
+    // Pose2d lastPose;
+    // try {
+    //   lastPose = m_poseHistory.getLatest().get().getPose();
+    // } catch (NoSuchElementException e) {
+    //   lastPose = robotPose;
+    // }
+    // m_velocity = robotPose.getTranslation().minus(lastPose.getTranslation());
     m_poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
 
     // System.out.println("pose: " + getPoseMeters().toString());
     m_field.setRobotPose(getPoseMeters());
 
     // Update brake/coast mode
-    setDriveNeutralMode(m_driveNeutralChooser.getSelected());
-    setTurningNeutralMode(m_turningNeutralChooser.getSelected());
+    // setDriveNeutralMode(m_driveNeutralChooser.getSelected());
+    // setTurningNeutralMode(m_turningNeutralChooser.getSelected());
   }
 }
