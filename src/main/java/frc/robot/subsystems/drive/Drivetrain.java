@@ -95,13 +95,13 @@ public class Drivetrain extends SubsystemBase implements Loggable {
             new Translation2d(
                 8.2296 - kRobotBumperLengthMeters / 2, 0.47 + kRobotBumperWidthMeters / 2),
             new Rotation2d(0)),
-        new Rotation2d());
+        Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometryWithoutVision.resetPosition(
         new Pose2d(
             new Translation2d(
                 8.2296 - kRobotBumperLengthMeters / 2, 0.47 + kRobotBumperWidthMeters / 2),
             new Rotation2d(0)),
-        new Rotation2d());
+        Rotation2d.fromDegrees(m_pigeon.getYaw()));
     // m_odometryWithoutVision.resetPosition(
     //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
     //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
@@ -244,22 +244,15 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     return m_velocity;
   }
 
-  @Log(name = "Distance to hub (meters)")
-  public double getTurretCenterDistanceToHubMeters() {
-    return getPoseMeters()
-        .plus(
-            kRobotToTurretCenterMeters.plus(
-                new Transform2d(new Translation2d(0, 0), this.getHeading())))
-        .getTranslation()
-        .getDistance(kHubCenterTranslation);
+  @Log(name = "Hub to turret center")
+  public double getHubToTurretCenterDistanceMeters() {
+    return getTurretCenterPoseMeters().getTranslation().getDistance(kHubCenterTranslation);
   }
 
-  @Log(name = "Robot to turret center")
-  public double getRobotToTurretCenterMeters() {
-    return kRobotToTurretCenterMeters
-        .plus(new Transform2d(new Translation2d(0, 0), this.getHeading()))
-        .getTranslation()
-        .getDistance(kHubCenterTranslation);
+  public Pose2d getTurretCenterPoseMeters() {
+    return getPoseMeters().plus(kRobotToTurretCenterMeters);
+    // .plus(
+    // new Transform2d(new Translation2d(0, 0), this.getHeading())));
   }
 
   /**
@@ -284,7 +277,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     return m_odometry.getPoseMeters().getRotation();
   }
 
-  // @Log(name = "Heading Radians")
+  @Log(name = "Heading Radians")
   public double getHeadingRadians() {
     return this.getHeading().getRadians();
   }
@@ -435,7 +428,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     //     m_frontRightModule.getState(),
     //     m_backRightModule.getState());
 
-    // m_field.getObject("Pure Odometry").setPose(m_odometryWithoutVision.getPoseMeters());
+    m_field.getObject("Turret").setPose(this.getTurretCenterPoseMeters());
 
     Pose2d robotPose = m_odometry.getPoseMeters();
     // Pose2d lastPose;

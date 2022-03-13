@@ -161,20 +161,20 @@ public class IntakeArm extends SubsystemBase implements Loggable {
       m_spark.setVoltage(m_voltageSetpoint);
     } else {
       double outputVoltage = 0;
-      if (m_armSetpointPosition && this.getAngleRadians() < 2.1) {
+      if (m_armSetpointPosition && this.getAngleRadians() < 2.15) {
         // System.out.println("Going up");
-        if (this.getAngleRadians() > 1.75) {
-          outputVoltage = 2;
+        if (this.getAngleRadians() > 1.6) {
+          outputVoltage = 0;
         } else {
           outputVoltage = 4;
         }
-      } else if (!m_armSetpointPosition && this.getAngleRadians() > 0.05) {
+      } else if (!m_armSetpointPosition && this.getAngleRadians() > -0.12) {
         // System.out.println("Going down");
 
-        if (this.getAngleRadians() > 1.75) {
-          outputVoltage = -5;
+        if (this.getAngleRadians() > 1.6) {
+          outputVoltage = -9;
         } else {
-          outputVoltage = -4;
+          outputVoltage = -5;
         }
       }
       if (outputVoltage != m_lastOutputVoltage) {

@@ -5,12 +5,14 @@ import static frc.robot.Constants.ClimbElevatorConstants.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.sendableRichness.SR_ElevatorFeedforward;
@@ -61,20 +63,20 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
           kvElevatorLoadedVoltSecondsPerMeter,
           kaElevatorLoadedVoltSecondsSquaredPerMeter);
 
-  // @Log(name = "loaded")
+  @Log(name = "loaded")
   private boolean m_loaded; // unloaded, true is loaded
 
   private boolean m_limitOverride = false;
 
-  // @Log(name = "position setpoint")
+  @Log(name = "position setpoint")
   private double m_positionSetpointMeters = 0;
 
   private final Servo m_ratchetServo = new Servo(kElevatorServoPort);
 
-  // @Log(name = "feedback output")
+  @Log(name = "feedback output")
   private double m_feedbackOutput = 0;
 
-  // @Log(name = "feedforward output")
+  @Log(name = "feedforward output")
   private double m_feedforwardOutput = 0;
 
   private boolean m_hookedOnMidBar = false;
@@ -82,6 +84,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
+  @Log(name = "enabled")
   private boolean m_enabled = false;
 
   public ClimbElevator() {
@@ -117,14 +120,14 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
 
     this.setRatchet(false);
 
-    // Shuffleboard.getTab("ClimbElevator").add("Controller Unloaded", m_pidControllerUnloaded);
-    // Shuffleboard.getTab("ClimbElevator").add("FF Unloaded", m_feedforwardUnloaded);
+    Shuffleboard.getTab("ClimbElevator").add("Controller Unloaded", m_pidControllerUnloaded);
+    Shuffleboard.getTab("ClimbElevator").add("FF Unloaded", m_feedforwardUnloaded);
 
-    // Shuffleboard.getTab("ClimbElevator").add("Controller Loaded", m_pidControllerLoaded);
-    // Shuffleboard.getTab("ClimbElevator").add("FF Loaded", m_feedforwardLoaded);
+    Shuffleboard.getTab("ClimbElevator").add("Controller Loaded", m_pidControllerLoaded);
+    Shuffleboard.getTab("ClimbElevator").add("FF Loaded", m_feedforwardLoaded);
   }
 
-  // @Config(name = "Set elevator position")
+  @Config(name = "Set elevator position")
   public void setPositionMeters(double position) {
     m_voltageOverride = false;
     m_positionSetpointMeters =
@@ -137,22 +140,22 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     m_limitOverride = limitOverride;
   }
 
-  // @Log(name = "Current elevator position")
+  @Log(name = "Current elevator position")
   public double getPositionMeters() {
     return m_talon.getSelectedSensorPosition() * kSlideDistancePerPulseMeters;
   }
 
-  // @Config(name = "Reset elevator positon")
+  @Config(name = "Reset elevator positon")
   public void resetPositionMeters(double position) {
     m_talon.setSelectedSensorPosition(position / kSlideDistancePerPulseMeters);
   }
 
-  // @Log(name = "Current elevator velocity")
+  @Log(name = "Current elevator velocity")
   public double getVelocityMetersPerSecond() {
     return m_talon.getSelectedSensorVelocity() * kSlideDistancePerPulseMeters * 10;
   }
 
-  // @Log(name = "At position goal")
+  @Log(name = "At position goal")
   private boolean atPositionGoal() {
     if (m_loaded) {
       return m_pidControllerLoaded.atGoal();
@@ -169,7 +172,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     return m_hookedOnMidBar;
   }
 
-  // @Config(name = "set loaded")
+  @Config(name = "set loaded")
   public void setMode(boolean loaded) {
     this.m_loaded = loaded;
   }
@@ -183,11 +186,37 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
   public void enable(boolean enabled) {
     m_enabled = enabled;
     if (enabled) {
-      m_talon.setStatusFramePeriod(1, 10);
-      m_talon.setStatusFramePeriod(2, 20);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 10);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
     } else {
-      m_talon.setStatusFramePeriod(1, 255);
-      m_talon.setStatusFramePeriod(2, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
     }
   }
 

@@ -22,6 +22,7 @@ import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_TalonFX;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
 
 public class SwerveModule implements Loggable {
 
@@ -154,7 +155,7 @@ public class SwerveModule implements Loggable {
    *
    * @return current heading in degrees
    */
-  // @Log(name = "current rotation (integrated)")
+  @Log(name = "current rotation (integrated)")
   private double getIntegratedHeadingDegrees() {
     return getIntegratedHeading().getDegrees();
   }
@@ -216,7 +217,7 @@ public class SwerveModule implements Loggable {
    *
    * @return speed in meters per second
    */
-  // @Log(name = "Speed meters per second")
+  @Log(name = "Speed meters per second")
   private double getSpeedMetersPerSecond() {
     return -m_driveMotor.getSelectedSensorVelocity() * kDriveDistMetersPerPulse * 10;
   }

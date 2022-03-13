@@ -64,6 +64,8 @@ public class Turret extends SubsystemBase implements Loggable {
   @Log(name = "filtered angle")
   private double m_filteredPotentiometerAngle;
 
+  private boolean m_enabled = true;
+
   public Turret() {
 
     TalonSRXConfiguration talonConfig = new TalonSRXConfiguration();
@@ -139,6 +141,39 @@ public class Turret extends SubsystemBase implements Loggable {
     return m_cwSlotSensor.get();
   }
 
+  public void enable(boolean enabled) {
+    m_enabled = enabled;
+    if (enabled) {
+      m_talon.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_4_AinTempVbat, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_6_Misc, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_7_CommStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_10_Targets, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_12_Feedback1, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_13_Base_PIDF0, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_15_FirmwareApiStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_17_Targets1, 255);
+    } else {
+      m_talon.setStatusFramePeriod(StatusFrame.Status_1_General, 10);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_4_AinTempVbat, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_6_Misc, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_7_CommStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_10_Targets, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_12_Feedback1, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_13_Base_PIDF0, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_15_FirmwareApiStatus, 255);
+      m_talon.setStatusFramePeriod(StatusFrame.Status_17_Targets1, 255);
+    }
+  }
+
   @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
   public void setVoltage(double voltage) {
     m_voltageOverride = true;
@@ -146,34 +181,36 @@ public class Turret extends SubsystemBase implements Loggable {
   }
 
   public void runControlLoop() {
-    double currentAngleRadians = this.getFilteredAngleRadians();
-    m_velocityRadiansPerSecond =
-        (currentAngleRadians - m_lastAngleRadians) / kTurretLoopTimeSeconds;
-
-    m_lastAngleRadians = currentAngleRadians;
-
     double outputVoltage = 0;
-    if (m_voltageOverride) {
-      outputVoltage = m_voltageSetpoint;
-    } else {
-      double feedbackOutputVoltage =
-          m_pidController.calculate(currentAngleRadians, m_angleSetpointRadians);
+    if (m_enabled) {
+      double currentAngleRadians = this.getFilteredAngleRadians();
+      m_velocityRadiansPerSecond =
+          (currentAngleRadians - m_lastAngleRadians) / kTurretLoopTimeSeconds;
 
-      double feedforwardOutputVoltage =
-          m_feedforward.calculate(
-              m_lastVelocitySetpoint,
-              m_pidController.getSetpoint().velocity,
-              kTurretLoopTimeSeconds);
+      m_lastAngleRadians = currentAngleRadians;
 
-      m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
-
-      m_feedbackOutput = feedbackOutputVoltage;
-      m_feedforwardOutput = feedforwardOutputVoltage;
-
-      if (!this.atGoal()) {
-        outputVoltage = feedbackOutputVoltage + feedforwardOutputVoltage;
+      if (m_voltageOverride) {
+        outputVoltage = m_voltageSetpoint;
       } else {
-        m_talon.set(ControlMode.PercentOutput, 0);
+        double feedbackOutputVoltage =
+            m_pidController.calculate(currentAngleRadians, m_angleSetpointRadians);
+
+        double feedforwardOutputVoltage =
+            m_feedforward.calculate(
+                m_lastVelocitySetpoint,
+                m_pidController.getSetpoint().velocity,
+                kTurretLoopTimeSeconds);
+
+        m_lastVelocitySetpoint = m_pidController.getSetpoint().velocity;
+
+        m_feedbackOutput = feedbackOutputVoltage;
+        m_feedforwardOutput = feedforwardOutputVoltage;
+
+        if (!this.atGoal()) {
+          outputVoltage = feedbackOutputVoltage + feedforwardOutputVoltage;
+        } else {
+          m_talon.set(ControlMode.PercentOutput, 0);
+        }
       }
     }
 
