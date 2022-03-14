@@ -506,6 +506,8 @@ public final class Constants {
 
     public static final double kTurretMinPositionRadians = -0.4;
     public static final double kTurretMaxPositionRadians = 0.4;
+    public static final double kTurretRangeRadians =
+        kTurretMaxPositionRadians - kTurretMinPositionRadians;
 
     public static final double kBufferSizeRadians = Math.toRadians(25);
   }

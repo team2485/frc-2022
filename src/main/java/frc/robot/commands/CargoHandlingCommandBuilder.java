@@ -7,6 +7,7 @@ import static frc.robot.Constants.IndexerConstants.*;
 import static frc.robot.Constants.IntakeArmConstants.*;
 import static frc.robot.Constants.IntakeConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
+import static frc.robot.Constants.TurretConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -117,6 +118,32 @@ public class CargoHandlingCommandBuilder {
             shooter.setVelocityRotationsPerSecond(
                 InterpolatingTable.get(distanceToHub.getAsDouble()).shooterSpeedRotationsPerSecond),
         shooter);
+  }
+
+  public static Command getEjectCommand(
+      Shooter shooter,
+      Hood hood,
+      Turret turret,
+      Indexer indexer,
+      Feeder feeder,
+      FeedServo servo,
+      Supplier<Pose2d> robotPose) {
+    return new RunCommand(() -> shooter.setVelocityRotationsPerSecond(40), shooter)
+        .alongWith(
+            new RunCommand(() -> hood.setAngleRadians(kHoodBottomPositionRadians), hood),
+            new RunCommand(() -> turret.setAngleRadians(findTurretEjectAngle(robotPose)), turret),
+            new WaitCommand(1)
+                .andThen(getIndexToShooterOnceCommand(indexer, feeder, servo, shooter)));
+  }
+
+  public static double findTurretEjectAngle(Supplier<Pose2d> robotPose) {
+    double angle = findTurretAimAngle(robotPose);
+    if (angle > 0) {
+      angle = angle - kTurretRangeRadians / 4.0;
+    } else {
+      angle = angle + kTurretRangeRadians / 4.0;
+    }
+    return angle;
   }
 
   // public static Command getIndexToShooterCommand(

@@ -228,6 +228,25 @@ public class RobotContainer {
         .whenInactive(
             CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
                 .alongWith(CargoHandlingCommandBuilder.getHoodDownCommand(m_hood)));
+
+    // Eject on operator X button
+    m_operator
+        .x()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whileActiveContinuous(
+            CargoHandlingCommandBuilder.getEjectCommand(
+                m_shooter,
+                m_hood,
+                m_turret,
+                m_indexer,
+                m_feeder,
+                m_feedServo,
+                m_drivetrain::getPoseMeters))
+        .whenInactive(
+            CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
+                .alongWith(
+                    CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
+                    CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
   }
 
   private void configureClimbCommands() {
