@@ -57,13 +57,6 @@ public class CargoHandlingCommandBuilder {
             new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0), intake));
   }
 
-  // .raceWith(
-  //     new WaitUntilCommand(
-  //             () -> {
-  //               return counter.getNumCargo() == 2;
-  //             })
-  //         .andThen(new WaitCommand(1)));
-
   public static Command getIntakeArmUpCommand(IntakeArm intakeArm) {
     return new RunCommand(() -> intakeArm.setPosition(true), intakeArm)
         .withInterrupt(() -> intakeArm.atPosition(true));
@@ -93,22 +86,35 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getHoodAutoAimCommand(
       Hood hood, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
-    return new RunCommand(
-        () ->
-            hood.setAngleRadians(
-                InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
-                    .hoodAngleRadians),
-        hood);
+    return getHoodSetCommand(hood, getHoodAutoSetpoint(distanceToHub, distanceOffset));
+  }
+
+  public static Command getHoodSetCommand(Hood hood, DoubleSupplier angle) {
+    return new RunCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood);
+  }
+
+  public static DoubleSupplier getHoodAutoSetpoint(
+      DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
+    return () ->
+        InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
+            .hoodAngleRadians;
   }
 
   public static Command getShooterAutoSetCommand(
       Shooter shooter, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
+    return getShooterSetCommand(shooter, getShooterAutoSetpoint(distanceToHub, distanceOffset));
+  }
+
+  public static Command getShooterSetCommand(Shooter shooter, DoubleSupplier velocity) {
     return new RunCommand(
-        () ->
-            shooter.setVelocityRotationsPerSecond(
-                InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
-                    .shooterSpeedRotationsPerSecond),
-        shooter);
+        () -> shooter.setVelocityRotationsPerSecond(velocity.getAsDouble()), shooter);
+  }
+
+  public static DoubleSupplier getShooterAutoSetpoint(
+      DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
+    return () ->
+        InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
+            .hoodAngleRadians;
   }
 
   public static Command getEjectCommand(

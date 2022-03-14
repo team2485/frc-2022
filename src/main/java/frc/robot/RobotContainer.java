@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.*;
@@ -56,6 +57,15 @@ public class RobotContainer {
   // Distance offset to change distance by for auto-aim -- used to adjust
   @Log(name = "Distance offset")
   double m_distanceOffset = 0;
+
+  @Log(name = "Setpoint lock")
+  boolean m_setpointLock = false;
+
+  @Log(name = "Shooter velocity lock")
+  double m_shooterVelocityLock = 0;
+
+  @Log(name = "Hood angle lock")
+  double m_hoodAngleLock = 0;
 
   @Log(name = "Auto Chooser")
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
@@ -201,12 +211,14 @@ public class RobotContainer {
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-                m_shooter,
-                m_drivetrain::getHubToTurretCenterDistanceMeters,
-                () -> {
-                  return m_distanceOffset;
-                }))
+            new ConditionalCommand(
+                CargoHandlingCommandBuilder.getShooterAutoSetCommand(
+                    m_shooter,
+                    m_drivetrain::getHubToTurretCenterDistanceMeters,
+                    () -> m_distanceOffset),
+                CargoHandlingCommandBuilder.getShooterSetCommand(
+                    m_shooter, () -> m_shooterVelocityLock),
+                () -> !m_setpointLock))
         .whenInactive(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
@@ -217,12 +229,13 @@ public class RobotContainer {
             CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
                 m_indexer, m_feeder, m_feedServo, m_shooter))
         .whenActive(
-            CargoHandlingCommandBuilder.getHoodAutoAimCommand(
-                m_hood,
-                m_drivetrain::getHubToTurretCenterDistanceMeters,
-                () -> {
-                  return m_distanceOffset;
-                }))
+            new ConditionalCommand(
+                CargoHandlingCommandBuilder.getHoodAutoAimCommand(
+                    m_hood,
+                    m_drivetrain::getHubToTurretCenterDistanceMeters,
+                    () -> m_distanceOffset),
+                CargoHandlingCommandBuilder.getHoodSetCommand(m_hood, () -> m_hoodAngleLock),
+                () -> !m_setpointLock))
         .whenInactive(
             CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
                 .alongWith(CargoHandlingCommandBuilder.getHoodDownCommand(m_hood)));
@@ -264,6 +277,25 @@ public class RobotContainer {
             new InstantCommand(
                 () -> {
                   m_distanceOffset -= 0.2;
+                }));
+
+    // lock current shooter setpoints in place
+    m_operator
+        .a()
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_setpointLock = !m_setpointLock;
+                  m_shooterVelocityLock =
+                      CargoHandlingCommandBuilder.getShooterAutoSetpoint(
+                              () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
+                              () -> m_distanceOffset)
+                          .getAsDouble();
+                  m_hoodAngleLock =
+                      CargoHandlingCommandBuilder.getHoodAutoSetpoint(
+                              () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
+                              () -> m_distanceOffset)
+                          .getAsDouble();
                 }));
   }
 
