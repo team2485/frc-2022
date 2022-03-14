@@ -195,9 +195,10 @@ public class RobotContainer {
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whenActive(
+        .whileActiveContinuous(
             CargoHandlingCommandBuilder.getIntakeCommand(
-                m_intake, m_intakeArm, m_indexer, m_feedServo))
+                m_intake, m_intakeArm, m_indexer, m_feedServo),
+            false)
         .whenInactive(
             CargoHandlingCommandBuilder.getStopIntakeCommand(m_intake, m_intakeArm, m_indexer));
 

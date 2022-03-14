@@ -166,15 +166,15 @@ public class IntakeArm extends SubsystemBase implements Loggable {
         if (this.getAngleRadians() > 1.6) {
           outputVoltage = 0;
         } else {
-          outputVoltage = 4;
+          outputVoltage = 3;
         }
       } else if (!m_armSetpointPosition && this.getAngleRadians() > -0.12) {
         // System.out.println("Going down");
 
         if (this.getAngleRadians() > 1.6) {
-          outputVoltage = -9;
+          outputVoltage = -6;
         } else {
-          outputVoltage = -5;
+          outputVoltage = -3;
         }
       }
       if (outputVoltage != m_lastOutputVoltage) {

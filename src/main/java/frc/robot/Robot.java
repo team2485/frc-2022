@@ -6,6 +6,7 @@ package frc.robot;
 
 import static frc.robot.Constants.TurretConstants.*;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -37,13 +38,13 @@ public class Robot extends TimedRobot {
         () -> m_robotContainer.m_shooter.runControlLoop(),
         Constants.ShooterConstants.kShooterLoopTimeSeconds);
 
-    // addPeriodic(
-    //     () -> m_robotContainer.m_climbElevator.runControlLoop(),
-    //     Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
+    addPeriodic(
+        () -> m_robotContainer.m_climbElevator.runControlLoop(),
+        Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
 
-    // addPeriodic(
-    //     () -> m_robotContainer.m_climbArm.runControlLoop(),
-    //     Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
+    addPeriodic(
+        () -> m_robotContainer.m_climbArm.runControlLoop(),
+        Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
   }
 
   /**
@@ -69,6 +70,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     Logger.updateEntries();
+    NetworkTableInstance.getDefault().flush();
     // System.out.println("Potentiometer reading: " + m_potentiometer.get());
   }
 

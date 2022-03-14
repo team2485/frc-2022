@@ -386,7 +386,7 @@ public final class Constants {
         IntakeConstants.kIntakeTopWheelDiameterMeters / kIndexerEntryWheelDiameterMeters;
 
     public static final double kIndexerDefaultSpeedRotationsPerSecond =
-        kIndexerFreeSpeedRotationsPerSecond * 0.5;
+        kIndexerFreeSpeedRotationsPerSecond * 0.7;
 
     public static final double kSIndexerVolts = 0.1;
     public static final double kVIndexerVoltSecondsPerMeter = 0.1;
@@ -610,21 +610,9 @@ public final class Constants {
     public static final double kElevatorMaxSpeedMetersPerSecond =
         kElevatorFreeSpeedMetersPerSecond * 0.5;
     // Find maximum simultaneously achievable acceleration
-    public static final double kElevatorMaxAccelerationMetersPerSecondSquaredUnloaded =
-        new ElevatorFeedforward(
-                ksElevatorUnloadedVolts,
-                kgElevatorUnloadedVolts,
-                kvElevatorUnloadedVoltSecondsPerMeter,
-                kaElevatorLoadedVoltSecondsSquaredPerMeter)
-            .maxAchievableAcceleration(kNominalVoltage, kElevatorMaxSpeedMetersPerSecond);
+    public static final double kElevatorMaxAccelerationMetersPerSecondSquaredUnloaded = 0.3;
 
-    public static final double kSlideMaxAccelerationMetersPerSecondSquaredLoaded =
-        new ElevatorFeedforward(
-                ksElevatorLoadedVolts,
-                kgElevatorLoadedVolts,
-                kvElevatorLoadedVoltSecondsPerMeter,
-                kaElevatorLoadedVoltSecondsSquaredPerMeter)
-            .maxAchievableAcceleration(kNominalVoltage, kElevatorMaxSpeedMetersPerSecond);
+    public static final double kSlideMaxAccelerationMetersPerSecondSquaredLoaded = 0.1;
     ;
 
     // Constraint for the motion profilied elevator controller (unloaded mode)
