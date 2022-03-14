@@ -53,6 +53,10 @@ public class RobotContainer {
   public final ClimbArm m_climbArm = new ClimbArm();
   public final ClimbStateMachine m_climbStateMachine = new ClimbStateMachine();
 
+  // Distance offset to change distance by for auto-aim -- used to adjust
+  @Log(name = "Distance offset")
+  double m_distanceOffset = 0;
+
   @Log(name = "Auto Chooser")
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
 
@@ -151,10 +155,7 @@ public class RobotContainer {
   }
 
   private void configureCargoHandlingCommands() {
-    // Default commands for intake, intake arm, shooter, and indexers are to turn them off
-    // m_shooter.setDefaultCommand(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
-    // m_indexer.setDefaultCommand(CargoHandlingCommandBuilder.getIndexerOffCommand(m_indexer));
-    // m_feeder.setDefaultCommand(CargoHandlingCommandBuilder.getFeederOffCommand(m_feeder));
+    // Control systems for hood and shooter enabled when not climbing
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
         .whenActive(new InstantCommand(() -> m_shooter.enable(true), m_shooter))
@@ -165,30 +166,23 @@ public class RobotContainer {
         .whenActive(new InstantCommand(() -> m_hood.enable(true), m_hood))
         .whenInactive(new InstantCommand(() -> m_hood.enable(false), m_hood));
 
-    // // Default commands for turret and hood are to auto-aim based on robot pose/distance
+    // Turret defaults to to auto-aim based on robot pose/distance
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
         .whenActive(new InstantCommand(() -> m_turret.enable(true), m_turret))
         .whileActiveContinuous(
             CargoHandlingCommandBuilder.getTurretAutoAimCommand(
-                m_turret,
-                m_drivetrain::getTurretCenterPoseMeters,
-                m_drivetrain::getFieldRelativeVelocityMetersPerSecond))
+                m_turret, m_drivetrain::getTurretCenterPoseMeters))
         .whenInactive(
             new InstantCommand(() -> m_turret.setAngleRadians(0), m_turret)
                 .andThen(
                     new WaitUntilCommand(m_turret::atGoal),
                     new InstantCommand(() -> m_turret.enable(false), m_turret)));
 
+    // Puts intake arm down at start of climb
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
         .whenInactive(new InstantCommand(() -> m_intakeArm.setPosition(false), m_intakeArm));
-
-    // m_hood.setDefaultCommand(
-    //     CargoHandlingCommandBuilder.getHoodAutoAimCommand(
-    //         m_hood,
-    //         m_drivetrain::getDistanceToHubMeters,
-    //         m_drivetrain::getFieldRelativeVelocityMetersPerSecond));
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer
     // stopped by hitting high indexer path
@@ -210,7 +204,9 @@ public class RobotContainer {
             CargoHandlingCommandBuilder.getShooterAutoSetCommand(
                 m_shooter,
                 m_drivetrain::getHubToTurretCenterDistanceMeters,
-                m_drivetrain::getFieldRelativeVelocityMetersPerSecond))
+                () -> {
+                  return m_distanceOffset;
+                }))
         .whenInactive(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
@@ -224,7 +220,9 @@ public class RobotContainer {
             CargoHandlingCommandBuilder.getHoodAutoAimCommand(
                 m_hood,
                 m_drivetrain::getHubToTurretCenterDistanceMeters,
-                m_drivetrain::getFieldRelativeVelocityMetersPerSecond))
+                () -> {
+                  return m_distanceOffset;
+                }))
         .whenInactive(
             CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
                 .alongWith(CargoHandlingCommandBuilder.getHoodDownCommand(m_hood)));
@@ -247,6 +245,26 @@ public class RobotContainer {
                 .alongWith(
                     CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
                     CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
+
+    // Make robot think it's further when aiming
+    m_operator
+        .upperPOV()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_distanceOffset += 0.2;
+                }));
+
+    // Make robot think it's closer when aiming
+    m_operator
+        .lowerPOV()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_distanceOffset -= 0.2;
+                }));
   }
 
   private void configureClimbCommands() {

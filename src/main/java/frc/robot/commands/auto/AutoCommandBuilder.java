@@ -33,7 +33,9 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
             shooter,
             drivetrain::getHubToTurretCenterDistanceMeters,
-            drivetrain::getFieldRelativeVelocityMetersPerSecond);
+            () -> {
+              return 0;
+            });
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
             lowIndexer, highIndexer, servo, shooter);
@@ -65,7 +67,9 @@ public class AutoCommandBuilder {
         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
             shooter,
             drivetrain::getHubToTurretCenterDistanceMeters,
-            drivetrain::getFieldRelativeVelocityMetersPerSecond);
+            () -> {
+              return 0;
+            });
     Command feedToShooterOnce =
         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
             lowIndexer, highIndexer, servo, shooter);

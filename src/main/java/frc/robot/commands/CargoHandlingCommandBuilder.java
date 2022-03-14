@@ -10,7 +10,6 @@ import static frc.robot.Constants.ShooterConstants.*;
 import static frc.robot.Constants.TurretConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -75,8 +74,7 @@ public class CargoHandlingCommandBuilder {
         .withInterrupt(() -> intakeArm.atPosition(false));
   }
 
-  public static Command getTurretAutoAimCommand(
-      Turret turret, Supplier<Pose2d> robotPose, Supplier<Translation2d> robotVelocity) {
+  public static Command getTurretAutoAimCommand(Turret turret, Supplier<Pose2d> robotPose) {
     return new RunCommand(() -> turret.setAngleRadians(findTurretAimAngle(robotPose)), turret);
   }
 
@@ -93,30 +91,23 @@ public class CargoHandlingCommandBuilder {
     }
   }
 
-  public static Command getHoodShooterAutoAimCommand(
-      Hood hood,
-      Shooter shooter,
-      DoubleSupplier distanceToHub,
-      Supplier<Translation2d> robotVelocity) {
-    return getHoodAutoAimCommand(hood, distanceToHub, robotVelocity)
-        .alongWith(getShooterAutoSetCommand(shooter, distanceToHub, robotVelocity));
-  }
-
   public static Command getHoodAutoAimCommand(
-      Hood hood, DoubleSupplier distanceToHub, Supplier<Translation2d> robotVelocity) {
+      Hood hood, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
     return new RunCommand(
         () ->
             hood.setAngleRadians(
-                InterpolatingTable.get(distanceToHub.getAsDouble()).hoodAngleRadians),
+                InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
+                    .hoodAngleRadians),
         hood);
   }
 
   public static Command getShooterAutoSetCommand(
-      Shooter shooter, DoubleSupplier distanceToHub, Supplier<Translation2d> robotVelocity) {
+      Shooter shooter, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
     return new RunCommand(
         () ->
             shooter.setVelocityRotationsPerSecond(
-                InterpolatingTable.get(distanceToHub.getAsDouble()).shooterSpeedRotationsPerSecond),
+                InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
+                    .shooterSpeedRotationsPerSecond),
         shooter);
   }
 
