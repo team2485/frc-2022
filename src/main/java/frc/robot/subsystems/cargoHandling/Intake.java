@@ -32,6 +32,7 @@ public class Intake extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
+  @Log(name = "Output voltage")
   private double m_lastOutputVoltage = 0;
 
   private DoubleLogEntry statorCurrentLog =
