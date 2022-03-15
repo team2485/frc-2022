@@ -40,7 +40,7 @@ public class RobotContainer {
   private final FeedServo m_feedServo = new FeedServo();
   public final Shooter m_shooter = new Shooter();
   private final Hood m_hood = new Hood();
-  //   private final Turret m_turret = new Turret();
+  private final Turret m_turret = new Turret();
   private final BallCounter m_ballCounter = new BallCounter(m_shooter::hasDipped);
 
   private final Drivetrain m_drivetrain =
@@ -251,24 +251,24 @@ public class RobotContainer {
             CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
                 .alongWith(CargoHandlingCommandBuilder.getHoodDownCommand(m_hood)));
 
-    // // Eject on operator X button
-    // m_operator
-    //     .x()
-    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-    //     .whileActiveContinuous(
-    //         CargoHandlingCommandBuilder.getEjectCommand(
-    //             m_shooter,
-    //             m_hood,
-    //             m_turret,
-    //             m_indexer,
-    //             m_feeder,
-    //             m_feedServo,
-    //             m_drivetrain::getPoseMeters))
-    //     .whenInactive(
-    //         CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
-    //             .alongWith(
-    //                 CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
-    //                 CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
+    // Eject on operator X button
+    m_operator
+        .x()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whileActiveContinuous(
+            CargoHandlingCommandBuilder.getEjectCommand(
+                m_shooter,
+                m_hood,
+                m_turret,
+                m_indexer,
+                m_feeder,
+                m_feedServo,
+                m_drivetrain::getPoseMeters))
+        .whenInactive(
+            CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
+                .alongWith(
+                    CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
+                    CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
 
     // Make robot think it's closer when aiming
     m_operator
