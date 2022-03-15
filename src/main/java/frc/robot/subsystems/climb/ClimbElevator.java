@@ -187,7 +187,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     m_enabled = enabled;
     if (enabled) {
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 10);
-      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);

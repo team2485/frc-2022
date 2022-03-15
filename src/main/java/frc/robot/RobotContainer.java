@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.*;
@@ -52,6 +53,19 @@ public class RobotContainer {
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
   public final ClimbStateMachine m_climbStateMachine = new ClimbStateMachine();
+
+  // Distance offset to change distance by for auto-aim -- used to adjust
+  @Log(name = "Distance offset")
+  double m_distanceOffset = 0;
+
+  @Log(name = "Setpoint lock")
+  boolean m_setpointLock = false;
+
+  @Log(name = "Shooter velocity lock")
+  double m_shooterVelocityLock = 0;
+
+  @Log(name = "Hood angle lock")
+  double m_hoodAngleLock = 0;
 
   @Log(name = "Auto Chooser")
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
@@ -151,10 +165,7 @@ public class RobotContainer {
   }
 
   private void configureCargoHandlingCommands() {
-    // Default commands for intake, intake arm, shooter, and indexers are to turn them off
-    // m_shooter.setDefaultCommand(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
-    // m_indexer.setDefaultCommand(CargoHandlingCommandBuilder.getIndexerOffCommand(m_indexer));
-    // m_feeder.setDefaultCommand(CargoHandlingCommandBuilder.getFeederOffCommand(m_feeder));
+    // Control systems for hood and shooter enabled when not climbing
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
         .whenActive(new InstantCommand(() -> m_shooter.enable(true), m_shooter))
@@ -180,24 +191,20 @@ public class RobotContainer {
     //                 new WaitUntilCommand(m_turret::atGoal),
     //                 new InstantCommand(() -> m_turret.enable(false), m_turret)));
 
+    // Puts intake arm down at start of climb
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
         .whenInactive(new InstantCommand(() -> m_intakeArm.setPosition(false), m_intakeArm));
-
-    // m_hood.setDefaultCommand(
-    //     CargoHandlingCommandBuilder.getHoodAutoAimCommand(
-    //         m_hood,
-    //         m_drivetrain::getDistanceToHubMeters,
-    //         m_drivetrain::getFieldRelativeVelocityMetersPerSecond));
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer
     // stopped by hitting high indexer path
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whenActive(
+        .whileActiveContinuous(
             CargoHandlingCommandBuilder.getIntakeCommand(
-                m_intake, m_intakeArm, m_indexer, m_feedServo))
+                m_intake, m_intakeArm, m_indexer, m_feedServo),
+            false)
         .whenInactive(
             CargoHandlingCommandBuilder.getStopIntakeCommand(m_intake, m_intakeArm, m_indexer));
 

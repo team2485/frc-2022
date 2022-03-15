@@ -38,13 +38,13 @@ public class Robot extends TimedRobot {
         () -> m_robotContainer.m_shooter.runControlLoop(),
         Constants.ShooterConstants.kShooterLoopTimeSeconds);
 
-    // addPeriodic(
-    //     () -> m_robotContainer.m_climbElevator.runControlLoop(),
-    //     Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
+    addPeriodic(
+        () -> m_robotContainer.m_climbElevator.runControlLoop(),
+        Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
 
-    // addPeriodic(
-    //     () -> m_robotContainer.m_climbArm.runControlLoop(),
-    //     Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
+    addPeriodic(
+        () -> m_robotContainer.m_climbArm.runControlLoop(),
+        Constants.ClimbArmConstants.kArmControlLoopTimeSeconds);
   }
 
   /**

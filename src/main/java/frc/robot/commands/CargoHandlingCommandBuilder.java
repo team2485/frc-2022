@@ -7,9 +7,9 @@ import static frc.robot.Constants.IndexerConstants.*;
 import static frc.robot.Constants.IntakeArmConstants.*;
 import static frc.robot.Constants.IntakeConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
+import static frc.robot.Constants.TurretConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -57,13 +57,6 @@ public class CargoHandlingCommandBuilder {
             new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0), intake));
   }
 
-  // .raceWith(
-  //     new WaitUntilCommand(
-  //             () -> {
-  //               return counter.getNumCargo() == 2;
-  //             })
-  //         .andThen(new WaitCommand(1)));
-
   public static Command getIntakeArmUpCommand(IntakeArm intakeArm) {
     return new RunCommand(() -> intakeArm.setPosition(true), intakeArm)
         .withInterrupt(() -> intakeArm.atPosition(true));
@@ -74,8 +67,7 @@ public class CargoHandlingCommandBuilder {
         .withInterrupt(() -> intakeArm.atPosition(false));
   }
 
-  public static Command getTurretAutoAimCommand(
-      Turret turret, Supplier<Pose2d> robotPose, Supplier<Translation2d> robotVelocity) {
+  public static Command getTurretAutoAimCommand(Turret turret, Supplier<Pose2d> robotPose) {
     return new RunCommand(() -> turret.setAngleRadians(findTurretAimAngle(robotPose)), turret);
   }
 
@@ -92,31 +84,63 @@ public class CargoHandlingCommandBuilder {
     }
   }
 
-  public static Command getHoodShooterAutoAimCommand(
-      Hood hood,
-      Shooter shooter,
-      DoubleSupplier distanceToHub,
-      Supplier<Translation2d> robotVelocity) {
-    return getHoodAutoAimCommand(hood, distanceToHub, robotVelocity)
-        .alongWith(getShooterAutoSetCommand(shooter, distanceToHub, robotVelocity));
+  public static Command getHoodAutoAimCommand(
+      Hood hood, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
+    return getHoodSetCommand(hood, getHoodAutoSetpoint(distanceToHub, distanceOffset));
   }
 
-  public static Command getHoodAutoAimCommand(
-      Hood hood, DoubleSupplier distanceToHub, Supplier<Translation2d> robotVelocity) {
-    return new RunCommand(
-        () ->
-            hood.setAngleRadians(
-                InterpolatingTable.get(distanceToHub.getAsDouble()).hoodAngleRadians),
-        hood);
+  public static Command getHoodSetCommand(Hood hood, DoubleSupplier angle) {
+    return new RunCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood);
+  }
+
+  public static DoubleSupplier getHoodAutoSetpoint(
+      DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
+    return () ->
+        InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
+            .hoodAngleRadians;
   }
 
   public static Command getShooterAutoSetCommand(
-      Shooter shooter, DoubleSupplier distanceToHub, Supplier<Translation2d> robotVelocity) {
+      Shooter shooter, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
+    return getShooterSetCommand(shooter, getShooterAutoSetpoint(distanceToHub, distanceOffset));
+  }
+
+  public static Command getShooterSetCommand(Shooter shooter, DoubleSupplier velocity) {
     return new RunCommand(
-        () ->
-            shooter.setVelocityRotationsPerSecond(
-                InterpolatingTable.get(distanceToHub.getAsDouble()).shooterSpeedRotationsPerSecond),
-        shooter);
+        () -> shooter.setVelocityRotationsPerSecond(velocity.getAsDouble()), shooter);
+  }
+
+  public static DoubleSupplier getShooterAutoSetpoint(
+      DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
+    return () ->
+        InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
+            .hoodAngleRadians;
+  }
+
+  public static Command getEjectCommand(
+      Shooter shooter,
+      Hood hood,
+      Turret turret,
+      Indexer indexer,
+      Feeder feeder,
+      FeedServo servo,
+      Supplier<Pose2d> robotPose) {
+    return new RunCommand(() -> shooter.setVelocityRotationsPerSecond(40), shooter)
+        .alongWith(
+            new RunCommand(() -> hood.setAngleRadians(kHoodBottomPositionRadians), hood),
+            new RunCommand(() -> turret.setAngleRadians(findTurretEjectAngle(robotPose)), turret),
+            new WaitCommand(1)
+                .andThen(getIndexToShooterOnceCommand(indexer, feeder, servo, shooter)));
+  }
+
+  public static double findTurretEjectAngle(Supplier<Pose2d> robotPose) {
+    double angle = findTurretAimAngle(robotPose);
+    if (angle > 0) {
+      angle = angle - kTurretRangeRadians / 4.0;
+    } else {
+      angle = angle + kTurretRangeRadians / 4.0;
+    }
+    return angle;
   }
 
   // public static Command getIndexToShooterCommand(
