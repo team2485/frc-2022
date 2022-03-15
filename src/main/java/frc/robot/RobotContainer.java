@@ -259,19 +259,9 @@ public class RobotContainer {
                     CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
                     CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
 
-    // Make robot think it's further when aiming
-    m_operator
-        .upperPOV()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_distanceOffset += 0.2;
-                }));
-
     // Make robot think it's closer when aiming
     m_operator
-        .lowerPOV()
+        .upperPOV()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whenActive(
             new InstantCommand(
@@ -279,9 +269,19 @@ public class RobotContainer {
                   m_distanceOffset -= 0.2;
                 }));
 
+    // Make robot think it's further when aiming
+    m_operator
+        .lowerPOV()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_distanceOffset += 0.2;
+                }));
+
     // lock current shooter setpoints in place
     m_operator
-        .a()
+        .b()
         .whenActive(
             new InstantCommand(
                 () -> {

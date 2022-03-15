@@ -132,11 +132,11 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
     // practice carpet
-    public static final double ksDriveVolts = IDManager.getInstance().select(0.0, 0.73658);
+    public static final double ksDriveVolts = IDManager.getInstance().select(0.67757, 0.73658);
     public static final double kvDriveVoltSecondsPerMeter =
-        IDManager.getInstance().select(0.0, 2.2729);
+        IDManager.getInstance().select(2.1986, 2.2729);
     public static final double kaDriveVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.0, 0.37446);
+        IDManager.getInstance().select(0.30189, 0.37446);
 
     public static final double kvMaxVelocity = 12 / kvDriveVoltSecondsPerMeter;
     public static final double kaMaxAcceleration = 12 / kaDriveVoltSecondsSquaredPerMeter;
@@ -159,7 +159,8 @@ public final class Constants {
     //// Turning PID constants
     public static final double kPTurning = 1;
     public static final double kDTurning = 0.1;
-    public static final double kFTurning = 0.4 * 1023 / 8360;
+    public static final double kFTurning =
+        IDManager.getInstance().select(0.4 * 1023 / 7674, 0.4 * 1023 / 8360);
 
     //// Turning trapezoidal motion profile/motion magic constants
     public static final double kModuleMaxSpeedTurningRadiansPerSecond = 4 * Math.PI;
