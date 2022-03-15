@@ -75,21 +75,6 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   @Log(name = "Output Voltage")
   private double m_lastOutputVoltage = 0;
 
-  @Log(name = "Filtered Encoder Angle")
-  private double m_filteredEncoderAngle = kIntakeArmBottomPositionRadians;
-
-  private enum ArmMovePhase {
-    kLifting,
-    kDropping
-  }
-
-  private ArmMovePhase m_phase = ArmMovePhase.kLifting;
-
-  private DoubleLogEntry statorCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/statorCurrent");
-  private DoubleLogEntry supplyCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/hood/supplyCurrent");
-
   /** Creates a new intakeArm. */
   public IntakeArm() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
@@ -110,7 +95,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   /** @return current angle from horizontal */
   @Log(name = "Current angle (radians)")
   public double getAngleRadians() {
-    return -m_encoder.getAbsolutePosition() * 2 * Math.PI + 5.44 - 0.2618;
+    return -m_encoder.getAbsolutePosition() * 2 * Math.PI + kIntakeArmEncoderOffset;
   }
 
   @Config(name = "Set angle (radians)", defaultValueNumeric = kIntakeArmBottomPositionRadians)
@@ -147,26 +132,32 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_armSetpointPosition = top;
   }
 
+  
   public boolean atPosition(boolean top) {
     if (top) {
-      return this.getAngleRadians() >= 2.1;
+      return Math.abs(this.getAngleRadians() - kIntakeArmTopPositionRadians) < kIntakeArmPositionToleranceRadians;
     } else {
-      return this.getAngleRadians() <= 0.05;
+      return Math.abs(this.getAngleRadians() - kIntakeArmBottomPositionRadians) < kIntakeArmPositionToleranceRadians;
     }
   }
 
   public void runControlLoop() {
+    if(this.atPosition(true)) {
+      m_armPosition = true;
+    } else if (this.atPosition(false)) {
+      m_armPosition = false;
+    }
 
     if (m_voltageOverride) {
       m_spark.setVoltage(m_voltageSetpoint);
     } else {
       double outputVoltage = 0;
-      if (m_armSetpointPosition && this.getAngleRadians() < 2.15) {
+      if (m_armSetpointPosition && !m_armPosition) {
         // System.out.println("Going up");
         if (this.getAngleRadians() > 1.6) {
           outputVoltage = 0;
         } else {
-          outputVoltage = 3;
+          outputVoltage = 6;
         }
       } else if (!m_armSetpointPosition && this.getAngleRadians() > -0.12) {
         // System.out.println("Going down");
@@ -174,9 +165,10 @@ public class IntakeArm extends SubsystemBase implements Loggable {
         if (this.getAngleRadians() > 1.6) {
           outputVoltage = -6;
         } else {
-          outputVoltage = -3;
+          outputVoltage = -2;
         }
       }
+
       if (outputVoltage != m_lastOutputVoltage) {
         m_spark.setVoltage(outputVoltage);
       }
@@ -187,6 +179,5 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   @Override
   public void periodic() {
     this.runControlLoop();
-    m_filteredEncoderAngle += (this.getAngleRadians() - m_filteredEncoderAngle) * 0.05;
   }
 }

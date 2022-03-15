@@ -31,6 +31,7 @@ public class Feeder extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
+  @Log(name = "Output voltage")
   private double m_lastOutputVoltage = 0;
 
   public Feeder() {
@@ -44,7 +45,7 @@ public class Feeder extends SubsystemBase implements Loggable {
   }
 
   /** @return the current velocity in rotations per second. */
-  // @Log(name = "Current velocity (RPS)")
+  @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
     return m_spark.getEncoder().getVelocity() / 60.0;
   }
@@ -54,7 +55,7 @@ public class Feeder extends SubsystemBase implements Loggable {
    *
    * @param rotationsPerSecond velocity setpoint
    */
-  // @Config(name = "Set Velocity (RPS)")
+  @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
     m_voltageOverride = false;
 
@@ -72,7 +73,7 @@ public class Feeder extends SubsystemBase implements Loggable {
     m_voltageSetpoint = voltage;
   }
 
-  // @Log(name = "At setpoint")
+  //@Log(name = "At setpoint")
   public boolean atSetpoint() {
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
         < kFeederVelocityToleranceRotationsPerSecond;

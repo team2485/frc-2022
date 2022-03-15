@@ -303,7 +303,7 @@ public final class Constants {
     public static final double kIntakeGearRatio = 4; // motor turns : output/full hood turns
 
     public static final double kIntakeFreeSpeedRotationsPerSecond =
-        kNeo550FreeSpeedRotationsPerSecond / kIntakeGearRatio;
+        kNeoFreeSpeedRotationsPerSecond / kIntakeGearRatio;
 
     public static final double kIntakeTopWheelDiameterMeters = 0.1016; // 4 in
     public static final double kIntakeBottomWheelDiameterMeters = 0.1524; // 6 in
@@ -311,9 +311,11 @@ public final class Constants {
     public static final double kIntakeDefaultSpeedRotationsPerSecond =
         kIntakeFreeSpeedRotationsPerSecond * 0.5;
 
-    public static final double kSIntakeVolts = 0;
-    public static final double kVIntakeVoltSecondsPerMeter = 0.1;
-    public static final double kAIntakeVoltSecondsSquaredPerMeter = 0.01;
+    public static final double kSIntakeVolts = IDManager.getInstance().select(0.15, 0.0);
+    public static final double kVIntakeVoltSecondsPerMeter =
+        IDManager.getInstance().select(0.08, 0.1);
+    public static final double kAIntakeVoltSecondsSquaredPerMeter =
+        IDManager.getInstance().select(0.01, 0.01);
 
     public static final double kIntakeVelocityToleranceRotationsPerSecond = 1;
 
@@ -340,7 +342,11 @@ public final class Constants {
         1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
     public static final double kIntakeArmBottomPositionRadians = -0.2618; // from horizontal
-    public static final double kIntakeArmTopPositionRadians = 2.0071; // change later
+    public static final double kIntakeArmTopPositionRadians =
+        IDManager.getInstance().select(1.988, 2.0071); // change later
+
+    public static final double kIntakeArmEncoderOffset =
+        IDManager.getInstance().select(3.28 + 0.038 - 0.2618, 5.44 - 0.2618);
 
     // Intake Arm characterization constants
     public static final double kSIntakeArmVolts = 0.5;
@@ -367,7 +373,7 @@ public final class Constants {
     // Intake Arm PID constants
     public static final double kPIntakeArmVoltsPerRadian = 10;
     public static final double kDIntakeArmVoltSecondsPerRadian = 0;
-    public static final double kIntakeArmPositionToleranceRadians = 0.01;
+    public static final double kIntakeArmPositionToleranceRadians = 0.02;
   }
 
   public static final class IndexerConstants {
@@ -389,9 +395,11 @@ public final class Constants {
     public static final double kIndexerDefaultSpeedRotationsPerSecond =
         kIndexerFreeSpeedRotationsPerSecond * 0.7;
 
-    public static final double kSIndexerVolts = 0.1;
-    public static final double kVIndexerVoltSecondsPerMeter = 0.1;
-    public static final double kAIndexerVoltSecondsSquaredPerMeter = 0.005;
+    public static final double kSIndexerVolts = IDManager.getInstance().select(0.49, 0.1);
+    public static final double kVIndexerVoltSecondsPerMeter =
+        IDManager.getInstance().select(0.1, 0.1);
+    public static final double kAIndexerVoltSecondsSquaredPerMeter =
+        IDManager.getInstance().select(0.005, 0.005);
 
     public static final double kIndexerVelocityToleranceRotationsPerSecond = 1;
   }
@@ -419,9 +427,11 @@ public final class Constants {
         kFeederSurfaceFreeSpeedMetersPerSecond
             / ShooterConstants.kShooterSurfaceFreeSpeedMetersPerSecond;
 
-    public static final double kSFeederVolts = 0.65884;
-    public static final double kVFeederVoltSecondsPerMeter = 0.11065;
-    public static final double kAFeederVoltSecondsSquaredPerMeter = 0.023167;
+    public static final double kSFeederVolts = IDManager.getInstance().select(0.52807, 0.65884);
+    public static final double kVFeederVoltSecondsPerMeter =
+        IDManager.getInstance().select(0.24889, 0.11065);
+    public static final double kAFeederVoltSecondsSquaredPerMeter =
+        IDManager.getInstance().select(0.033443, 0.023167);
 
     public static final double kFeederVelocityToleranceRotationsPerSecond = 1;
 
@@ -445,16 +455,20 @@ public final class Constants {
 
     public static final double kHoodBottomPositionRadians =
         0.4363323; // from horizontal (25.21 deg)
-    public static final double kHoodTopPositionRadians = 0.525; //
+    public static final double kHoodTopPositionRadians = 0.51; //
 
+    public static final boolean kHoodGearBacklashCompensation = true;
     // Hood characterization constants
-    public static final double ksHoodVolts = 0.13428;
-    public static final double kgHoodVolts = 0.061339;
-    public static final double kvHoodVoltSecondsPerRadian = 0.99111;
-    public static final double kaHoodVoltSecondsSquaredPerRadian = 0.12369;
+    // these are wrong rn
+    public static final double ksHoodVolts = IDManager.getInstance().select(0.14803, 0.13428);
+    public static final double kgHoodVolts = IDManager.getInstance().select(0.058609, 0.061339);
+    public static final double kvHoodVoltSecondsPerRadian =
+        IDManager.getInstance().select(1.1003, 0.99111);
+    public static final double kaHoodVoltSecondsSquaredPerRadian =
+        IDManager.getInstance().select(0.1298, 0.12369);
 
-    public static final double kHoodMaxSpeedRadiansPerSecond = 2;
-    public static final double kHoodMaxAccelerationRadiansPerSecondSquared = 10;
+    public static final double kHoodMaxSpeedRadiansPerSecond = 1;
+    public static final double kHoodMaxAccelerationRadiansPerSecondSquared = 2;
 
     public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
@@ -524,18 +538,23 @@ public final class Constants {
     public static final int kFalconPulsesPerRevolution = 2048;
 
     public static final double kShooterRotationsPerPulse = 1.0 / kFalconPulsesPerRevolution;
+    public static final double kShooterGearRatio = IDManager.getInstance().select(2.0 / 3.0, 1.0);
 
     public static final double kShooterCircumferenceMeters = 0.1524 * Math.PI;
-    public static final double kShooterFreeSpeedRotationsPerSecond = 93.2;
+    public static final double kShooterFreeSpeedRotationsPerSecond =
+        IDManager.getInstance()
+            .select(kFalconFreeSpeedRotationsPerSecond / kShooterGearRatio, 93.2);
     public static final double kShooterSurfaceFreeSpeedMetersPerSecond =
         kShooterFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
 
-    // shooter wood prototype gains
-    public static final double kSShooterVolts = 0.59077;
-    public static final double kVShooterVoltSecondsPerMeter = 0.10773;
-    public static final double kAShooterVoltSecondsSquaredPerMeter = 0.0091575;
+    public static final double kSShooterVolts = IDManager.getInstance().select(0.55769, 0.59077);
+    public static final double kVShooterVoltSecondsPerMeter =
+        IDManager.getInstance().select(0.071665, 0.10773);
+    public static final double kAShooterVoltSecondsSquaredPerMeter =
+        IDManager.getInstance().select(0.0057801, 0.0091575);
 
-    public static final double kShooterFeedforwardScale = 0.95;
+    public static final double kShooterFeedforwardScale =
+        IDManager.getInstance().select(0.91, 0.95);
 
     // currently unused
     public static final double kP = 1;
@@ -549,6 +568,7 @@ public final class Constants {
   }
 
   public static final class ClimbElevatorConstants {
+
     public static final double kElevatorControlLoopTimeSeconds = 0.01;
     // SLIDE CONSTANTS
     public static final int kElevatorTalonPort = 40;
@@ -666,10 +686,14 @@ public final class Constants {
 
     public static final double kArmRotationTolerance = 0.01;
     // ARM TRANSLATION CONSTANTS
-    public static final double ksArmTranslationVolts = 0.55953;
-    public static final double kgArmTranslationVolts = 0.18092;
-    public static final double kvArmTranslationVoltSecondsPerMeter = 62.802;
-    public static final double kaArmTranslationVoltSecondsSquaredPerMeter = 0.04;
+    public static final double ksArmTranslationVolts =
+        IDManager.getInstance().select(0.57233, 0.55953);
+    public static final double kgArmTranslationVolts =
+        IDManager.getInstance().select(0.023933, 0.18092);
+    public static final double kvArmTranslationVoltSecondsPerMeter =
+        IDManager.getInstance().select(103.19, 62.802);
+    public static final double kaArmTranslationVoltSecondsSquaredPerMeter =
+        IDManager.getInstance().select(8.7859, 0.04);
 
     public static final double kArmMaxSpeedTranslationMetersPerSecond =
         kArmFreeSpeedMetersPerSecond * 0.5;

@@ -47,6 +47,7 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   private boolean m_enabled = true;
 
+  @Log(name = "Output voltage")
   private double m_lastOutputVoltage = 0;
 
   /** Creates a new Shooter. Controlled with a feedforward and a bang bang controlller. */
@@ -68,15 +69,15 @@ public class Shooter extends SubsystemBase implements Loggable {
   /** @return the current talon-reported velocity in rotations per second. */
   @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
-    return m_talon.getSelectedSensorVelocity() * kShooterRotationsPerPulse * 10;
+    return m_talon.getSelectedSensorVelocity() / kShooterGearRatio * kShooterRotationsPerPulse * 10;
   }
 
-  /**
+/**
    * Sets the velocity setpoint for the flywheel.
    *
    * @param rotationsPerSecond velocity setpoint
    */
-  @Config.NumberSlider(name = "Set Velocity (RPS)", min = 0, max = 100)
+  @Config.NumberSlider(name = "Set Velocity (RPS)", min = 0, max = 154)
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
     m_lastVelocitySetpoint = m_velocitySetpointRotationsPerSecond;
     m_velocitySetpointRotationsPerSecond =

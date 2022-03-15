@@ -19,7 +19,7 @@ public class Indexer extends SubsystemBase implements Loggable {
       new SR_SimpleMotorFeedforward(
           kSIndexerVolts, kVIndexerVoltSecondsPerMeter, kAIndexerVoltSecondsSquaredPerMeter);
 
-  // @Log(name = "Velocity Setpoint")
+  @Log(name = "Velocity Setpoint")
   private double m_velocitySetpointRotationsPerSecond;
 
   private double m_lastVelocitySetpoint;
@@ -32,6 +32,7 @@ public class Indexer extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
+  @Log(name = "output voltage")
   private double m_lastOutputVoltage = 0;
 
   public Indexer() {
@@ -46,7 +47,7 @@ public class Indexer extends SubsystemBase implements Loggable {
   }
 
   /** @return the current velocity in rotations per second. */
-  // @Log(name = "Current velocity (RPS)")
+   @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
     return m_spark.getEncoder().getVelocity() / (60.0 * kIndexerGearRatio);
   }

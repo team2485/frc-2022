@@ -81,12 +81,14 @@ public class Hood extends SubsystemBase implements Loggable {
   public void setAngleRadians(double angle) {
     m_voltageOverride = false;
 
-    if (Math.abs(angle - m_angleSetpointRadians) >= kHoodSetpointDeadbandRadians) {
-      m_angleSetpointRadians =
-          MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
+    if (kHoodGearBacklashCompensation && Math.abs(angle - m_angleSetpointRadians) >= kHoodSetpointDeadbandRadians) {
       if (angle > kHoodBottomPositionRadians && angle != m_angleSetpointRadians) {
         m_isZeroed = false;
       }
+      m_angleSetpointRadians =
+          MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
+    } else if (!kHoodGearBacklashCompensation) {
+      m_angleSetpointRadians = MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
     }
   }
 
@@ -135,9 +137,9 @@ public class Hood extends SubsystemBase implements Loggable {
       if (m_voltageOverride) {
         outputVoltage = m_voltageSetpoint;
       } else {
-        if (m_angleSetpointRadians <= kHoodBottomPositionRadians || !m_isZeroed) {
+        if (kHoodGearBacklashCompensation && (m_angleSetpointRadians <= kHoodBottomPositionRadians || !m_isZeroed)) {
           if (!this.getBottomLimitSwitch()) {
-            outputVoltage = -3;
+            outputVoltage = -2;
           }
         } else {
           double feedbackOutputVoltage =
