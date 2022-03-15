@@ -104,13 +104,13 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
     //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
 
-    m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
-    m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);
-    setDriveNeutralMode(m_driveNeutralChooser.getSelected());
+    // m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
+    // m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);
+    // setDriveNeutralMode(m_driveNeutralChooser.getSelected());
 
-    m_turningNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
-    m_turningNeutralChooser.addOption("Coast", NeutralMode.Coast);
-    setDriveNeutralMode(m_turningNeutralChooser.getSelected());
+    // m_turningNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
+    // m_turningNeutralChooser.addOption("Coast", NeutralMode.Coast);
+    // setDriveNeutralMode(m_turningNeutralChooser.getSelected());
 
     m_rotationController.setTolerance(kRotationTolerance);
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);

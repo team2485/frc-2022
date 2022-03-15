@@ -40,6 +40,21 @@ public final class Constants {
   public static final int kCANTimeoutMs = 250;
   public static final double kTimestepSeconds = 0.02;
 
+  public static final double kRIOLoopTime = 0.02;
+
+  // motor constants
+  public static final int kFalconCPR = 2048; // pulses per rotation
+  public static final double kFalconWindingsResistanceOhms = 12.0 / 257;
+  public static final double kFalconTorquePerAmp = 4.69 / 257;
+  public static final int kFalconOutputUnitsFull = 1023;
+  public static final double kFalconOutputUnitsPerVolt = kFalconOutputUnitsFull / kNominalVoltage;
+  public static final double kFalconFreeSpeedRotationsPerSecond = 6380.0 / 60.0;
+
+  public static final double kNeoFreeSpeedRotationsPerSecond = 5676.0 / 60.0;
+  public static final double kNeo550FreeSpeedRotationsPerSecond = 11000.0 / 60.0;
+
+  public static final double k775FreeSpeedRotationsPerSecond = 18730.0 / 60.0;
+
   // meters and shot parameters (radians and rps)
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
@@ -56,20 +71,7 @@ public final class Constants {
               entry(5.2, new ShotParameter(89, 0.5, 0)),
               entry(5.72, new ShotParameter(91, 0.52, 0))));
 
-  public static final double kRIOLoopTime = 0.02;
-
-  // motor constants
-  public static final int kFalconCPR = 2048; // pulses per rotation
-  public static final double kFalconWindingsResistanceOhms = 12.0 / 257;
-  public static final double kFalconTorquePerAmp = 4.69 / 257;
-  public static final int kFalconOutputUnitsFull = 1023;
-  public static final double kFalconOutputUnitsPerVolt = kFalconOutputUnitsFull / kNominalVoltage;
-  public static final double kFalconFreeSpeedRotationsPerSecond = 6380.0 / 60.0;
-
-  public static final double kNeoFreeSpeedRotationsPerSecond = 5676.0 / 60.0;
-  public static final double kNeo550FreeSpeedRotationsPerSecond = 11000.0 / 60.0;
-
-  public static final double k775FreeSpeedRotationsPerSecond = 18730.0 / 60.0;
+  public static final double kShootingSetpointDistance = 2.52;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
