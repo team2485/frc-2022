@@ -594,8 +594,8 @@ public final class Constants {
     public static final double kElevatorSupplyCurrentLimitAmps = 25;
     public static final double kElevatorSupplyCurrentThresholdAmps = 30;
     public static final double kElevatorSupplyCurrentThresholdTimeSecs = 0.1;
-    public static final double kElevatorStatorCurrentLimitAmps = 20;
-    public static final double kElevatorStatorCurrentThresholdAmps = 25;
+    public static final double kElevatorStatorCurrentLimitAmps = 30;
+    public static final double kElevatorStatorCurrentThresholdAmps = 35;
     public static final double kElevatorStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final int kElevatorSlotSensorTopPort = 0; // dio
@@ -626,19 +626,31 @@ public final class Constants {
         kElevatorDistancePerMotorRevMeters / kFalconCPR;
 
     // Slide characterization constants: UNLOADED (not carrying robot)
-    public static final double ksElevatorUnloadedVolts = 0.70015;
-    public static final double kgElevatorUnloadedVolts = 0.010378;
-    public static final double kvElevatorUnloadedVoltSecondsPerMeter = 30;
-    public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter = 0.01;
+    public static final double ksElevatorUnloadedVolts =
+        IDManager.getInstance().select(0.62614, 0.70015);
+    public static final double kgElevatorUnloadedVolts =
+        IDManager.getInstance().select(0.0906651, 0.010378);
+    public static final double kvElevatorUnloadedVoltSecondsPerMeter =
+        IDManager.getInstance().select(33.22, 30.0);
+    public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter =
+        IDManager.getInstance().select(0.01, 0.01);
 
     // Slide characterization constants: LOADED ( carrying robot)
-    public static final double ksElevatorLoadedVolts = 0.44256;
+    public static final double ksElevatorLoadedVolts =
+        IDManager.getInstance().select(0.64858, 0.44256);
     public static final double kgElevatorLoadedVolts =
-        -0.50; // this is negative because gravity fights the downward motion when loaded --
+        IDManager.getInstance()
+            .select(
+                -0.56969,
+                -0.50); // this is negative because gravity fights the downward motion when loaded
+    // --
     // retracting the elevator moves the robot up.
-    public static final double kvElevatorLoadedVoltSecondsPerMeter = 30;
+    public static final double kvElevatorLoadedVoltSecondsPerMeter =
+        IDManager.getInstance().select(30, 30);
     public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter =
-        0.18; // these are recalc gains -- the ka from sysid was lost in the noise
+        IDManager.getInstance()
+            .select(
+                0.18, 0.18); // these are recalc gains -- the ka from sysid was lost in the noise
 
     public static final double kPElevatorUnloadedVoltsPerMeter = 100;
     public static final double kDElevatorUnloadedVoltSecondsPerMeter = 0.05;

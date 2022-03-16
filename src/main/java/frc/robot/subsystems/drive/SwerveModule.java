@@ -182,7 +182,7 @@ public class SwerveModule implements Loggable {
     return m_turningMotor.getSelectedSensorPosition();
   }
 
-  @Log(name = "Can coder heading degreees")
+  // @Log(name = "Can coder heading degreees")
   private double getCANCoderHeadingDegrees() {
     return getCANCoderHeading().getDegrees();
   }

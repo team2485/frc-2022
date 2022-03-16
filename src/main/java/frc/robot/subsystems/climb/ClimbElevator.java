@@ -157,11 +157,8 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
 
   @Log(name = "At position goal")
   private boolean atPositionGoal() {
-    if (m_loaded) {
-      return m_pidControllerLoaded.atGoal();
-    } else {
-      return m_pidControllerUnloaded.atGoal();
-    }
+    return Math.abs(this.getPositionMeters() - m_positionSetpointMeters)
+        < kElevatorPositionToleranceMeters;
   }
 
   public void setHookedOnMidBar(boolean hooked) {
@@ -299,6 +296,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     // }
   }
 
+  @Config.ToggleSwitch(name = "Set ratchet")
   public void setRatchet(boolean engaged) {
     if (engaged) {
       m_ratchetServo.set(kElevatorServoEngageValue);
