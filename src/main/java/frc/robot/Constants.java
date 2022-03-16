@@ -6,7 +6,6 @@ package frc.robot;
 
 import static java.util.Map.entry;
 
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -365,7 +364,8 @@ public final class Constants {
         IDManager.getInstance().select(1.988, 2.0071); // change later
 
     public static final double kIntakeArmEncoderOffset =
-        IDManager.getInstance().select(3.28 + 0.038 - 0.2618, 5.44 - 0.2618);
+        IDManager.getInstance()
+            .select(3.28 + 0.038 - 0.2618 - 0.702 - 0.2418 - 0.03 - 0.13, 5.44 - 0.2618);
 
     // Intake Arm characterization constants
     public static final double kSIntakeArmVolts = 0.5;
@@ -392,7 +392,7 @@ public final class Constants {
     // Intake Arm PID constants
     public static final double kPIntakeArmVoltsPerRadian = 10;
     public static final double kDIntakeArmVoltSecondsPerRadian = 0;
-    public static final double kIntakeArmPositionToleranceRadians = 0.02;
+    public static final double kIntakeArmPositionToleranceRadians = 0.05;
   }
 
   public static final class IndexerConstants {
@@ -515,7 +515,8 @@ public final class Constants {
     public static final int kTurretPotentiometerChannel = 0; // Analog channel
     public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
     public static final double kTurretPotentiometerOffset =
-        -Math.PI - 0.3625 - 0.48 + 0.053 - 0.16 - 1.37 + 1.196 - 0.225;
+        IDManager.getInstance()
+            .select(-0.3235, -Math.PI - 0.3625 - 0.48 + 0.053 - 0.16 - 1.37 + 1.196 - 0.225);
 
     public static final double kTurretGearing = 462;
 
@@ -594,8 +595,8 @@ public final class Constants {
     public static final double kElevatorSupplyCurrentLimitAmps = 25;
     public static final double kElevatorSupplyCurrentThresholdAmps = 30;
     public static final double kElevatorSupplyCurrentThresholdTimeSecs = 0.1;
-    public static final double kElevatorStatorCurrentLimitAmps = 30;
-    public static final double kElevatorStatorCurrentThresholdAmps = 35;
+    public static final double kElevatorStatorCurrentLimitAmps = 40;
+    public static final double kElevatorStatorCurrentThresholdAmps = 45;
     public static final double kElevatorStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final int kElevatorSlotSensorTopPort = 0; // dio
@@ -662,12 +663,11 @@ public final class Constants {
     public static final double kElevatorVelocityToleranceMetersPerSecond = 0.01;
 
     public static final double kElevatorMaxSpeedMetersPerSecond =
-        kElevatorFreeSpeedMetersPerSecond * 0.5;
+        kElevatorFreeSpeedMetersPerSecond * 0.95;
     // Find maximum simultaneously achievable acceleration
-    public static final double kElevatorMaxAccelerationMetersPerSecondSquaredUnloaded = 0.3;
+    public static final double kElevatorMaxAccelerationMetersPerSecondSquaredUnloaded = 0.8;
 
-    public static final double kSlideMaxAccelerationMetersPerSecondSquaredLoaded = 0.1;
-    ;
+    public static final double kSlideMaxAccelerationMetersPerSecondSquaredLoaded = 0.5;
 
     // Constraint for the motion profilied elevator controller (unloaded mode)
     public static final SR_TrapezoidProfile.Constraints kElevatorControllerConstraintsUnloaded =
@@ -689,8 +689,8 @@ public final class Constants {
     public static final double kArmSupplyCurrentLimitAmps = 25;
     public static final double kArmSupplyCurrentThresholdAmps = 30;
     public static final double kArmSupplyCurrentThresholdTimeSecs = 0.1;
-    public static final double kArmStatorCurrentLimitAmps = 30;
-    public static final double kArmStatorCurrentThresholdAmps = 35;
+    public static final double kArmStatorCurrentLimitAmps = 25;
+    public static final double kArmStatorCurrentThresholdAmps = 30;
     public static final double kArmStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final double kArmStatorCurrentSpikeThresholdAmps = 30;
@@ -718,23 +718,17 @@ public final class Constants {
     public static final double kArmRotationTolerance = 0.01;
     // ARM TRANSLATION CONSTANTS
     public static final double ksArmTranslationVolts =
-        IDManager.getInstance().select(0.57233, 0.55953);
+        IDManager.getInstance().select(0.47533, 0.55953);
     public static final double kgArmTranslationVolts =
-        IDManager.getInstance().select(0.023933, 0.18092);
+        IDManager.getInstance().select(0.25818, 0.18092);
     public static final double kvArmTranslationVoltSecondsPerMeter =
-        IDManager.getInstance().select(103.19, 62.802);
+        IDManager.getInstance().select(63.445, 62.802);
     public static final double kaArmTranslationVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(8.7859, 0.04);
+        IDManager.getInstance().select(0.07, 0.04);
 
     public static final double kArmMaxSpeedTranslationMetersPerSecond =
-        kArmFreeSpeedMetersPerSecond * 0.5;
-    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared =
-        new ElevatorFeedforward(
-                ksArmTranslationVolts,
-                kgArmTranslationVolts,
-                kvArmTranslationVoltSecondsPerMeter,
-                kaArmTranslationVoltSecondsSquaredPerMeter)
-            .maxAchievableAcceleration(12.0, kArmMaxSpeedTranslationMetersPerSecond);
+        kArmFreeSpeedMetersPerSecond * 0.9;
+    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared = 20;
 
     // Constraint for the motion profilied arm rotation controller
     public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsTranslation =

@@ -42,6 +42,10 @@ public class ClimbCommandBuilder {
     return new InstantCommand(() -> elevator.setRatchet(false), elevator);
   }
 
+  public static Command getDisengageArmCommand(ClimbArm arm) {
+    return getTranslateArmCommand(0.03, arm).andThen(getTranslateArmCommand(0, arm));
+  }
+
   // Start lined up (roughly) to tape. Raise hook.
   public static Command getRaiseHookCommand(ClimbElevator elevator) {
     return new InstantCommand(() -> elevator.setMode(false), elevator)
@@ -99,13 +103,13 @@ public class ClimbCommandBuilder {
         .andThen(
             getMoveElevatorCommand(Units.inchesToMeters(3.2), elevator),
             new InstantCommand(() -> arm.setMode(false), arm),
-            getTranslateArmCommand(0.25, arm), // push arm forward
+            getTranslateArmCommand(0.22, arm), // push arm forward
             getMoveElevatorCommand(
-                Units.inchesToMeters(12), elevator), // extend elevator to release arm
+                Units.inchesToMeters(13), elevator), // extend elevator to release arm
             new InstantCommand(() -> arm.setVoltage(0)), // let arm fall to rest
-            new WaitCommand(1), // wait for a few seconds
-            new RunCommand(() -> arm.setVoltage(-0.4 * Constants.kNominalVoltage))
-                .until(() -> arm.getStatorCurrentSpike(10)),
+            new WaitCommand(0), // wait for a few seconds
+            new RunCommand(() -> arm.setVoltage(-0.6 * Constants.kNominalVoltage))
+                .until(() -> arm.getStatorCurrentSpike(8)),
             new InstantCommand(() -> arm.setVoltage(0)),
             getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator)); // climb vertically
   }

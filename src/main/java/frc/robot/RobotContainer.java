@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.cargoHandling.*;
@@ -69,6 +70,8 @@ public class RobotContainer {
 
   @Log(name = "2.5 meter lock")
   boolean m_fixedSetpoint = false;
+
+  int m_barToClimbTo = 0; // 1 mid, 2 high, 3 traverse
 
   @Log(name = "Auto Chooser")
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
@@ -359,7 +362,8 @@ public class RobotContainer {
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kAligningToMidbar)
                 .andThen(
-                    ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator),
+                    ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator)
+                        .alongWith(ClimbCommandBuilder.getDisengageArmCommand(m_climbArm)),
                     ClimbCommandBuilder.getRaiseHookCommand(m_climbElevator),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointAlignedToMidBar)));
 
@@ -393,10 +397,37 @@ public class RobotContainer {
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnMidBar))
         .whenActive(m_climbStateMachine.getSetStateCommand(ClimbState.kPreClimb));
 
-    // when at climbed on mid bar checkpoint, pressing proceed will move arms to high bar
+    m_driver
+        .y()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_barToClimbTo = 3;
+                }));
+
     m_driver
         .b()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_barToClimbTo = 2;
+                }));
+
+    m_driver
+        .a()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_barToClimbTo = 1;
+                }));
+
+    // when at climbed on mid bar checkpoint, pressing proceed will move arms to high bar
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar)
+        .and(new Trigger(() -> m_barToClimbTo == 2 || m_barToClimbTo == 3))
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kMovingArmsToHighBar)
@@ -405,9 +436,9 @@ public class RobotContainer {
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointArmsOnHighBar)));
 
     // When at climbed on mid bar checkpoint, pressing finish will complete climb on mid bar
-    m_driver
-        .a()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar))
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar)
+        .and(new Trigger(() -> m_barToClimbTo == 1))
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kFinishingClimbOnMidBar)
@@ -417,9 +448,8 @@ public class RobotContainer {
 
     // When at arms on high bar checkpoint, pressing proceed will pull back arms and translate
     // the bar, then hook on the high bar
-    m_driver
-        .b()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointArmsOnHighBar))
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kCheckpointArmsOnHighBar)
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kMovingToHighBar)
@@ -430,19 +460,20 @@ public class RobotContainer {
 
     // When at arms on high bar checkpoint, pressing repeat will move to climbed on mid bar
     // checkpoint.
-    m_driver
-        .x()
-        .and(
-            m_climbStateMachine
-                .getClimbStateTrigger(ClimbState.kCheckpointArmsOnHighBar)
-                .or(m_climbStateMachine.getClimbStateTrigger(ClimbState.kMovingArmsToHighBar)))
-        .whenActive(m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar));
+    // m_driver
+    //     .x()
+    //     .and(
+    //         m_climbStateMachine
+    //             .getClimbStateTrigger(ClimbState.kCheckpointArmsOnHighBar)
+    //             .or(m_climbStateMachine.getClimbStateTrigger(ClimbState.kMovingArmsToHighBar)))
+    //
+    // .whenActive(m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar));
 
     // When at hooked on high bar checkpoint, pressing proceed will reset climber for climb on
     // traverse bar and move arms there
-    m_driver
-        .b()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnHighBar))
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kCheckpointHookedOnHighBar)
+        .and(new Trigger(() -> m_barToClimbTo == 3))
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kResettingClimberOnHighBar)
@@ -453,9 +484,9 @@ public class RobotContainer {
                         ClimbState.kCheckpointArmsOnTraverseBar)));
 
     // When at hooked on high bar checkpoint, pressing finish will complete climb on high bar
-    m_driver
-        .a()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnHighBar))
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kCheckpointHookedOnHighBar)
+        .and(new Trigger(() -> m_barToClimbTo == 2))
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kFinishingClimbOnHighBar)
@@ -464,13 +495,10 @@ public class RobotContainer {
                     ClimbCommandBuilder.getEngageRatchetAndLowerCommand(m_climbElevator),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kClimbedOnHighBar)));
 
-    // When at arms on traverse bar checkpoint, pressing proceed will pull back arms and
-
-    // up
+    // When at arms on traverse bar checkpoint, pressing proceed will pull back arms and up
     // the bar, then hook on traverse bar
-    m_driver
-        .b()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointArmsOnTraverseBar))
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kCheckpointArmsOnTraverseBar)
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kMovingToTraverseBar)
@@ -482,15 +510,15 @@ public class RobotContainer {
 
     // When at arms on traverse bar checkpoint, pressing repeat will move to hooked on high bar
     // checkpoint.
-    m_driver
-        .x()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointArmsOnTraverseBar))
-        .whenActive(m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointHookedOnHighBar));
+    // m_driver
+    //     .x()
+    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointArmsOnTraverseBar))
+    //
+    // .whenActive(m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointHookedOnHighBar));
 
     // When at hooked on traverse bar checkpoint, pressing proceed will finish climb
-    m_driver
-        .b()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnTraverseBar))
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kCheckpointHookedOnTraverseBar)
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kFinishingClimbOnTraverseBar)

@@ -12,8 +12,6 @@ import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -132,17 +130,18 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_armSetpointPosition = top;
   }
 
-  
   public boolean atPosition(boolean top) {
     if (top) {
-      return Math.abs(this.getAngleRadians() - kIntakeArmTopPositionRadians) < kIntakeArmPositionToleranceRadians;
+      return Math.abs(this.getAngleRadians() - kIntakeArmTopPositionRadians)
+          < kIntakeArmPositionToleranceRadians;
     } else {
-      return Math.abs(this.getAngleRadians() - kIntakeArmBottomPositionRadians) < kIntakeArmPositionToleranceRadians;
+      return Math.abs(this.getAngleRadians() - kIntakeArmBottomPositionRadians)
+          < kIntakeArmPositionToleranceRadians;
     }
   }
 
   public void runControlLoop() {
-    if(this.atPosition(true)) {
+    if (this.atPosition(true)) {
       m_armPosition = true;
     } else if (this.atPosition(false)) {
       m_armPosition = false;
