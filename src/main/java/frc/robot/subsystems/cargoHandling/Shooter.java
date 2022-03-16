@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -57,6 +58,8 @@ public class Shooter extends SubsystemBase implements Loggable {
     talonConfig.supplyCurrLimit.enable = true;
     talonConfig.voltageCompSaturation = Constants.kNominalVoltage;
     talonConfig.peakOutputReverse = 0;
+    talonConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
+    talonConfig.velocityMeasurementWindow = 1;
     m_talon.configAllSettings(talonConfig);
 
     m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
@@ -72,7 +75,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     return m_talon.getSelectedSensorVelocity() / kShooterGearRatio * kShooterRotationsPerPulse * 10;
   }
 
-/**
+  /**
    * Sets the velocity setpoint for the flywheel.
    *
    * @param rotationsPerSecond velocity setpoint

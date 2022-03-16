@@ -13,6 +13,7 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
@@ -42,6 +43,7 @@ public class SwerveModule implements Loggable {
       int turningMotorID,
       int turningEncoderID,
       Rotation2d zero,
+      boolean driveInverted,
       String moduleID) {
     this.m_moduleID = moduleID;
 
@@ -52,10 +54,14 @@ public class SwerveModule implements Loggable {
     driveMotorConfig.supplyCurrLimit.currentLimit = kDriveCurrentLimitAmps;
     driveMotorConfig.supplyCurrLimit.enable = true;
     driveMotorConfig.slot0.kP = kPDrive;
+    driveMotorConfig.slot0.allowableClosedloopError = 0.01 / kDriveDistMetersPerPulse / 10;
+    driveMotorConfig.velocityMeasurementWindow = 1;
+    driveMotorConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
     this.m_driveMotor = new WL_TalonFX(driveMotorID);
     m_driveMotor.configAllSettings(driveMotorConfig);
     m_driveMotor.enableVoltageCompensation(true);
     m_driveMotor.setNeutralMode(NeutralMode.Brake);
+    m_driveMotor.setInverted(driveInverted);
     m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
     m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
     m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
@@ -91,7 +97,7 @@ public class SwerveModule implements Loggable {
         AbsoluteSensorRange.Signed_PlusMinus180, Constants.kCANTimeoutMs);
     m_turningMotor.setNeutralMode(NeutralMode.Brake);
     m_turningMotor.configAllowableClosedloopError(
-        0, Units.degreesToRadians(1) / kTurningRadiansPerPulse, Constants.kCANTimeoutMs);
+        0, Units.degreesToRadians(2) / kTurningRadiansPerPulse, Constants.kCANTimeoutMs);
     m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
     m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
     m_turningMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
@@ -176,6 +182,7 @@ public class SwerveModule implements Loggable {
     return m_turningMotor.getSelectedSensorPosition();
   }
 
+  @Log(name = "Can coder heading degreees")
   private double getCANCoderHeadingDegrees() {
     return getCANCoderHeading().getDegrees();
   }

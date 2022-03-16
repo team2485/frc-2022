@@ -71,17 +71,38 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   public Drivetrain(Supplier<Rotation2d> turretAngle) {
     m_frontLeftModule =
         new SwerveModule(
-            kFLDriveTalonPort, kFLTurningTalonPort, kFLCANCoderPort, kFLCANCoderZero, "FL");
+            kFLDriveTalonPort,
+            kFLTurningTalonPort,
+            kFLCANCoderPort,
+            kFLCANCoderZero,
+            kDriveInverted,
+            "FL");
 
     m_frontRightModule =
         new SwerveModule(
-            kFRDriveTalonPort, kFRTurningTalonPort, kFRCANCoderPort, kFRCANCoderZero, "FR");
+            kFRDriveTalonPort,
+            kFRTurningTalonPort,
+            kFRCANCoderPort,
+            kFRCANCoderZero,
+            kDriveInverted,
+            "FR");
+
     m_backLeftModule =
         new SwerveModule(
-            kBLDriveTalonPort, kBLTurningTalonPort, kBLCANCoderPort, kBLCANCoderZero, "BL");
+            kBLDriveTalonPort,
+            kBLTurningTalonPort,
+            kBLCANCoderPort,
+            kBLCANCoderZero,
+            kDriveInverted,
+            "BL");
     m_backRightModule =
         new SwerveModule(
-            kBRDriveTalonPort, kBRTurningTalonPort, kBRCANCoderPort, kBRCANCoderZero, "BR");
+            kBRDriveTalonPort,
+            kBRTurningTalonPort,
+            kBRCANCoderPort,
+            kBRCANCoderZero,
+            kDriveInverted,
+            "BR");
 
     m_pigeon = new WPI_Pigeon2(kPigeonPort);
 

@@ -178,25 +178,42 @@ public final class Constants {
     /** Zeros found with bevel gears facing right. Applied offset is the negative of the zero. */
     public static final int kPigeonPort = 9;
 
+    public static final boolean kDriveInverted = IDManager.getInstance().select(true, false);
     public static final int kFLDriveTalonPort = 5;
     public static final int kFLTurningTalonPort = 6;
     public static final int kFLCANCoderPort = 12;
-    public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(56.0 - 1.66);
+    public static final Rotation2d kFLCANCoderZero =
+        IDManager.getInstance()
+            .select(
+                Rotation2d.fromDegrees(-133.6 + 0.261 + 5.4492 - 78.838),
+                Rotation2d.fromDegrees(56.0 - 1.66));
 
     public static final int kFRDriveTalonPort = 7;
     public static final int kFRTurningTalonPort = 8;
     public static final int kFRCANCoderPort = 13;
-    public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(139.0 + 0.52);
+    public static final Rotation2d kFRCANCoderZero =
+        IDManager.getInstance()
+            .select(
+                Rotation2d.fromDegrees(-161.4907 - 167.4316 - 85.957),
+                Rotation2d.fromDegrees(139.0 + 0.52));
 
     public static final int kBRDriveTalonPort = 1;
     public static final int kBRTurningTalonPort = 2;
     public static final int kBRCANCoderPort = 10;
-    public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(-3.6 - 5.18);
+    public static final Rotation2d kBRCANCoderZero =
+        IDManager.getInstance()
+            .select(
+                Rotation2d.fromDegrees(162.3504 - 4.92 + 73.649),
+                Rotation2d.fromDegrees(-3.6 - 5.18));
 
     public static final int kBLDriveTalonPort = 3;
     public static final int kBLTurningTalonPort = 4;
     public static final int kBLCANCoderPort = 11;
-    public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33);
+    public static final Rotation2d kBLCANCoderZero =
+        IDManager.getInstance()
+            .select(
+                Rotation2d.fromDegrees(178.1158 - 42.8878 + 167.1679 + 95.3613),
+                Rotation2d.fromDegrees(-167.7 + 4.33));
 
     // Drivebase dimensions
     public static final double kWheelbaseLengthMeters = 0.635; // meters
