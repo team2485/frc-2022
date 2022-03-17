@@ -106,6 +106,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     m_pigeon = new WPI_Pigeon2(kPigeonPort);
 
+    m_pigeon.setYaw(0);
     m_odometry =
         new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
@@ -117,6 +118,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
                 kRobotBumperLengthMeters / 2, 4.1148 * 2 - kRobotBumperWidthMeters / 2),
             new Rotation2d(0)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
+
     // m_odometryWithoutVision.resetPosition(
     //     new Pose2d(
     //         new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),

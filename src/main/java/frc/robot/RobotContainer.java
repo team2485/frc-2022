@@ -10,6 +10,7 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -59,14 +60,20 @@ public class RobotContainer {
 
   // SHOOTER SETPOINT FIELDS
   // Distance offset to change distance by for auto-aim -- used to adjust
+
+  // OPERATOR ADJUSTMENTS
   @Log(name = "Distance offset")
   double m_distanceOffset = 0;
 
   @Log(name = "Turret shift")
   double m_turretShift = 0;
 
+  // OPERATOR LOCKS
   @Log(name = "Last setpoint lock")
   boolean m_setpointLock = false;
+
+  @Log(name = "2.5 meter lock")
+  boolean m_fixedSetpoint = false;
 
   @Log(name = "Shooter velocity lock value")
   double m_shooterVelocityLock = 0;
@@ -74,9 +81,7 @@ public class RobotContainer {
   @Log(name = "Hood angle lock value")
   double m_hoodAngleLock = 0;
 
-  @Log(name = "2.5 meter lock")
-  boolean m_fixedSetpoint = false;
-
+  @Log(name = "Bar to climb to")
   int m_barToClimbTo = 0; // 1 mid, 2 high, 3 traverse
 
   @Log(name = "Auto Chooser")
@@ -604,12 +609,16 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     WL_SwerveControllerCommand path =
-        PathCommandBuilder.getPathCommand(m_drivetrain, "2 Ball Path");
+        PathCommandBuilder.getPathCommand(m_drivetrain, "2 to 4 ball right");
     InstantCommand resetOdometry =
         new InstantCommand(
-            () -> {
-              m_drivetrain.resetOdometry(path.m_trajectory.getInitialPose(), false);
-            });
+            () ->
+                m_drivetrain.resetOdometry(
+                    new Pose2d(
+                        path.m_trajectory.getInitialState().poseMeters.getTranslation(),
+                        path.m_trajectory.getInitialState().holonomicRotation),
+                    false),
+            m_drivetrain);
 
     return resetOdometry
         .andThen(path)
