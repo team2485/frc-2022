@@ -39,7 +39,9 @@ public class Hood extends SubsystemBase implements Loggable {
   @Log(name = "zeroed")
   private boolean m_isZeroed = false;
 
+  @Log(name = "Voltage override")
   private boolean m_voltageOverride = false;
+
   private double m_voltageSetpoint = 0;
 
   @Log(name = "Feedforward Output")
@@ -51,6 +53,7 @@ public class Hood extends SubsystemBase implements Loggable {
   @Log(name = "Output voltage")
   private double m_lastOutputVoltage = 0;
 
+  @Log(name = "Enabled")
   private boolean m_enabled = true;
 
   public Hood() {
@@ -67,6 +70,10 @@ public class Hood extends SubsystemBase implements Loggable {
 
     this.resetAngleRadians(kHoodBottomPositionRadians);
 
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10); // default 10
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20); // default 20
+    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
+
     Shuffleboard.getTab("Hood").add("Hood controller", m_pidController);
     Shuffleboard.getTab("Hood").add("Hood feedforward", m_feedforward);
   }
@@ -77,18 +84,20 @@ public class Hood extends SubsystemBase implements Loggable {
     return m_spark.getEncoder().getPosition() * kHoodRadiansPerMotorRev;
   }
 
-  @Config(name = "Set angle (radians)", defaultValueNumeric = kHoodBottomPositionRadians)
+  @Config(name = "Set angle radians")
   public void setAngleRadians(double angle) {
     m_voltageOverride = false;
 
-    if (kHoodGearBacklashCompensation && Math.abs(angle - m_angleSetpointRadians) >= kHoodSetpointDeadbandRadians) {
+    if (kHoodGearBacklashCompensation
+        && Math.abs(angle - m_angleSetpointRadians) >= kHoodSetpointDeadbandRadians) {
       if (angle > kHoodBottomPositionRadians && angle != m_angleSetpointRadians) {
         m_isZeroed = false;
       }
       m_angleSetpointRadians =
           MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
     } else if (!kHoodGearBacklashCompensation) {
-      m_angleSetpointRadians = MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
+      m_angleSetpointRadians =
+          MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
     }
   }
 
@@ -112,7 +121,6 @@ public class Hood extends SubsystemBase implements Loggable {
     return m_limitDebounce.calculate(m_limitSwitch.isPressed());
   }
 
-  @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
   public void setVoltage(double voltage) {
     m_voltageOverride = true;
     m_voltageSetpoint = voltage;
@@ -137,7 +145,7 @@ public class Hood extends SubsystemBase implements Loggable {
       if (m_voltageOverride) {
         outputVoltage = m_voltageSetpoint;
       } else {
-        if (kHoodGearBacklashCompensation && (m_angleSetpointRadians <= kHoodBottomPositionRadians || !m_isZeroed)) {
+        if ((m_angleSetpointRadians <= kHoodBottomPositionRadians || !m_isZeroed)) {
           if (!this.getBottomLimitSwitch()) {
             outputVoltage = -2;
           }

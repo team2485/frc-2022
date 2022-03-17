@@ -18,8 +18,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
+import frc.robot.commands.auto.PathCommandBuilder;
+import frc.robot.commands.auto.WL_SwerveControllerCommand;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.climb.*;
@@ -41,8 +45,7 @@ public class RobotContainer {
   private final FeedServo m_feedServo = new FeedServo();
   public final Shooter m_shooter = new Shooter();
   private final Hood m_hood = new Hood();
-  //   private final Turret m_turret = new Turret();
-  private final BallCounter m_ballCounter = new BallCounter(m_shooter::hasDipped);
+  private final Turret m_turret = new Turret();
 
   private final Drivetrain m_drivetrain =
       new Drivetrain(
@@ -183,20 +186,24 @@ public class RobotContainer {
     //     .whenInactive(new InstantCommand(() -> m_hood.enable(false), m_hood));
 
     // // // Default commands for turret and hood are to auto-aim based on robot pose/distance
-    // m_climbStateMachine
-    //     .getClimbStateTrigger(ClimbState.kNotClimbing)
-    //     .whenActive(new InstantCommand(() -> m_turret.enable(true), m_turret))
-    //     .whileActiveContinuous(
-    //         CargoHandlingCommandBuilder.getTurretAutoAimCommand(
-    //             m_turret,
-    //             m_drivetrain::getTurretCenterPoseMeters,
-    //             m_drivetrain::getFieldRelativeVelocityMetersPerSecond))
-    //     .whenInactive(
-    //         new InstantCommand(() -> m_turret.setAngleRadians(0), m_turret)
-    //             .andThen(
-    //                 new WaitUntilCommand(m_turret::atGoal),
-    //                 new InstantCommand(() -> m_turret.enable(false), m_turret)));
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kNotClimbing)
+        .whenActive(new InstantCommand(() -> m_turret.enable(true), m_turret))
+        .whileActiveContinuous(
+            CargoHandlingCommandBuilder.getTurretAutoAimCommand(
+                m_turret, m_drivetrain::getTurretCenterPoseMeters))
+        .whenInactive(
+            new InstantCommand(() -> m_turret.setAngleRadians(0), m_turret)
+                .andThen(
+                    new WaitUntilCommand(m_turret::atGoal),
+                    new InstantCommand(() -> m_turret.enable(false), m_turret)));
 
+    // m_turret.setDefaultCommand(
+    //     new RunCommand(
+    //         () ->
+    //             m_turret.setAngleRadians(
+    //                 m_driver.getLeftTriggerAxis() * (m_driver.leftPOV().get() ? 1 : -1)),
+    // m_turret));
     // Puts intake arm down at start of climb
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
@@ -212,7 +219,15 @@ public class RobotContainer {
                 m_intake, m_intakeArm, m_indexer, m_feedServo),
             false)
         .whenInactive(
-            CargoHandlingCommandBuilder.getStopIntakeCommand(m_intake, m_intakeArm, m_indexer));
+            new InstantCommand(
+                    () ->
+                        m_indexer.setVelocityRotationsPerSecond(
+                            m_indexer.getVelocityRotationsPerSecond()),
+                    m_indexer)
+                .andThen(
+                    new WaitCommand(0.5),
+                    CargoHandlingCommandBuilder.getStopIntakeCommand(
+                        m_intake, m_intakeArm, m_indexer)));
 
     // Set shooter on operator left trigger: based on distance to hub
     m_operator
@@ -534,7 +549,16 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return null;
+    WL_SwerveControllerCommand path = PathCommandBuilder.getPathCommand(m_drivetrain, "Rotate");
+    InstantCommand resetOdometry =
+        new InstantCommand(
+            () -> {
+              m_drivetrain.resetOdometry(path.m_trajectory.getInitialPose(), false);
+            });
+
+    return resetOdometry
+        .andThen(path)
+        .andThen(new InstantCommand(() -> m_drivetrain.drive(0, 0, 0, false)));
     // return m_autoChooser.getSelected().andThen(AutoCommandBuilder.setLEDsAutoCommand(m_vision));
   }
 

@@ -46,6 +46,7 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   private double m_lastVelocity = 0;
 
+  @Log(name = "enabled")
   private boolean m_enabled = true;
 
   @Log(name = "Output voltage")
@@ -133,8 +134,8 @@ public class Shooter extends SubsystemBase implements Loggable {
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
     } else {
-      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 10);
+      m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10);
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
       m_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);

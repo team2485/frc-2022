@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -63,6 +64,8 @@ public class ClimbArm extends SubsystemBase implements Loggable {
 
   @Log(name = "enabled")
   private boolean m_enabled = false;
+
+  private final Timer m_voltageRampTimer = new Timer();
 
   public ClimbArm() {
     TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -154,6 +157,15 @@ public class ClimbArm extends SubsystemBase implements Loggable {
 
   public boolean atPositionGoal() {
     return m_pidControllerTranslation.atGoal();
+  }
+
+  public void restartTimer() {
+    m_voltageRampTimer.reset();
+    m_voltageRampTimer.start();
+  }
+
+  public double getTimerTime() {
+    return m_voltageRampTimer.get();
   }
 
   public void enable(boolean enabled) {

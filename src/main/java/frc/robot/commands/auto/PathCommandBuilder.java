@@ -20,7 +20,7 @@ public class PathCommandBuilder {
 
     // create controller for robot angle
     var thetaController =
-        new ProfiledPIDController(kPAutoThetaController, 0, 0, kAutoThetaControllerConstraints);
+        new ProfiledPIDController(kPAutoThetaController, 1, 0, kAutoThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     // create command to follow path

@@ -90,7 +90,7 @@ public class CargoHandlingCommandBuilder {
   }
 
   public static Command getHoodSetCommand(Hood hood, DoubleSupplier angle) {
-    return new RunCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood);
+    return new InstantCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood);
   }
 
   public static DoubleSupplier getHoodAutoSetpoint(
@@ -114,7 +114,7 @@ public class CargoHandlingCommandBuilder {
       DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
     return () ->
         InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
-            .hoodAngleRadians;
+            .shooterSpeedRotationsPerSecond;
   }
 
   public static Command getEjectCommand(

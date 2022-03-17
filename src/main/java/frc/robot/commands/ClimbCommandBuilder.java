@@ -67,10 +67,11 @@ public class ClimbCommandBuilder {
 
   // Swing arm up, and then reset absolute rotation.
   public static Command getArmOnNextBarCommand(ClimbElevator elevator, ClimbArm arm) {
-    return new RunCommand(() -> arm.setVoltage(-8))
-        .withTimeout(1)
+    return new InstantCommand(arm::restartTimer)
         .andThen(
+            new RunCommand(() -> arm.setVoltage(-10 * arm.getTimerTime())).withTimeout(1.2),
             new InstantCommand(() -> arm.setVoltage(0)),
+            new WaitCommand(0.5),
             getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator));
   }
 
@@ -109,7 +110,9 @@ public class ClimbCommandBuilder {
             new InstantCommand(() -> arm.setVoltage(0)), // let arm fall to rest
             new WaitCommand(0), // wait for a few seconds
             new RunCommand(() -> arm.setVoltage(-0.6 * Constants.kNominalVoltage))
-                .until(() -> arm.getStatorCurrentSpike(8)),
+                .until(() -> arm.getTranslationMeters() < 0.02),
+            new RunCommand(() -> arm.setVoltage(-0.1 * Constants.kNominalVoltage))
+                .until(() -> arm.getStatorCurrentSpike(6)),
             new InstantCommand(() -> arm.setVoltage(0)),
             getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator)); // climb vertically
   }

@@ -39,7 +39,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   private final WPI_Pigeon2 m_pigeon;
 
   private final SwerveDriveOdometry m_odometry;
-  private final SwerveDriveOdometry m_odometryWithoutVision;
+  // private final SwerveDriveOdometry m_odometryWithoutVision;
 
   private final SlewRateLimiter m_xAccelLimiterTeleop =
       new SlewRateLimiter(kTeleopMaxAccelerationMetersPerSecondSquared);
@@ -109,18 +109,19 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_odometry =
         new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
-    m_odometryWithoutVision =
-        new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
+    // m_odometryWithoutVision =
+    //     new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometry.resetPosition(
         new Pose2d(
-            new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
+            new Translation2d(
+                kRobotBumperLengthMeters / 2, 4.1148 * 2 - kRobotBumperWidthMeters / 2),
             new Rotation2d(0)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
-    m_odometryWithoutVision.resetPosition(
-        new Pose2d(
-            new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
-            new Rotation2d(0)),
-        Rotation2d.fromDegrees(m_pigeon.getYaw()));
+    // m_odometryWithoutVision.resetPosition(
+    //     new Pose2d(
+    //         new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
+    //         new Rotation2d(0)),
+    //     Rotation2d.fromDegrees(m_pigeon.getYaw()));
     // m_odometryWithoutVision.resetPosition(
     //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
     //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
@@ -158,10 +159,14 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     // if not being fed a speed, set all wheels pointing toward center to minimize pushability
     if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
-      m_frontLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-      m_frontRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-      m_backRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+      m_frontLeftModule.setDesiredState(
+          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      m_frontRightModule.setDesiredState(
+          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+      m_backLeftModule.setDesiredState(
+          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+      m_backRightModule.setDesiredState(
+          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
     } else {
       SwerveModuleState[] states =
           kDriveKinematics.toSwerveModuleStates(
@@ -174,10 +179,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
                   : new ChassisSpeeds(xVelocity, yVelocity, angularVelocity));
       SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
 
-      m_frontLeftModule.setDesiredState(states[0]);
-      m_frontRightModule.setDesiredState(states[1]);
-      m_backLeftModule.setDesiredState(states[2]);
-      m_backRightModule.setDesiredState(states[3]);
+      m_frontLeftModule.setDesiredState(states[0], false);
+      m_frontRightModule.setDesiredState(states[1], false);
+      m_backLeftModule.setDesiredState(states[2], false);
+      m_backRightModule.setDesiredState(states[3], false);
 
       this.m_desiredRotation = angularVelocity;
       this.m_desiredXSpeed = xVelocity;
@@ -207,10 +212,13 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     // if not being fed a speed, set all wheels pointing toward center to minimize pushability
     if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
-      m_frontLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-      m_frontRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-      m_backRightModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+      m_frontLeftModule.setDesiredState(
+          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      m_frontRightModule.setDesiredState(
+          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      m_backRightModule.setDesiredState(
+          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
     } else {
       SwerveModuleState[] states =
           kDriveKinematics.toSwerveModuleStates(
@@ -223,10 +231,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
                   : new ChassisSpeeds(xVelocity, yVelocity, angularVelocity));
       SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
 
-      m_frontLeftModule.setDesiredState(states[0]);
-      m_frontRightModule.setDesiredState(states[1]);
-      m_backLeftModule.setDesiredState(states[2]);
-      m_backRightModule.setDesiredState(states[3]);
+      m_frontLeftModule.setDesiredState(states[0], false);
+      m_frontRightModule.setDesiredState(states[1], false);
+      m_backLeftModule.setDesiredState(states[2], false);
+      m_backRightModule.setDesiredState(states[3], false);
     }
     this.m_desiredRotation = angularVelocity;
     this.m_desiredXSpeed = xVelocity;
@@ -240,10 +248,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, kAutoMaxSpeedMetersPerSecond);
-    m_frontLeftModule.setDesiredState(desiredStates[0]);
-    m_frontRightModule.setDesiredState(desiredStates[1]);
-    m_backLeftModule.setDesiredState(desiredStates[2]);
-    m_backRightModule.setDesiredState(desiredStates[3]);
+    m_frontLeftModule.setDesiredState(desiredStates[0], true);
+    m_frontRightModule.setDesiredState(desiredStates[1], true);
+    m_backLeftModule.setDesiredState(desiredStates[2], true);
+    m_backRightModule.setDesiredState(desiredStates[3], true);
   }
 
   /**
@@ -259,8 +267,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     return m_velocity;
   }
 
-  public Translation2d getRobotRelativeVelocityMetersPerSecond() {
-    return m_velocity;
+  public double getRobotRelativeForwardVelocityMetersPerSecond() {
+    return m_velocity.getX() * this.getHeadingRadians();
   }
 
   @Log(name = "Hub to turret center")

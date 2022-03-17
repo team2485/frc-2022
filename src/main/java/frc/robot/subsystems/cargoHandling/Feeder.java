@@ -73,7 +73,7 @@ public class Feeder extends SubsystemBase implements Loggable {
     m_voltageSetpoint = voltage;
   }
 
-  //@Log(name = "At setpoint")
+  // @Log(name = "At setpoint")
   public boolean atSetpoint() {
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
         < kFeederVelocityToleranceRotationsPerSecond;

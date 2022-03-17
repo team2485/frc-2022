@@ -47,7 +47,7 @@ public class Indexer extends SubsystemBase implements Loggable {
   }
 
   /** @return the current velocity in rotations per second. */
-   @Log(name = "Current velocity (RPS)")
+  @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
     return m_spark.getEncoder().getVelocity() / (60.0 * kIndexerGearRatio);
   }

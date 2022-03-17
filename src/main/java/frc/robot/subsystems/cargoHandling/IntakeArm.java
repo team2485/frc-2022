@@ -96,7 +96,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     return -m_encoder.getAbsolutePosition() * 2 * Math.PI + kIntakeArmEncoderOffset;
   }
 
-  @Config(name = "Set angle (radians)", defaultValueNumeric = kIntakeArmBottomPositionRadians)
+  @Config(name = "Set angle (radians)", defaultValueNumeric = -0.3)
   public void setAngleRadians(double angle) {
     m_voltageOverride = false;
     m_angleSetpointRadians =
@@ -153,18 +153,18 @@ public class IntakeArm extends SubsystemBase implements Loggable {
       double outputVoltage = 0;
       if (m_armSetpointPosition && !m_armPosition) {
         // System.out.println("Going up");
-        if (this.getAngleRadians() > 1.6) {
-          outputVoltage = 0;
+        if (this.getAngleRadians() > 1.4) {
+          outputVoltage = 1;
         } else {
-          outputVoltage = 6;
+          outputVoltage = 4;
         }
-      } else if (!m_armSetpointPosition && this.getAngleRadians() > -0.12) {
+      } else if (!m_armSetpointPosition && m_armPosition) {
         // System.out.println("Going down");
 
-        if (this.getAngleRadians() > 1.6) {
-          outputVoltage = -6;
+        if (this.getAngleRadians() > kIntakeArmTipPositionRadians) {
+          outputVoltage = -5;
         } else {
-          outputVoltage = -2;
+          outputVoltage = -4;
         }
       }
 

@@ -58,17 +58,11 @@ public final class Constants {
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
           Map.ofEntries(
-              entry(1.45, new ShotParameter(33, 0.47, 0)),
-              entry(1.989, new ShotParameter(45, 0.45, 0)),
-              entry(1.99, new ShotParameter(62, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(2.12, new ShotParameter(65, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(2.52, new ShotParameter(75, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(3.29, new ShotParameter(78, 0.46, 0)),
-              entry(3.67, new ShotParameter(80, 0.46, 0)),
-              entry(4.15, new ShotParameter(81.5, 0.47, 0)),
-              entry(4.68, new ShotParameter(86.5, 0.48, 0)),
-              entry(5.2, new ShotParameter(89, 0.5, 0)),
-              entry(5.72, new ShotParameter(91, 0.52, 0))));
+              entry(2.05, new ShotParameter(95, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(2.49, new ShotParameter(100, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(3.01, new ShotParameter(105, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(3.54, new ShotParameter(113, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(4.03, new ShotParameter(123, HoodConstants.kHoodBottomPositionRadians, 0))));
 
   public static final double kShootingSetpointDistance = 2.52;
 
@@ -84,17 +78,11 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kAutoMaxSpeedMetersPerSecond = 3;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared =
-        (kNominalVoltage
-                - ModuleConstants.ksDriveVolts
-                - kAutoMaxSpeedMetersPerSecond * ModuleConstants.kvDriveVoltSecondsPerMeter)
-            / ModuleConstants.kaDriveVoltSecondsSquaredPerMeter;
+    public static final double kAutoMaxSpeedMetersPerSecond = 1;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 1;
 
-    public static final double kAutoMaxAngularSpeedRadiansPerSecond =
-        kAutoMaxSpeedMetersPerSecond / DriveConstants.kTurningRadiusMeters;
-    public static final double kAutoMaxAngularAccelerationRadiansPerSecondSquared =
-        kAutoMaxAccelerationMetersPerSecondSquared / DriveConstants.kTurningRadiusMeters;
+    public static final double kAutoMaxAngularSpeedRadiansPerSecond = Math.PI;
+    public static final double kAutoMaxAngularAccelerationRadiansPerSecondSquared = 1 * Math.PI;
 
     public static final double kPAutoXController = 1;
     public static final double kPAutoYController = 1;
@@ -350,8 +338,8 @@ public final class Constants {
   public static final class IntakeArmConstants {
     public static final int kIntakeArmSparkPort = 20;
     public static final double kIntakeArmLoopTimeSeconds = 0.020;
-    public static final int kIntakeArmSmartCurrentLimitAmps = 20;
-    public static final int kIntakeArmImmediateCurrentLimitAmps = 25;
+    public static final int kIntakeArmSmartCurrentLimitAmps = 30;
+    public static final int kIntakeArmImmediateCurrentLimitAmps = 35;
 
     public static final double kIntakeArmGearRatio = 125.0;
     public static final double kIntakeArmFreeSpeedRadiansPerSecond =
@@ -359,13 +347,16 @@ public final class Constants {
     public static final double kIntakeArmRadiansPerMotorRev =
         1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
-    public static final double kIntakeArmBottomPositionRadians = -0.2618; // from horizontal
+    public static final double kIntakeArmBottomPositionRadians =
+        IDManager.getInstance().select(-0.216, -0.2618); // from horizontal
     public static final double kIntakeArmTopPositionRadians =
-        IDManager.getInstance().select(1.988, 2.0071); // change later
+        IDManager.getInstance().select(1.81, 2.0071); // change later
+    public static final double kIntakeArmTipPositionRadians =
+        IDManager.getInstance().select(1.30, 1.6);
 
     public static final double kIntakeArmEncoderOffset =
         IDManager.getInstance()
-            .select(3.28 + 0.038 - 0.2618 - 0.702 - 0.2418 - 0.03 - 0.13, 5.44 - 0.2618);
+            .select(3.28 + 0.038 - 0.2618 - 0.702 - 0.2418 - 0.03 - 0.13 + 0.0861, 5.44 - 0.2618);
 
     // Intake Arm characterization constants
     public static final double kSIntakeArmVolts = 0.5;
@@ -392,7 +383,7 @@ public final class Constants {
     // Intake Arm PID constants
     public static final double kPIntakeArmVoltsPerRadian = 10;
     public static final double kDIntakeArmVoltSecondsPerRadian = 0;
-    public static final double kIntakeArmPositionToleranceRadians = 0.05;
+    public static final double kIntakeArmPositionToleranceRadians = 0.02;
   }
 
   public static final class IndexerConstants {
@@ -412,7 +403,7 @@ public final class Constants {
         IntakeConstants.kIntakeTopWheelDiameterMeters / kIndexerEntryWheelDiameterMeters;
 
     public static final double kIndexerDefaultSpeedRotationsPerSecond =
-        kIndexerFreeSpeedRotationsPerSecond * 0.7;
+        kIndexerFreeSpeedRotationsPerSecond * 0.9;
 
     public static final double kSIndexerVolts = IDManager.getInstance().select(0.49, 0.1);
     public static final double kVIndexerVoltSecondsPerMeter =
@@ -516,31 +507,34 @@ public final class Constants {
     public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
     public static final double kTurretPotentiometerOffset =
         IDManager.getInstance()
-            .select(-0.3235, -Math.PI - 0.3625 - 0.48 + 0.053 - 0.16 - 1.37 + 1.196 - 0.225);
+            .select(-2.385 + 0.05, -Math.PI - 0.3625 - 0.48 + 0.053 - 0.16 - 1.37 + 1.196 - 0.225);
 
     public static final double kTurretGearing = 462;
 
     public static final double kTurretFreeSpeedRadiansPerSecond =
         k775FreeSpeedRotationsPerSecond / kTurretGearing * 2 * Math.PI;
 
-    public static final double kVTurretVoltSecondsPerRadian = 1;
-    public static final double kATurretVoltSecondsSquaredPerRadian = 0.1;
+    public static final double kVTurretVoltSecondsPerRadian =
+        IDManager.getInstance().select(1.0, 1.0);
+    public static final double kATurretVoltSecondsSquaredPerRadian =
+        IDManager.getInstance().select(0.3, 0.1);
     public static final double kSTurretVolts = 0.9;
 
-    public static final double kPTurretVoltsPerRadian = 8;
-    public static final double kDTurretVoltSecondsPerRadian = 4;
+    public static final double kPTurretVoltsPerRadian = IDManager.getInstance().select(2.0, 8.0);
+    public static final double kDTurretVoltSecondsPerRadian =
+        IDManager.getInstance().select(1.0, 4.0);
 
-    public static final double kTurretPositionTolerance = 0.02;
+    public static final double kTurretPositionTolerance = 0.01;
 
-    public static final double kTurretMaxVelocityRadiansPerSecond = 4;
-    public static final double kTurretMaxAccelerationRadiansPerSecondSquared = 2;
+    public static final double kTurretMaxVelocityRadiansPerSecond = 2;
+    public static final double kTurretMaxAccelerationRadiansPerSecondSquared = 5;
 
     public static final SR_TrapezoidProfile.Constraints kTurretMotionProfileConstraints =
         new SR_TrapezoidProfile.Constraints(
             kTurretMaxVelocityRadiansPerSecond, kTurretMaxAccelerationRadiansPerSecondSquared);
 
-    public static final double kTurretMinPositionRadians = -0.4;
-    public static final double kTurretMaxPositionRadians = 0.4;
+    public static final double kTurretMinPositionRadians = -Math.toRadians(45);
+    public static final double kTurretMaxPositionRadians = Math.toRadians(45);
     public static final double kTurretRangeRadians =
         kTurretMaxPositionRadians - kTurretMinPositionRadians;
 
@@ -574,7 +568,7 @@ public final class Constants {
         IDManager.getInstance().select(0.0057801, 0.0091575);
 
     public static final double kShooterFeedforwardScale =
-        IDManager.getInstance().select(0.91, 0.95);
+        IDManager.getInstance().select(0.93, 0.95);
 
     // currently unused
     public static final double kP = 1;
@@ -728,7 +722,7 @@ public final class Constants {
 
     public static final double kArmMaxSpeedTranslationMetersPerSecond =
         kArmFreeSpeedMetersPerSecond * 0.9;
-    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared = 20;
+    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared = 10;
 
     // Constraint for the motion profilied arm rotation controller
     public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsTranslation =

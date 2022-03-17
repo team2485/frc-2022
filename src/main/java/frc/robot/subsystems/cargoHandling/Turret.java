@@ -15,6 +15,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -59,10 +60,14 @@ public class Turret extends SubsystemBase implements Loggable {
   @Log(name = "Feedforward output")
   private double m_feedforwardOutput = 0;
 
+  @Log(name = "Output voltage")
   private double m_lastOutputVoltage = 0;
 
   @Log(name = "filtered angle")
   private double m_filteredPotentiometerAngle;
+
+  @Log(name = "filtered velocity")
+  private double m_filteredVelocity = 0;
 
   private boolean m_enabled = true;
 
@@ -91,16 +96,16 @@ public class Turret extends SubsystemBase implements Loggable {
     m_talon.setStatusFramePeriod(StatusFrame.Status_15_FirmwareApiStatus, 255);
     m_talon.setStatusFramePeriod(StatusFrame.Status_17_Targets1, 255);
 
-    m_talon.setInverted(true);
+    m_talon.setInverted(false);
 
     m_filteredPotentiometerAngle = this.getUnfilteredAngleRadians();
+    m_angleSetpointRadians = this.getUnfilteredAngleRadians();
 
     Shuffleboard.getTab("Turret").add("Turret controller", m_pidController);
     Shuffleboard.getTab("Hood").add("Turret feedforward", m_feedforward);
   }
 
   // ccw + cw-, 0 straight forward
-  @Config(name = "Set angle (radians)")
   public void setAngleRadians(double angle) {
     m_voltageOverride = false;
     m_angleSetpointRadians =
@@ -182,11 +187,12 @@ public class Turret extends SubsystemBase implements Loggable {
 
   public void runControlLoop() {
     double outputVoltage = 0;
-    if (m_enabled) {
+    if (m_enabled && DriverStation.isEnabled()) {
       double currentAngleRadians = this.getFilteredAngleRadians();
       m_velocityRadiansPerSecond =
           (currentAngleRadians - m_lastAngleRadians) / kTurretLoopTimeSeconds;
 
+      m_filteredVelocity = (m_velocityRadiansPerSecond - m_filteredVelocity) * 0.05;
       m_lastAngleRadians = currentAngleRadians;
 
       if (m_voltageOverride) {
