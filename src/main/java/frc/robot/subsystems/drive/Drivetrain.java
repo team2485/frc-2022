@@ -248,10 +248,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, kAutoMaxSpeedMetersPerSecond);
-    m_frontLeftModule.setDesiredState(desiredStates[0], true);
-    m_frontRightModule.setDesiredState(desiredStates[1], true);
-    m_backLeftModule.setDesiredState(desiredStates[2], true);
-    m_backRightModule.setDesiredState(desiredStates[3], true);
+    m_frontLeftModule.setDesiredState(desiredStates[0], false);
+    m_frontRightModule.setDesiredState(desiredStates[1], false);
+    m_backLeftModule.setDesiredState(desiredStates[2], false);
+    m_backRightModule.setDesiredState(desiredStates[3], false);
   }
 
   /**

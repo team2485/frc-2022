@@ -67,8 +67,11 @@ public class CargoHandlingCommandBuilder {
         .withInterrupt(() -> intakeArm.atPosition(false));
   }
 
-  public static Command getTurretAutoAimCommand(Turret turret, Supplier<Pose2d> robotPose) {
-    return new RunCommand(() -> turret.setAngleRadians(findTurretAimAngle(robotPose)), turret);
+  public static Command getTurretAutoAimCommand(
+      Turret turret, Supplier<Pose2d> robotPose, DoubleSupplier turretShift) {
+    return new RunCommand(
+        () -> turret.setAngleRadians(findTurretAimAngle(robotPose) + turretShift.getAsDouble()),
+        turret);
   }
 
   public static double findTurretAimAngle(Supplier<Pose2d> robotPose) {

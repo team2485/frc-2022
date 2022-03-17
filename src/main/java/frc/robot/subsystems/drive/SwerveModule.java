@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.ModuleConstants.*;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -154,7 +155,8 @@ public class SwerveModule implements Loggable {
    * @return current state
    */
   public SwerveModuleState getState() {
-    return new SwerveModuleState(this.getSpeedMetersPerSecond(), this.getIntegratedHeading());
+    return new SwerveModuleState(
+        (kDriveInverted ? -1 : 1) * getSpeedMetersPerSecond(), this.getIntegratedHeading());
   }
 
   /**

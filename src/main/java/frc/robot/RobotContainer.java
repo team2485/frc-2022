@@ -62,13 +62,16 @@ public class RobotContainer {
   @Log(name = "Distance offset")
   double m_distanceOffset = 0;
 
-  @Log(name = "Setpoint lock")
+  @Log(name = "Turret shift")
+  double m_turretShift = 0;
+
+  @Log(name = "Last setpoint lock")
   boolean m_setpointLock = false;
 
-  @Log(name = "Shooter velocity lock")
+  @Log(name = "Shooter velocity lock value")
   double m_shooterVelocityLock = 0;
 
-  @Log(name = "Hood angle lock")
+  @Log(name = "Hood angle lock value")
   double m_hoodAngleLock = 0;
 
   @Log(name = "2.5 meter lock")
@@ -191,7 +194,7 @@ public class RobotContainer {
         .whenActive(new InstantCommand(() -> m_turret.enable(true), m_turret))
         .whileActiveContinuous(
             CargoHandlingCommandBuilder.getTurretAutoAimCommand(
-                m_turret, m_drivetrain::getTurretCenterPoseMeters))
+                m_turret, m_drivetrain::getTurretCenterPoseMeters, () -> -m_turretShift))
         .whenInactive(
             new InstantCommand(() -> m_turret.setAngleRadians(0), m_turret)
                 .andThen(
@@ -241,7 +244,7 @@ public class RobotContainer {
                         m_fixedSetpoint
                             ? kShootingSetpointDistance
                             : m_drivetrain.getHubToTurretCenterDistanceMeters(),
-                    () -> m_distanceOffset),
+                    () -> -m_distanceOffset),
                 CargoHandlingCommandBuilder.getShooterSetCommand(
                     m_shooter, () -> m_shooterVelocityLock),
                 () -> !m_setpointLock))
@@ -262,31 +265,31 @@ public class RobotContainer {
                         m_fixedSetpoint
                             ? kShootingSetpointDistance
                             : m_drivetrain.getHubToTurretCenterDistanceMeters(),
-                    () -> m_distanceOffset),
+                    () -> --m_distanceOffset),
                 CargoHandlingCommandBuilder.getHoodSetCommand(m_hood, () -> m_hoodAngleLock),
                 () -> !m_setpointLock))
         .whenInactive(
             CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
                 .alongWith(CargoHandlingCommandBuilder.getHoodDownCommand(m_hood)));
 
-    // // Eject on operator X button
-    // m_operator
-    //     .x()
-    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-    //     .whileActiveContinuous(
-    //         CargoHandlingCommandBuilder.getEjectCommand(
-    //             m_shooter,
-    //             m_hood,
-    //             m_turret,
-    //             m_indexer,
-    //             m_feeder,
-    //             m_feedServo,
-    //             m_drivetrain::getPoseMeters))
-    //     .whenInactive(
-    //         CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
-    //             .alongWith(
-    //                 CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
-    //                 CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
+    // Eject on operator X button
+    m_operator
+        .x()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whileActiveContinuous(
+            CargoHandlingCommandBuilder.getEjectCommand(
+                m_shooter,
+                m_hood,
+                m_turret,
+                m_indexer,
+                m_feeder,
+                m_feedServo,
+                m_drivetrain::getPoseMeters))
+        .whenInactive(
+            CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
+                .alongWith(
+                    CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
+                    CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
 
     // Make robot think it's closer when aiming
     m_operator
@@ -295,7 +298,7 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_distanceOffset -= 0.2;
+                  m_distanceOffset += 0.2;
                 }));
 
     // Make robot think it's further when aiming
@@ -305,7 +308,27 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_distanceOffset += 0.2;
+                  m_distanceOffset -= 0.2;
+                }));
+
+    // Shift turret to right
+    m_operator
+        .rightPOV()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_turretShift += 0.05;
+                }));
+
+    // Shift turret to left
+    m_operator
+        .leftPOV()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_turretShift -= 0.05;
                 }));
 
     // lock current shooter setpoints in place
@@ -314,7 +337,7 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_setpointLock = !m_setpointLock;
+                  m_setpointLock = true;
                   m_shooterVelocityLock =
                       CargoHandlingCommandBuilder.getShooterAutoSetpoint(
                               () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
@@ -325,12 +348,43 @@ public class RobotContainer {
                               () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
                               () -> m_distanceOffset)
                           .getAsDouble();
+                }))
+        .whenInactive(
+            new InstantCommand(
+                () -> {
+                  m_setpointLock = false;
                 }));
 
     m_operator
         .y()
-        .whenActive(new InstantCommand(() -> m_fixedSetpoint = true))
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_fixedSetpoint = true;
+                  m_shooterVelocityLock =
+                      CargoHandlingCommandBuilder.getShooterAutoSetpoint(
+                              () -> Constants.kShootingSetpointDistance, () -> 0)
+                          .getAsDouble();
+                  m_hoodAngleLock =
+                      CargoHandlingCommandBuilder.getHoodAutoSetpoint(
+                              () -> Constants.kShootingSetpointDistance, () -> 0)
+                          .getAsDouble();
+                }))
         .whenInactive(new InstantCommand(() -> m_fixedSetpoint = false));
+
+    // reset all
+    m_operator
+        .back()
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_fixedSetpoint = false;
+                  m_setpointLock = false;
+                  m_distanceOffset = 0;
+                  m_turretShift = 0;
+                  m_shooterVelocityLock = 0;
+                  m_hoodAngleLock = 0;
+                }));
   }
 
   private void configureClimbCommands() {
@@ -549,7 +603,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    WL_SwerveControllerCommand path = PathCommandBuilder.getPathCommand(m_drivetrain, "Rotate");
+    WL_SwerveControllerCommand path =
+        PathCommandBuilder.getPathCommand(m_drivetrain, "2 Ball Path");
     InstantCommand resetOdometry =
         new InstantCommand(
             () -> {

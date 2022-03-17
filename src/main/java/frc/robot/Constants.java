@@ -165,7 +165,7 @@ public final class Constants {
     /** Zeros found with bevel gears facing right. Applied offset is the negative of the zero. */
     public static final int kPigeonPort = 9;
 
-    public static final boolean kDriveInverted = IDManager.getInstance().select(true, false);
+    public static final boolean kDriveInverted = IDManager.getInstance().select(false, true);
     public static final int kFLDriveTalonPort = 5;
     public static final int kFLTurningTalonPort = 6;
     public static final int kFLCANCoderPort = 12;
@@ -506,8 +506,7 @@ public final class Constants {
     public static final int kTurretPotentiometerChannel = 0; // Analog channel
     public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
     public static final double kTurretPotentiometerOffset =
-        IDManager.getInstance()
-            .select(-2.385 + 0.05, -Math.PI - 0.3625 - 0.48 + 0.053 - 0.16 - 1.37 + 1.196 - 0.225);
+        IDManager.getInstance().select(-2.385 + 0.05, -3.011);
 
     public static final double kTurretGearing = 462;
 
@@ -519,6 +518,8 @@ public final class Constants {
     public static final double kATurretVoltSecondsSquaredPerRadian =
         IDManager.getInstance().select(0.3, 0.1);
     public static final double kSTurretVolts = 0.9;
+
+    public static final boolean kTurretInvert = IDManager.getInstance().select(false, true);
 
     public static final double kPTurretVoltsPerRadian = IDManager.getInstance().select(2.0, 8.0);
     public static final double kDTurretVoltSecondsPerRadian =
@@ -552,23 +553,26 @@ public final class Constants {
     public static final int kFalconPulsesPerRevolution = 2048;
 
     public static final double kShooterRotationsPerPulse = 1.0 / kFalconPulsesPerRevolution;
-    public static final double kShooterGearRatio = IDManager.getInstance().select(2.0 / 3.0, 1.0);
+    public static final double kShooterGearRatio =
+        IDManager.getInstance().select(2.0 / 3.0, 2.0 / 3.0);
 
     public static final double kShooterCircumferenceMeters = 0.1524 * Math.PI;
     public static final double kShooterFreeSpeedRotationsPerSecond =
         IDManager.getInstance()
-            .select(kFalconFreeSpeedRotationsPerSecond / kShooterGearRatio, 93.2);
+            .select(
+                kFalconFreeSpeedRotationsPerSecond / kShooterGearRatio,
+                kFalconFreeSpeedRotationsPerSecond / kShooterGearRatio);
     public static final double kShooterSurfaceFreeSpeedMetersPerSecond =
         kShooterFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
 
-    public static final double kSShooterVolts = IDManager.getInstance().select(0.55769, 0.59077);
+    public static final double kSShooterVolts = IDManager.getInstance().select(0.55769, 0.56);
     public static final double kVShooterVoltSecondsPerMeter =
-        IDManager.getInstance().select(0.071665, 0.10773);
+        IDManager.getInstance().select(0.071665, 0.07);
     public static final double kAShooterVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.0057801, 0.0091575);
+        IDManager.getInstance().select(0.0057801, 0.005);
 
     public static final double kShooterFeedforwardScale =
-        IDManager.getInstance().select(0.93, 0.95);
+        IDManager.getInstance().select(0.93, 0.93);
 
     // currently unused
     public static final double kP = 1;

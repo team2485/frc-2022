@@ -47,15 +47,15 @@ public class DriveWithController extends CommandBase {
     SmartDashboard.putNumber("xbox left y", m_rotSpeedSupplier.getAsDouble());
 
     final double xSpeed =
-        Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband)
+        -Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband)
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double ySpeed =
-        Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband)
+        -Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband)
             * kTeleopMaxSpeedMetersPerSecond;
 
     final double rot =
-        Deadband.cubicScaledDeadband(m_rotSpeedSupplier.getAsDouble(), kDriverRightXDeadband)
+        -Deadband.cubicScaledDeadband(m_rotSpeedSupplier.getAsDouble(), kDriverRightXDeadband)
             * kTeleopMaxAngularSpeedRadiansPerSecond;
 
     final boolean fieldRelative = m_fieldRelative.getAsBoolean();

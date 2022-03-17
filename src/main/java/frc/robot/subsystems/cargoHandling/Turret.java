@@ -96,7 +96,7 @@ public class Turret extends SubsystemBase implements Loggable {
     m_talon.setStatusFramePeriod(StatusFrame.Status_15_FirmwareApiStatus, 255);
     m_talon.setStatusFramePeriod(StatusFrame.Status_17_Targets1, 255);
 
-    m_talon.setInverted(false);
+    m_talon.setInverted(kTurretInvert);
 
     m_filteredPotentiometerAngle = this.getUnfilteredAngleRadians();
     m_angleSetpointRadians = this.getUnfilteredAngleRadians();
