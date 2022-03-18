@@ -10,10 +10,12 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -86,50 +88,7 @@ public class RobotContainer {
     // m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
     configureButtonBindings();
 
-    // m_autoChooser.setDefaultOption(
-    //     "2 Ball Right Side",
-    //     AutoCommandBuilder.get2BallAuto(
-    //         m_drivetrain,
-    //         m_vision,
-    //         m_intake,
-    //         m_intakeArm,
-    //         m_indexer,
-    //         m_feeder,
-    //         m_shooter,
-    //         m_ballCounter));
-    // m_autoChooser.addOption(
-    //     "3 Ball Right Side",
-    //     AutoCommandBuilder.get3BallAuto(
-    //         m_drivetrain,
-    //         m_vision,
-    //         m_intake,
-    //         m_intakeArm,
-    //         m_indexer,
-    //         m_feeder,
-    //         m_shooter,
-    //         m_ballCounter));
-    // m_autoChooser.addOption(
-    //     "4 Ball Right Side",
-    //     AutoCommandBuilder.get4BallAuto(
-    //         m_drivetrain,
-    //         m_vision,
-    //         m_intake,
-    //         m_intakeArm,
-    //         m_indexer,
-    //         m_feeder,
-    //         m_shooter,
-    //         m_ballCounter));
-    // m_autoChooser.addOption(
-    //     "5 Ball Right Side",
-    //     AutoCommandBuilder.get5BallAuto(
-    //         m_drivetrain,
-    //         m_vision,
-    //         m_intake,
-    //         m_intakeArm,
-    //         m_indexer,
-    //         m_feeder,
-    //         m_shooter,
-    //         m_ballCounter));
+    Shuffleboard.getTab("RobotContainer").add(CameraServer.startAutomaticCapture());
   }
 
   /**
@@ -170,10 +129,7 @@ public class RobotContainer {
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
   }
 
-  private void configureVisionCommands() {
-    // Cycle LED Mode when start button pressed
-    // m_driver.start().whenPressed(new InstantCommand(m_vision::cycleLEDMode));
-  }
+  private void configureVisionCommands() {}
 
   private void configureCargoHandlingCommands() {
     // Control systems for hood and shooter enabled when not climbing
@@ -181,11 +137,6 @@ public class RobotContainer {
         .getClimbStateTrigger(ClimbState.kNotClimbing)
         .whenActive(new InstantCommand(() -> m_shooter.enable(true), m_shooter))
         .whenInactive(new InstantCommand(() -> m_shooter.enable(false), m_shooter));
-
-    // m_climbStateMachine
-    //     .getClimbStateTrigger(ClimbState.kNotClimbing)
-    //     .whenActive(new InstantCommand(() -> m_hood.enable(true), m_hood))
-    //     .whenInactive(new InstantCommand(() -> m_hood.enable(false), m_hood));
 
     // // // Default commands for turret and hood are to auto-aim based on robot pose/distance
     m_climbStateMachine
@@ -200,12 +151,6 @@ public class RobotContainer {
                     new WaitUntilCommand(m_turret::atGoal),
                     new InstantCommand(() -> m_turret.enable(false), m_turret)));
 
-    // m_turret.setDefaultCommand(
-    //     new RunCommand(
-    //         () ->
-    //             m_turret.setAngleRadians(
-    //                 m_driver.getLeftTriggerAxis() * (m_driver.leftPOV().get() ? 1 : -1)),
-    // m_turret));
     // Puts intake arm down at start of climb
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
@@ -396,6 +341,17 @@ public class RobotContainer {
     // Y button: finish
     // However, not all checkpoints have either repeat or finish options, and none have both.
 
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kNotClimbing)
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_climbElevator.enable(false);
+                  m_climbArm.enable(false);
+                  m_climbElevator.setRatchet(true);
+                },
+                m_climbElevator,
+                m_climbArm));
     // turn on climb mode
     m_driver
         .start()
@@ -526,17 +482,6 @@ public class RobotContainer {
                         m_climbElevator, m_climbArm),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointHookedOnHighBar)));
 
-    // When at arms on high bar checkpoint, pressing repeat will move to climbed on mid bar
-    // checkpoint.
-    // m_driver
-    //     .x()
-    //     .and(
-    //         m_climbStateMachine
-    //             .getClimbStateTrigger(ClimbState.kCheckpointArmsOnHighBar)
-    //             .or(m_climbStateMachine.getClimbStateTrigger(ClimbState.kMovingArmsToHighBar)))
-    //
-    // .whenActive(m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar));
-
     // When at hooked on high bar checkpoint, pressing proceed will reset climber for climb on
     // traverse bar and move arms there
     m_climbStateMachine
@@ -576,14 +521,6 @@ public class RobotContainer {
                     m_climbStateMachine.getSetStateCommand(
                         ClimbState.kCheckpointHookedOnTraverseBar)));
 
-    // When at arms on traverse bar checkpoint, pressing repeat will move to hooked on high bar
-    // checkpoint.
-    // m_driver
-    //     .x()
-    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointArmsOnTraverseBar))
-    //
-    // .whenActive(m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointHookedOnHighBar));
-
     // When at hooked on traverse bar checkpoint, pressing proceed will finish climb
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kCheckpointHookedOnTraverseBar)
@@ -617,7 +554,6 @@ public class RobotContainer {
                     m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
 
     return auto;
-    // return m_autoChooser.getSelected().andThen(AutoCommandBuilder.setLEDsAutoCommand(m_vision));
   }
 
   // whenever the robot is disabled, drive should be turned off
