@@ -83,7 +83,13 @@ public class ClimbStateMachine implements Loggable {
     return m_state;
   }
 
-  @Log(name = "Climb State", tabName = "RobotContainer")
+  @Log(
+      name = "Climb State",
+      tabName = "RobotContainer",
+      width = 2,
+      height = 2,
+      rowIndex = 0,
+      columnIndex = 0)
   public String getStateString() {
     return m_state.toString();
   }

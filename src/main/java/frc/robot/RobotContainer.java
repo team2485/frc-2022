@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -62,30 +61,27 @@ public class RobotContainer {
   // Distance offset to change distance by for auto-aim -- used to adjust
 
   // OPERATOR ADJUSTMENTS
-  @Log(name = "Distance offset")
+  @Log(name = "Distance offset", width = 4, height = 2, rowIndex = 4, columnIndex = 12)
   double m_distanceOffset = 0;
 
-  @Log(name = "Turret shift")
+  @Log(name = "Turret shift", width = 4, height = 2, rowIndex = 6, columnIndex = 12)
   double m_turretShift = 0;
 
   // OPERATOR LOCKS
-  @Log(name = "Last setpoint lock")
+  @Log(name = "Last setpoint lock", width = 3, height = 2, rowIndex = 0, columnIndex = 12)
   boolean m_setpointLock = false;
 
-  @Log(name = "2.5 meter lock")
+  @Log(name = "2.5 meter lock", width = 3, height = 2, rowIndex = 2, columnIndex = 12)
   boolean m_fixedSetpoint = false;
 
-  @Log(name = "Shooter velocity lock value")
+  @Log(name = "Shooter velocity lock value", width = 4, height = 2, rowIndex = 0, columnIndex = 15)
   double m_shooterVelocityLock = 0;
 
-  @Log(name = "Hood angle lock value")
+  @Log(name = "Hood angle lock value", width = 4, height = 2, rowIndex = 2, columnIndex = 15)
   double m_hoodAngleLock = 0;
 
-  @Log(name = "Bar to climb to")
+  @Log(name = "Bar to climb to", width = 2, height = 2, rowIndex = 2, columnIndex = 0)
   int m_barToClimbTo = 0; // 1 mid, 2 high, 3 traverse
-
-  @Log(name = "Auto Chooser")
-  private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
