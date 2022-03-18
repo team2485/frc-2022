@@ -78,14 +78,15 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kAutoMaxSpeedMetersPerSecond = 1;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 1;
+    public static final double kAutoMaxSpeedMetersPerSecond = 4;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 3;
 
-    public static final double kAutoMaxAngularSpeedRadiansPerSecond = Math.PI;
+    public static final double kAutoMaxAngularSpeedRadiansPerSecond =
+        2.5 / DriveConstants.kTurningRadiusMeters;
     public static final double kAutoMaxAngularAccelerationRadiansPerSecondSquared = 1 * Math.PI;
 
-    public static final double kPAutoXController = 1;
-    public static final double kPAutoYController = 1;
+    public static final double kPAutoXController = 2;
+    public static final double kPAutoYController = 2;
     public static final double kPAutoThetaController = 5;
 
     // Constraint for the motion profilied robot angle controller

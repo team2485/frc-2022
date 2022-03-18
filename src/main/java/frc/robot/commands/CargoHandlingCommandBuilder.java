@@ -223,4 +223,8 @@ public class CargoHandlingCommandBuilder {
   public static Command getIntakeArmOffCommand(IntakeArm intakeArm) {
     return new RunCommand(() -> intakeArm.setVoltage(0), intakeArm);
   }
+
+  public static Command getFeedServoOpenCommand(FeedServo servo) {
+    return new InstantCommand(() -> servo.engage(false), servo);
+  }
 }

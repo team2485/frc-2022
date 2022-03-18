@@ -7,10 +7,13 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.drive.Drivetrain;
 
 public class PathCommandBuilder {
-  public static WL_SwerveControllerCommand getPathCommand(Drivetrain drivetrain, String name) {
+  public static Command getPathCommand(Drivetrain drivetrain, String name) {
     PathPlannerTrajectory path =
         PathPlanner.loadPath(
             name, kAutoMaxSpeedMetersPerSecond, kAutoMaxAccelerationMetersPerSecondSquared);
@@ -20,7 +23,7 @@ public class PathCommandBuilder {
 
     // create controller for robot angle
     var thetaController =
-        new ProfiledPIDController(kPAutoThetaController, 1, 0, kAutoThetaControllerConstraints);
+        new ProfiledPIDController(kPAutoThetaController, 0.5, 0, kAutoThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     // create command to follow path
@@ -35,6 +38,17 @@ public class PathCommandBuilder {
             drivetrain::setModuleStates,
             drivetrain);
 
-    return pathCommand;
+    InstantCommand resetOdometry =
+        new InstantCommand(
+            () ->
+                drivetrain.resetOdometry(
+                    new Pose2d(
+                        pathCommand.m_trajectory.getInitialState().poseMeters.getTranslation(),
+                        pathCommand.m_trajectory.getInitialState().holonomicRotation),
+                    false),
+            drivetrain);
+
+    InstantCommand stop = new InstantCommand(() -> drivetrain.drive(0, 0, 0, false));
+    return resetOdometry.andThen(pathCommand, stop);
   }
 }

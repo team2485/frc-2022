@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -71,6 +72,8 @@ public class Turret extends SubsystemBase implements Loggable {
 
   private boolean m_enabled = true;
 
+  private double m_startTime = -1;
+
   public Turret() {
 
     TalonSRXConfiguration talonConfig = new TalonSRXConfiguration();
@@ -97,7 +100,6 @@ public class Turret extends SubsystemBase implements Loggable {
     m_talon.setStatusFramePeriod(StatusFrame.Status_17_Targets1, 255);
 
     m_talon.setInverted(kTurretInvert);
-
     m_filteredPotentiometerAngle = this.getUnfilteredAngleRadians();
     m_angleSetpointRadians = this.getUnfilteredAngleRadians();
 
@@ -107,9 +109,16 @@ public class Turret extends SubsystemBase implements Loggable {
 
   // ccw + cw-, 0 straight forward
   public void setAngleRadians(double angle) {
+    if (m_startTime == -1 && DriverStation.isEnabled()) {
+      m_startTime = Timer.getFPGATimestamp();
+    }
+
     m_voltageOverride = false;
-    m_angleSetpointRadians =
-        MathUtil.clamp(angle % (2 * Math.PI), kTurretMinPositionRadians, kTurretMaxPositionRadians);
+    if (Timer.getFPGATimestamp() - m_startTime > 0.2) {
+      m_angleSetpointRadians =
+          MathUtil.clamp(
+              angle % (2 * Math.PI), kTurretMinPositionRadians, kTurretMaxPositionRadians);
+    }
   }
 
   @Log(name = "Current unfiltered angle (radians)")
