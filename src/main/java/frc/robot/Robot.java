@@ -6,6 +6,10 @@ package frc.robot;
 
 import static frc.robot.Constants.TurretConstants.*;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.VideoMode;
+import edu.wpi.first.cscore.VideoSource;
+import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -54,7 +58,8 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     LiveWindow.disableAllTelemetry();
-    // CameraServer.startAutomaticCapture();
+    VideoSource video = CameraServer.startAutomaticCapture();
+    video.setVideoMode(new VideoMode(PixelFormat.kMJPEG, 320, 240, 120));
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);
   }

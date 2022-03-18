@@ -61,10 +61,10 @@ public class RobotContainer {
   // Distance offset to change distance by for auto-aim -- used to adjust
 
   // OPERATOR ADJUSTMENTS
-  @Log(name = "Distance offset", width = 4, height = 2, rowIndex = 4, columnIndex = 12)
+  @Log(name = "Distance offset", width = 3, height = 1, rowIndex = 2, columnIndex = 15)
   double m_distanceOffset = 0;
 
-  @Log(name = "Turret shift", width = 4, height = 2, rowIndex = 6, columnIndex = 12)
+  @Log(name = "Turret shift", width = 3, height = 1, rowIndex = 3, columnIndex = 15)
   double m_turretShift = 0;
 
   // OPERATOR LOCKS
@@ -74,10 +74,10 @@ public class RobotContainer {
   @Log(name = "2.5 meter lock", width = 3, height = 2, rowIndex = 2, columnIndex = 12)
   boolean m_fixedSetpoint = false;
 
-  @Log(name = "Shooter velocity lock value", width = 4, height = 2, rowIndex = 0, columnIndex = 15)
+  @Log(name = "Shooter velocity lock value", width = 3, height = 1, rowIndex = 0, columnIndex = 15)
   double m_shooterVelocityLock = 0;
 
-  @Log(name = "Hood angle lock value", width = 4, height = 2, rowIndex = 2, columnIndex = 15)
+  @Log(name = "Hood angle lock value", width = 3, height = 1, rowIndex = 1, columnIndex = 15)
   double m_hoodAngleLock = 0;
 
   @Log(name = "Bar to climb to", width = 2, height = 2, rowIndex = 2, columnIndex = 0)
@@ -87,8 +87,6 @@ public class RobotContainer {
   public RobotContainer() {
     // m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
     configureButtonBindings();
-
-    Shuffleboard.getTab("RobotContainer").add(CameraServer.startAutomaticCapture());
   }
 
   /**
@@ -209,7 +207,7 @@ public class RobotContainer {
                         m_fixedSetpoint
                             ? kShootingSetpointDistance
                             : m_drivetrain.getHubToTurretCenterDistanceMeters(),
-                    () -> --m_distanceOffset),
+                    () -> -m_distanceOffset),
                 CargoHandlingCommandBuilder.getHoodSetCommand(m_hood, () -> m_hoodAngleLock),
                 () -> !m_setpointLock))
         .whenInactive(
@@ -540,7 +538,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     Command auto =
-        AutoCommandBuilder.get4BallAuto(
+        AutoCommandBuilder.get2BallAutoLeft(
                 m_drivetrain,
                 m_intake,
                 m_intakeArm,

@@ -64,7 +64,7 @@ public class AutoCommandBuilder {
       Shooter shooter,
       Hood hood) {
 
-    Command backUpPath = PathCommandBuilder.getPathCommand(drivetrain, "2 ball right");
+    Command backUpPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Right");
 
     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
 
@@ -93,7 +93,7 @@ public class AutoCommandBuilder {
       Shooter shooter,
       Hood hood) {
 
-    Command backUpPath = PathCommandBuilder.getPathCommand(drivetrain, "2 ball left");
+    Command backUpPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Left");
 
     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
 

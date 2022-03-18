@@ -114,9 +114,9 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     //     new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometry.resetPosition(
         new Pose2d(
-            new Translation2d(
-                kRobotBumperLengthMeters / 2, 4.1148 * 2 - kRobotBumperWidthMeters / 2),
-            new Rotation2d(0)),
+            new Translation2d(5.75, 5.09
+            ),
+            new Rotation2d(62.5)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     // m_odometryWithoutVision.resetPosition(

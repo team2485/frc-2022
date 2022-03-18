@@ -58,13 +58,12 @@ public final class Constants {
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
           Map.ofEntries(
-              entry(2.05, new ShotParameter(95, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(2.49, new ShotParameter(100, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(3.01, new ShotParameter(105, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(3.54, new ShotParameter(113, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(4.03, new ShotParameter(123, HoodConstants.kHoodBottomPositionRadians, 0))));
+              entry(2.5, new ShotParameter(115, 0.45, 0)),
+              entry(3.5, new ShotParameter(123, 0.46, 0))));
 
-  public static final double kShootingSetpointDistance = 2.52;
+// 3.5, 123, 0.47
+
+  public static final double kShootingSetpointDistance = 2.5;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -223,7 +222,7 @@ public final class Constants {
         kTeleopMaxSpeedMetersPerSecond / kTurningRadiusMeters; // radians per second
 
     public static final double kTeleopMaxAccelerationMetersPerSecondSquared = 3;
-    public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared = 2 * Math.PI;
+    public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared = 1.5* Math.PI;
 
     // Vision pose estimation constants
     public static final double kVisionWeightPerSec =
@@ -349,11 +348,11 @@ public final class Constants {
         1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
     public static final double kIntakeArmBottomPositionRadians =
-        IDManager.getInstance().select(-0.216, -0.2618); // from horizontal
+        IDManager.getInstance().select(-0.248, -0.2618); // from horizontal
     public static final double kIntakeArmTopPositionRadians =
-        IDManager.getInstance().select(1.81, 2.0071); // change later
+        IDManager.getInstance().select(1.98, 2.0071); // change later
     public static final double kIntakeArmTipPositionRadians =
-        IDManager.getInstance().select(1.30, 1.6);
+        IDManager.getInstance().select(1.45, 1.6);
 
     public static final double kIntakeArmEncoderOffset =
         IDManager.getInstance()
