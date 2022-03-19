@@ -78,7 +78,7 @@ public class AutoCommandBuilder {
         getFeedToShooterCommand(hood, drivetrain, indexer, feeder, servo, shooter);
 
     return new ParallelRaceGroup(
-            new WaitCommand(1).andThen(backUpPath, new WaitCommand(2)),
+            new WaitCommand(0.5).andThen(backUpPath, new WaitCommand(2)),
             intakeBalls.alongWith(setShooter))
         .andThen(stopIntake)
         .andThen(feedToShooterOnce, feedToShooterOnce2);
@@ -108,7 +108,7 @@ public class AutoCommandBuilder {
         getFeedToShooterCommand(hood, drivetrain, indexer, feeder, servo, shooter);
 
     return new ParallelRaceGroup(
-            new WaitCommand(1).andThen(backUpPath, new WaitCommand(2)),
+            new WaitCommand(0.5).andThen(backUpPath, new WaitCommand(2)),
             intakeBalls.alongWith(setShooter))
         .andThen(stopIntake)
         .andThen(feedToShooterOnce, feedToShooterOnce2);
@@ -159,8 +159,7 @@ public class AutoCommandBuilder {
 
     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
 
-    Command setShooter1 = getSetShooterCommand(shooter, drivetrain);
-    Command setShooter2 = getSetShooterCommand(shooter, drivetrain);
+    Command setShooter = getSetShooterCommand(shooter, drivetrain);
 
     Command feedToShooterOnce =
         getFeedToShooterCommand(hood, drivetrain, indexer, feeder, servo, shooter);
@@ -171,11 +170,12 @@ public class AutoCommandBuilder {
     return get2BallAutoRight(drivetrain, intake, intakeArm, indexer, feeder, servo, shooter, hood)
         .andThen(
             new ParallelRaceGroup(
-                thirdAndFourthBallPath.andThen(new WaitCommand(0.5)),
-                intakeBalls.alongWith(setShooter1)),
-            new ParallelRaceGroup(scoreBallPath.andThen(new WaitCommand(0.2)), setShooter2),
+                new WaitCommand(0.2).andThen(thirdAndFourthBallPath, new WaitCommand(2)),
+            intakeBalls,
+            new WaitCommand(0.5),
+            new ParallelRaceGroup(scoreBallPath.andThen(new WaitCommand(0.2)), setShooter),
             feedToShooterOnce,
-            feedToShooterOnce2);
+            feedToShooterOnce2));
   }
 
   //   public static Command get5BallAuto(

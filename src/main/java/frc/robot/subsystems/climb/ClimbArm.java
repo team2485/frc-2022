@@ -125,9 +125,9 @@ public class ClimbArm extends SubsystemBase implements Loggable {
     m_translationSetpointMeters = translation;
   }
 
-  @Log(name = "Velocity mps")
-  public double getVelocityMetersPerSecond() {
-    return m_talon.getSelectedSensorVelocity();
+  @Log(name = "Velocity rps")
+  public double getVelocityRotationsPerSecond() {
+    return m_talon.getSelectedSensorVelocity() * kArmRotationsPerPulse * 10;
   }
 
   // @Config(name = "set current (amps)")

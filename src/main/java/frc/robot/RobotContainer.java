@@ -69,8 +69,11 @@ public class RobotContainer {
   @Log(name = "Last setpoint lock", width = 3, height = 2, rowIndex = 0, columnIndex = 12)
   boolean m_setpointLock = false;
 
-  @Log(name = "2.5 meter lock", width = 3, height = 2, rowIndex = 2, columnIndex = 12)
+  @Log(name = "3.2 meter lock", width = 3, height = 2, rowIndex = 2, columnIndex = 12)
   boolean m_fixedSetpoint = false;
+
+  @Log(name = "Low shot lock", width = 3, height = 1, rowIndex = 4, columnIndex = 12)
+  boolean m_lowShot = false;
 
   @Log(name = "Shooter velocity lock value", width = 3, height = 1, rowIndex = 0, columnIndex = 15)
   double m_shooterVelocityLock = 0;
@@ -293,6 +296,22 @@ public class RobotContainer {
             new InstantCommand(
                 () -> {
                   m_setpointLock = false;
+                }));
+
+     m_operator
+        .a()
+        .whenActive(
+            new InstantCommand(
+                () -> {
+                  m_lowShot = true;
+                  m_shooterVelocityLock = 80;
+                  m_hoodAngleLock =
+                      0.46;
+                }))
+        .whenInactive(
+            new InstantCommand(
+                () -> {
+                  m_lowShot = false;
                 }));
 
     m_operator

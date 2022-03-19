@@ -113,7 +113,7 @@ public class ClimbCommandBuilder {
                 .until(() -> arm.getTranslationMeters() < 0.1),
             new InstantCommand(() -> arm.setVoltage(0), arm),
             new RunCommand(() -> arm.setVoltage(-0.5), arm)
-                .until(() -> arm.getVelocityMetersPerSecond() < 0.005),
+                .until(() -> arm.getVelocityRotationsPerSecond() < 0.005),
             new InstantCommand(() -> arm.setVoltage(0), arm),
             getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator)); // climb vertically
   }

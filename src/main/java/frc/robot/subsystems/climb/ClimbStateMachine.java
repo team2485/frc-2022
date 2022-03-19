@@ -59,7 +59,7 @@ public class ClimbStateMachine implements Loggable {
     if (m_preDisableState != ClimbState.kNotClimbing) {
       m_state = m_preDisableState;
     } else {
-      m_state = ClimbState.kCheckpointArmsOnHighBar;
+      m_state = ClimbState.kPreClimb;
     }
   }
 

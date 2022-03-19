@@ -115,6 +115,10 @@ public class Shooter extends SubsystemBase implements Loggable {
         && m_velocitySetpointRotationsPerSecond >= m_lastVelocitySetpoint;
   }
 
+  public double getSetpoint() {
+    return m_velocitySetpointRotationsPerSecond;
+  }
+
   public void enable(boolean enabled) {
     m_enabled = enabled;
     if (enabled) {

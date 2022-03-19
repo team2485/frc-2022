@@ -58,14 +58,14 @@ public final class Constants {
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
           Map.ofEntries(
-              entry(2.76, new ShotParameter(103, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(2.76, new ShotParameter(105, HoodConstants.kHoodBottomPositionRadians, 0)),
               entry(3.2, new ShotParameter(120, 0.455, 0)), 
               entry(3.6, new ShotParameter(123, 0.475, 0))));
 
   // 3.5, 123, 0.475
   // 
 
-  public static final double kShootingSetpointDistance = 2.5;
+  public static final double kShootingSetpointDistance = 3.2;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -79,8 +79,8 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kAutoMaxSpeedMetersPerSecond = 2;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2;
+    public static final double kAutoMaxSpeedMetersPerSecond = 3;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2.5;
 
     public static final double kAutoMaxAngularSpeedRadiansPerSecond =
         2.5 / DriveConstants.kTurningRadiusMeters;
@@ -582,7 +582,9 @@ public final class Constants {
 
     public static final double kShooterControlVelocityTolerance = 0.5;
 
-    public static final double kShooterFeedVelocityTolerance = 3;
+    public static final double kShooterFeedVelocityToleranceHigh = 3;
+    public static final double kShooterFeedVelocityToleranceLow = 6;
+
 
     public static final double kShooterVelocityDipThresholdRotationsPerSecond = 3;
   }

@@ -167,7 +167,10 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getIndexToShooterOnceCommand(
       Indexer indexer, Feeder feeder, FeedServo servo, Shooter shooter) {
-    return new WaitUntilCommand(() -> shooter.withinTolerance(kShooterFeedVelocityTolerance))
+    return new WaitUntilCommand(() -> 
+    {
+      return shooter.getSetpoint() > 100? 
+      shooter.withinTolerance(kShooterFeedVelocityToleranceHigh) : shooter.withinTolerance(kShooterFeedVelocityToleranceLow);})
         .andThen(
             new ParallelRaceGroup(
                 new RunCommand(
