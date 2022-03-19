@@ -36,7 +36,7 @@ public class CargoHandlingCommandBuilder {
   public static Command getIntakeCommand(
       Intake intake, IntakeArm intakeArm, Indexer indexer, FeedServo servo) {
     return getIntakeArmDownCommand(intakeArm)
-        .andThen(
+        .alongWith(
             new RunCommand(
                     () ->
                         intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond),
@@ -93,7 +93,8 @@ public class CargoHandlingCommandBuilder {
   }
 
   public static Command getHoodSetCommand(Hood hood, DoubleSupplier angle) {
-    return new InstantCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood);
+    return new RunCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood)
+        .until(hood::atGoal);
   }
 
   public static DoubleSupplier getHoodAutoSetpoint(

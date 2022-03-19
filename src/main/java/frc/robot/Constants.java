@@ -58,10 +58,12 @@ public final class Constants {
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
           Map.ofEntries(
-              entry(2.5, new ShotParameter(115, 0.45, 0)),
-              entry(3.5, new ShotParameter(123, 0.46, 0))));
+              entry(2.76, new ShotParameter(103, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(3.2, new ShotParameter(120, 0.455, 0)), 
+              entry(3.6, new ShotParameter(123, 0.475, 0))));
 
-// 3.5, 123, 0.47
+  // 3.5, 123, 0.475
+  // 
 
   public static final double kShootingSetpointDistance = 2.5;
 
@@ -77,8 +79,8 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kAutoMaxSpeedMetersPerSecond = 4;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 3;
+    public static final double kAutoMaxSpeedMetersPerSecond = 2;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2;
 
     public static final double kAutoMaxAngularSpeedRadiansPerSecond =
         2.5 / DriveConstants.kTurningRadiusMeters;
@@ -219,10 +221,10 @@ public final class Constants {
     // Max speed teleoperated
     public static final double kTeleopMaxSpeedMetersPerSecond = 3; // meters per second
     public static final double kTeleopMaxAngularSpeedRadiansPerSecond =
-        kTeleopMaxSpeedMetersPerSecond / kTurningRadiusMeters; // radians per second
+        2.5 / kTurningRadiusMeters; // radians per second
 
     public static final double kTeleopMaxAccelerationMetersPerSecondSquared = 3;
-    public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared = 1.5* Math.PI;
+    public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared = 1.5 * Math.PI;
 
     // Vision pose estimation constants
     public static final double kVisionWeightPerSec =
@@ -315,7 +317,7 @@ public final class Constants {
     public static final double kIntakeBottomWheelDiameterMeters = 0.1524; // 6 in
     public static final double kIntakeBottomWheelCircumferenceMeters = 0.1524 * Math.PI;
     public static final double kIntakeDefaultSpeedRotationsPerSecond =
-        kIntakeFreeSpeedRotationsPerSecond * 0.5;
+        kIntakeFreeSpeedRotationsPerSecond * 0.4;
 
     public static final double kSIntakeVolts = IDManager.getInstance().select(0.15, 0.0);
     public static final double kVIntakeVoltSecondsPerMeter =
@@ -348,11 +350,11 @@ public final class Constants {
         1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
     public static final double kIntakeArmBottomPositionRadians =
-        IDManager.getInstance().select(-0.248, -0.2618); // from horizontal
+        IDManager.getInstance().select(-0.246, -0.2618); // from horizontal
     public static final double kIntakeArmTopPositionRadians =
-        IDManager.getInstance().select(1.98, 2.0071); // change later
+        IDManager.getInstance().select(1.995, 2.0071); // change later
     public static final double kIntakeArmTipPositionRadians =
-        IDManager.getInstance().select(1.45, 1.6);
+        IDManager.getInstance().select(1.25, 1.6);
 
     public static final double kIntakeArmEncoderOffset =
         IDManager.getInstance()
@@ -580,7 +582,7 @@ public final class Constants {
 
     public static final double kShooterControlVelocityTolerance = 0.5;
 
-    public static final double kShooterFeedVelocityTolerance = 2.5;
+    public static final double kShooterFeedVelocityTolerance = 3;
 
     public static final double kShooterVelocityDipThresholdRotationsPerSecond = 3;
   }
@@ -736,9 +738,9 @@ public final class Constants {
 
     public static final double kPArmTranslationVoltsPerMeter = 400;
     public static final double kDArmTranslationVoltSecondsPerMeter = 0.275;
-    public static final double ksArmUnloadedVolts = 0.6;
+    public static final double ksArmUnloadedVolts = 0.47;
     public static final double kgArmUnloadedVolts = 0.02;
-    public static final double kvArmUnloadedVoltSecondsPerMeter = 55.315;
+    public static final double kvArmUnloadedVoltSecondsPerMeter = 63.445;
     public static final double kaArmUnloadedVoltSecondsSquaredPerMeter = 0.01;
 
     public static final double kArmTranslationToleranceMeters = 0.02;

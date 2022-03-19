@@ -155,8 +155,7 @@ public class SwerveModule implements Loggable {
    * @return current state
    */
   public SwerveModuleState getState() {
-    return new SwerveModuleState(
-        (kDriveInverted ? -1 : 1) * getSpeedMetersPerSecond(), this.getIntegratedHeading());
+    return new SwerveModuleState(-1 * getSpeedMetersPerSecond(), this.getIntegratedHeading());
   }
 
   /**

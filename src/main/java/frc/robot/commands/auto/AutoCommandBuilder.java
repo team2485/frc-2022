@@ -67,7 +67,8 @@ public class AutoCommandBuilder {
     Command backUpPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Right");
 
     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
-
+    Command stopIntake =
+        CargoHandlingCommandBuilder.getStopIntakeCommand(intake, intakeArm, indexer);
     Command setShooter = getSetShooterCommand(shooter, drivetrain);
 
     Command feedToShooterOnce =
@@ -76,11 +77,11 @@ public class AutoCommandBuilder {
     Command feedToShooterOnce2 =
         getFeedToShooterCommand(hood, drivetrain, indexer, feeder, servo, shooter);
 
-    return CargoHandlingCommandBuilder.getFeedServoOpenCommand(servo)
-        .andThen(
-            new ParallelRaceGroup(backUpPath.withTimeout(1), intakeBalls.alongWith(setShooter)),
-            feedToShooterOnce,
-            feedToShooterOnce2);
+    return new ParallelRaceGroup(
+            new WaitCommand(1).andThen(backUpPath, new WaitCommand(2)),
+            intakeBalls.alongWith(setShooter))
+        .andThen(stopIntake)
+        .andThen(feedToShooterOnce, feedToShooterOnce2);
   }
 
   public static Command get2BallAutoLeft(
@@ -96,7 +97,8 @@ public class AutoCommandBuilder {
     Command backUpPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Left");
 
     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
-
+    Command stopIntake =
+        CargoHandlingCommandBuilder.getStopIntakeCommand(intake, intakeArm, indexer);
     Command setShooter = getSetShooterCommand(shooter, drivetrain);
 
     Command feedToShooterOnce =
@@ -106,7 +108,9 @@ public class AutoCommandBuilder {
         getFeedToShooterCommand(hood, drivetrain, indexer, feeder, servo, shooter);
 
     return new ParallelRaceGroup(
-            backUpPath.andThen(new WaitCommand(1)), intakeBalls.alongWith(setShooter))
+            new WaitCommand(1).andThen(backUpPath, new WaitCommand(2)),
+            intakeBalls.alongWith(setShooter))
+        .andThen(stopIntake)
         .andThen(feedToShooterOnce, feedToShooterOnce2);
   }
 

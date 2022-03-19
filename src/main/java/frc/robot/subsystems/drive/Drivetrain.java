@@ -113,10 +113,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     // m_odometryWithoutVision =
     //     new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometry.resetPosition(
-        new Pose2d(
-            new Translation2d(5.75, 5.09
-            ),
-            new Rotation2d(62.5)),
+        new Pose2d(new Translation2d(5, 3.9), new Rotation2d(0)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     // m_odometryWithoutVision.resetPosition(
@@ -174,10 +171,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
           kDriveKinematics.toSwerveModuleStates(
               fieldRelative
                   ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                      xVelocity,
-                      yVelocity,
-                      angularVelocity,
-                      Rotation2d.fromDegrees(m_pigeon.getYaw()))
+                      xVelocity, yVelocity, angularVelocity, this.getHeading())
                   : new ChassisSpeeds(xVelocity, yVelocity, angularVelocity));
       SwerveDriveKinematics.desaturateWheelSpeeds(states, kTeleopMaxSpeedMetersPerSecond);
 
@@ -313,7 +307,9 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
   /** Sets the pigeon's current heading to zero. */
   public void zeroHeading() {
-    m_pigeon.setYaw(0);
+    m_odometry.resetPosition(
+        new Pose2d(this.getPoseMeters().getTranslation(), new Rotation2d(0)),
+        Rotation2d.fromDegrees(m_pigeon.getYaw()));
   }
 
   /** Returns the current angular velocity in radians per second */

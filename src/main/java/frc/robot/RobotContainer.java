@@ -10,12 +10,10 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -81,7 +79,7 @@ public class RobotContainer {
   double m_hoodAngleLock = 0;
 
   @Log(name = "Bar to climb to", width = 2, height = 2, rowIndex = 2, columnIndex = 0)
-  int m_barToClimbTo = 0; // 1 mid, 2 high, 3 traverse
+  int m_barToClimbTo = 3; // 1 mid, 2 high, 3 traverse
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -162,7 +160,7 @@ public class RobotContainer {
         .whileActiveContinuous(
             CargoHandlingCommandBuilder.getIntakeCommand(
                 m_intake, m_intakeArm, m_indexer, m_feedServo),
-            false)
+            true)
         .whenInactive(
             new InstantCommand(
                     () ->
@@ -170,7 +168,7 @@ public class RobotContainer {
                             m_indexer.getVelocityRotationsPerSecond()),
                     m_indexer)
                 .andThen(
-                    new WaitCommand(0.5),
+                    new WaitCommand(0.2),
                     CargoHandlingCommandBuilder.getStopIntakeCommand(
                         m_intake, m_intakeArm, m_indexer)));
 
@@ -197,19 +195,20 @@ public class RobotContainer {
         .rightBumper()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
-                m_indexer, m_feeder, m_feedServo, m_shooter))
-        .whenActive(
             new ConditionalCommand(
-                CargoHandlingCommandBuilder.getHoodAutoAimCommand(
-                    m_hood,
-                    () ->
-                        m_fixedSetpoint
-                            ? kShootingSetpointDistance
-                            : m_drivetrain.getHubToTurretCenterDistanceMeters(),
-                    () -> -m_distanceOffset),
-                CargoHandlingCommandBuilder.getHoodSetCommand(m_hood, () -> m_hoodAngleLock),
-                () -> !m_setpointLock))
+                    CargoHandlingCommandBuilder.getHoodAutoAimCommand(
+                        m_hood,
+                        () ->
+                            m_fixedSetpoint
+                                ? kShootingSetpointDistance
+                                : m_drivetrain.getHubToTurretCenterDistanceMeters(),
+                        () -> -m_distanceOffset),
+                    CargoHandlingCommandBuilder.getHoodSetCommand(m_hood, () -> m_hoodAngleLock),
+                    () -> !m_setpointLock)
+                .andThen(
+                    new WaitCommand(0.1),
+                    CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
+                        m_indexer, m_feeder, m_feedServo, m_shooter)), false)
         .whenInactive(
             CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
                 .alongWith(CargoHandlingCommandBuilder.getHoodDownCommand(m_hood)));
@@ -233,14 +232,13 @@ public class RobotContainer {
                     CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
                     CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
 
-    // Make robot think it's closer when aiming
     m_operator
         .upperPOV()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_distanceOffset += 0.2;
+                  m_distanceOffset += 0.1;
                 }));
 
     // Make robot think it's further when aiming
@@ -250,7 +248,7 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_distanceOffset -= 0.2;
+                  m_distanceOffset -= 0.1;
                 }));
 
     // Shift turret to right
@@ -260,7 +258,7 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_turretShift += 0.05;
+                  m_turretShift += 0.04;
                 }));
 
     // Shift turret to left
@@ -270,7 +268,7 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_turretShift -= 0.05;
+                  m_turretShift -= 0.04;                 ;
                 }));
 
     // lock current shooter setpoints in place
@@ -488,11 +486,10 @@ public class RobotContainer {
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kResettingClimberOnHighBar)
-                .andThen(
-                    ClimbCommandBuilder.getResetClimberCommand(m_climbElevator, m_climbArm),
-                    ClimbCommandBuilder.getArmOnNextBarCommand(m_climbElevator, m_climbArm),
-                    m_climbStateMachine.getSetStateCommand(
-                        ClimbState.kCheckpointArmsOnTraverseBar)));
+                .andThen(ClimbCommandBuilder.getResetClimberCommand(m_climbElevator, m_climbArm)));
+    // ClimbCommandBuilder.getArmOnNextBarCommand(m_climbElevator, m_climbArm),
+    // m_climbStateMachine.getSetStateCommand(
+    //     ClimbState.kCheckpointArmsOnTraverseBar)));
 
     // When at hooked on high bar checkpoint, pressing finish will complete climb on high bar
     m_climbStateMachine
