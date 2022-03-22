@@ -55,6 +55,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Log private double m_desiredXSpeed;
   @Log private double m_desiredYSpeed;
 
+  @Log private boolean m_pushable;
+
   // @Log(name = "Drive Neutral")
   private SendableChooser<NeutralMode> m_driveNeutralChooser = new SendableChooser<NeutralMode>();
 
@@ -158,14 +160,26 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     // if not being fed a speed, set all wheels pointing toward center to minimize pushability
     if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
-      m_frontLeftModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
-      m_frontRightModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
-      m_backLeftModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
-      m_backRightModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      if (m_pushable) {
+        m_frontLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_frontRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_backLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_backRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+      } else {
+        m_frontLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+        m_frontRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+        m_backLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+        m_backRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      }
+
     } else {
       SwerveModuleState[] states =
           kDriveKinematics.toSwerveModuleStates(
@@ -208,13 +222,25 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     // if not being fed a speed, set all wheels pointing toward center to minimize pushability
     if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
-      m_frontLeftModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
-      m_frontRightModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
-      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
-      m_backRightModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+      if (m_pushable) {
+        m_frontLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_frontRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_backLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_backRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+      } else {
+        m_frontLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+        m_frontRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+        m_backLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+        m_backRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      }
     } else {
       SwerveModuleState[] states =
           kDriveKinematics.toSwerveModuleStates(
@@ -339,6 +365,18 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_frontRightModule.setTurningNeutralMode(mode);
     m_backLeftModule.setTurningNeutralMode(mode);
     m_backRightModule.setTurningNeutralMode(mode);
+  }
+
+  @Config.ToggleSwitch(name = "Set pushable")
+  public void setPushable(boolean pushable) {
+    m_pushable = pushable;
+    if (m_pushable) {
+      this.setDriveNeutralMode(NeutralMode.Coast);
+      this.setTurningNeutralMode(NeutralMode.Brake);
+    } else {
+      this.setDriveNeutralMode(NeutralMode.Brake);
+      this.setTurningNeutralMode(NeutralMode.Brake);
+    }
   }
 
   /** Returns the Field2d object. */

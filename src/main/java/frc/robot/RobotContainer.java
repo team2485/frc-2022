@@ -36,7 +36,7 @@ public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
 
-  //   private final Vision m_vision = new Vision();
+  private final Vision m_vision = new Vision();
 
   private final IntakeArm m_intakeArm = new IntakeArm();
   private final Intake m_intake = new Intake();
@@ -98,7 +98,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
+    m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
     configureButtonBindings();
   }
 
@@ -110,7 +110,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     this.configureDrivetrainCommands();
-    // this.configureVisionCommands();
+    this.configureVisionCommands();
     this.configureCargoHandlingCommands();
     this.configureClimbCommands();
   }
@@ -138,6 +138,11 @@ public class RobotContainer {
                 m_drivetrain));
 
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
+
+    m_climbStateMachine
+        .getClimbStateTrigger(ClimbState.kNotClimbing)
+        .whenActive(new InstantCommand(() -> m_drivetrain.setPushable(false), m_drivetrain))
+        .whenInactive(new InstantCommand(() -> m_drivetrain.setPushable(true), m_drivetrain));
   }
 
   private void configureVisionCommands() {}
