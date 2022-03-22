@@ -104,6 +104,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   }
 
   public boolean withinTolerance(double tolerance) {
+
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
         < tolerance;
   }
@@ -115,6 +116,7 @@ public class Shooter extends SubsystemBase implements Loggable {
         && m_velocitySetpointRotationsPerSecond >= m_lastVelocitySetpoint;
   }
 
+  @Log(name = "Setpoint")
   public double getSetpoint() {
     return m_velocitySetpointRotationsPerSecond;
   }

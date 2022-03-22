@@ -74,6 +74,10 @@ public class CargoHandlingCommandBuilder {
         turret);
   }
 
+  public static Command getTurretSetCommand(Turret turret, DoubleSupplier angle) {
+    return new RunCommand(() -> turret.setAngleRadians(angle.getAsDouble()), turret);
+  }
+
   public static double findTurretAimAngle(Supplier<Pose2d> robotPose) {
     double uncorrectedAngle =
         Math.atan(
@@ -167,10 +171,16 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getIndexToShooterOnceCommand(
       Indexer indexer, Feeder feeder, FeedServo servo, Shooter shooter) {
-    return new WaitUntilCommand(() -> 
-    {
-      return shooter.getSetpoint() > 100? 
-      shooter.withinTolerance(kShooterFeedVelocityToleranceHigh) : shooter.withinTolerance(kShooterFeedVelocityToleranceLow);})
+    return new WaitUntilCommand(
+            () -> {
+              if (shooter.getSetpoint() > 80) {
+                System.out.println(
+                    "high: " + shooter.withinTolerance(kShooterFeedVelocityToleranceHigh));
+                return shooter.withinTolerance(kShooterFeedVelocityToleranceHigh);
+              } else {
+                return true;
+              }
+            })
         .andThen(
             new ParallelRaceGroup(
                 new RunCommand(
@@ -182,7 +192,7 @@ public class CargoHandlingCommandBuilder {
                         new InstantCommand(() -> servo.engage(true), servo), new WaitCommand(1))),
             new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder)
                 .alongWith(new InstantCommand(() -> servo.engage(false), servo)),
-            new WaitCommand(0.5),
+            new WaitCommand(0.8),
             new InstantCommand(
                 () -> indexer.setVelocityRotationsPerSecond(kIndexerDefaultSpeedRotationsPerSecond),
                 indexer),

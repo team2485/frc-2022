@@ -6,6 +6,7 @@ import static frc.robot.Constants.ClimbElevatorConstants.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -109,11 +110,12 @@ public class ClimbCommandBuilder {
             new InstantCommand(() -> arm.setVoltage(0), arm),
             getMoveElevatorCommand(
                 Units.inchesToMeters(13), elevator), // extend elevator to release arm
-            new RunCommand(() -> arm.setVoltage(-2), arm)
-                .until(() -> arm.getTranslationMeters() < 0.1),
+            new RunCommand(() -> arm.setVoltage(-4), arm)
+                .until(() -> arm.getTranslationMeters() < 0.05),
             new InstantCommand(() -> arm.setVoltage(0), arm),
-            new RunCommand(() -> arm.setVoltage(-0.5), arm)
-                .until(() -> arm.getVelocityRotationsPerSecond() < 0.005),
+            new ParallelRaceGroup(
+                new RunCommand(() -> arm.setVoltage(-0.7), arm),
+                new WaitUntilCommand(() -> arm.getStatorCurrentSpike(5))),
             new InstantCommand(() -> arm.setVoltage(0), arm),
             getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator)); // climb vertically
   }

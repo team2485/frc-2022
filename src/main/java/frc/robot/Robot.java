@@ -11,7 +11,6 @@ import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,8 +33,6 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     IDManager.getInstance(Constants.kRobotIdFile);
-
-    DataLogManager.start();
 
     m_robotContainer = new RobotContainer();
     addPeriodic(

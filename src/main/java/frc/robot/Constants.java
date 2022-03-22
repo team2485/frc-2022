@@ -59,13 +59,13 @@ public final class Constants {
       new TreeMap<>(
           Map.ofEntries(
               entry(2.76, new ShotParameter(105, HoodConstants.kHoodBottomPositionRadians, 0)),
-              entry(3.2, new ShotParameter(120, 0.455, 0)), 
+              entry(3.2, new ShotParameter(120, 0.455, 0)),
               entry(3.6, new ShotParameter(123, 0.475, 0))));
 
   // 3.5, 123, 0.475
-  // 
+  //
 
-  public static final double kShootingSetpointDistance = 3.2;
+  public static final double kShootingSetpointDistance = 2.76;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -350,9 +350,9 @@ public final class Constants {
         1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
     public static final double kIntakeArmBottomPositionRadians =
-        IDManager.getInstance().select(-0.246, -0.2618); // from horizontal
+        IDManager.getInstance().select(-0.254, -0.2618); // from horizontal
     public static final double kIntakeArmTopPositionRadians =
-        IDManager.getInstance().select(1.995, 2.0071); // change later
+        IDManager.getInstance().select(1.989, 2.0071); // change later
     public static final double kIntakeArmTipPositionRadians =
         IDManager.getInstance().select(1.25, 1.6);
 
@@ -506,9 +506,12 @@ public final class Constants {
     public static final int kTurretCWSlotSensorPort = 3;
 
     public static final int kTurretPotentiometerChannel = 0; // Analog channel
-    public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
+    // public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
+    // public static final double kTurretPotentiometerOffset =
+    //     IDManager.getInstance().select(-2.385 + 0.05 + 0.02, -3.011);
+    public static final double kTurretPotentiometerRangeOfMotion = Math.PI;
     public static final double kTurretPotentiometerOffset =
-        IDManager.getInstance().select(-2.385 + 0.05, -3.011);
+        IDManager.getInstance().select(-1.16, -3.011);
 
     public static final double kTurretGearing = 462;
 
@@ -536,8 +539,8 @@ public final class Constants {
         new SR_TrapezoidProfile.Constraints(
             kTurretMaxVelocityRadiansPerSecond, kTurretMaxAccelerationRadiansPerSecondSquared);
 
-    public static final double kTurretMinPositionRadians = -Math.toRadians(45);
-    public static final double kTurretMaxPositionRadians = Math.toRadians(45);
+    public static final double kTurretMinPositionRadians = -Math.toRadians(23);
+    public static final double kTurretMaxPositionRadians = Math.toRadians(23);
     public static final double kTurretRangeRadians =
         kTurretMaxPositionRadians - kTurretMinPositionRadians;
 
@@ -584,7 +587,6 @@ public final class Constants {
 
     public static final double kShooterFeedVelocityToleranceHigh = 3;
     public static final double kShooterFeedVelocityToleranceLow = 6;
-
 
     public static final double kShooterVelocityDipThresholdRotationsPerSecond = 3;
   }
