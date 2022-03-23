@@ -4,8 +4,6 @@ import static frc.robot.Constants.IntakeConstants.*;
 
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
@@ -34,11 +32,6 @@ public class Intake extends SubsystemBase implements Loggable {
 
   @Log(name = "Output voltage")
   private double m_lastOutputVoltage = 0;
-
-  private DoubleLogEntry statorCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/intake/statorCurrent");
-  private DoubleLogEntry supplyCurrentLog =
-      new DoubleLogEntry(DataLogManager.getLog(), "/current/intake/supplyCurrent");
 
   public Intake() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);

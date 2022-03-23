@@ -6,6 +6,7 @@ import static frc.robot.Constants.ClimbElevatorConstants.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -82,7 +83,7 @@ public class ClimbCommandBuilder {
   public static Command getRollToNextBarAndHookOnCommand(ClimbElevator elevator, ClimbArm arm) {
     return new InstantCommand(() -> arm.resetAbsoluteRotation(0), arm)
         .andThen(
-            new InstantCommand(() -> arm.setMode(true), arm),
+            new InstantCommand(() -> arm.setMode(false), arm),
             getTranslateArmCommand(
                 Units.inchesToMeters(0.64901028), arm), // pull arm back to settle on bar
             new InstantCommand(() -> elevator.setMode(false), elevator),
@@ -104,16 +105,18 @@ public class ClimbCommandBuilder {
         .andThen(
             getMoveElevatorCommand(Units.inchesToMeters(3.2), elevator),
             new InstantCommand(() -> arm.setMode(false), arm),
-            getTranslateArmCommand(0.22, arm), // push arm forward
+            new RunCommand(() -> arm.setVoltage(-6), arm)
+                .until(() -> arm.getTranslationMeters() < 0.22), // push arm forward
+            new InstantCommand(() -> arm.setVoltage(0), arm),
             getMoveElevatorCommand(
                 Units.inchesToMeters(13), elevator), // extend elevator to release arm
-            new InstantCommand(() -> arm.setVoltage(0)), // let arm fall to rest
-            new WaitCommand(0), // wait for a few seconds
-            new RunCommand(() -> arm.setVoltage(-0.6 * Constants.kNominalVoltage))
-                .until(() -> arm.getTranslationMeters() < 0.02),
-            new RunCommand(() -> arm.setVoltage(-0.1 * Constants.kNominalVoltage))
-                .until(() -> arm.getStatorCurrentSpike(6)),
-            new InstantCommand(() -> arm.setVoltage(0)),
+            new RunCommand(() -> arm.setVoltage(-4), arm)
+                .until(() -> arm.getTranslationMeters() < 0.05),
+            new InstantCommand(() -> arm.setVoltage(0), arm),
+            new ParallelRaceGroup(
+                new RunCommand(() -> arm.setVoltage(-0.7), arm),
+                new WaitUntilCommand(() -> arm.getStatorCurrentSpike(5))),
+            new InstantCommand(() -> arm.setVoltage(0), arm),
             getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator)); // climb vertically
   }
 
