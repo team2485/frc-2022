@@ -201,15 +201,13 @@ public class RobotContainer {
                                     () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
                                 .withTimeout(0.5))));
 
+    // Indexer manual override
     m_operator
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
-            CargoHandlingCommandBuilder.runIndexerCommand(m_indexer, m_feedServo), false)
-        .whenInactive(
-            CargoHandlingCommandBuilder.stopIndexerCommand(m_indexer)
-        );
-            
+            CargoHandlingCommandBuilder.getIndexerSetCommand(m_indexer, m_feedServo), false)
+        .whenInactive(CargoHandlingCommandBuilder.getIndexerOffCommand(m_indexer));
 
     // Set shooter on operator left trigger: based on distance to hub
     m_operator

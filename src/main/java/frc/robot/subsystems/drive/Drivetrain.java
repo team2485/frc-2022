@@ -26,6 +26,7 @@ import frc.robot.subsystems.Vision.TimestampedTranslation2d;
 import frc.team2485.WarlordsLib.PoseHistory;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 import java.util.Optional;
 import java.util.function.Supplier;
