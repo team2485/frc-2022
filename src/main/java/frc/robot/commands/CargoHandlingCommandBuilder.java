@@ -50,6 +50,25 @@ public class CargoHandlingCommandBuilder {
                     new InstantCommand(() -> servo.engage(false), servo)));
   }
 
+  public static Command runIndexerCommand(
+    Indexer indexer, FeedServo servo){
+
+      return new RunCommand(
+        () ->
+            indexer.setVelocityRotationsPerSecond(
+                kIndexerIntakeSpeedRatio * kIntakeDefaultSpeedRotationsPerSecond),
+        indexer)
+        .alongWith( new InstantCommand(() -> servo.engage(false), servo));
+
+    }
+
+    public static Command stopIndexerCommand(Indexer indexer){
+
+      return new InstantCommand(()->indexer.setVelocityRotationsPerSecond(0), indexer);
+
+    }
+  
+
   public static Command getStopIntakeCommand(Intake intake, IntakeArm intakeArm, Indexer indexer) {
     return getIntakeArmUpCommand(intakeArm)
         .alongWith(

@@ -10,12 +10,10 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -173,6 +171,16 @@ public class RobotContainer {
                     new WaitCommand(0.5),
                     CargoHandlingCommandBuilder.getStopIntakeCommand(
                         m_intake, m_intakeArm, m_indexer)));
+
+    m_operator
+        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whileActiveContinuous(
+            CargoHandlingCommandBuilder.runIndexerCommand(m_indexer, m_feedServo), false)
+        .whenInactive(
+            CargoHandlingCommandBuilder.stopIndexerCommand(m_indexer)
+        );
+            
 
     // Set shooter on operator left trigger: based on distance to hub
     m_operator
