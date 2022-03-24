@@ -2,16 +2,12 @@ package frc.robot.commands;
 
 import static frc.robot.Constants.FeederConstants.*;
 import static frc.robot.Constants.FieldConstants.*;
-import static frc.robot.Constants.HoodConstants.*;
 import static frc.robot.Constants.IndexerConstants.*;
 import static frc.robot.Constants.IntakeArmConstants.*;
 import static frc.robot.Constants.IntakeConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
-import static frc.robot.Constants.TurretConstants.*;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -21,15 +17,12 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
 import frc.robot.subsystems.cargoHandling.FeedServo;
 import frc.robot.subsystems.cargoHandling.Feeder;
-import frc.robot.subsystems.cargoHandling.Hood;
 import frc.robot.subsystems.cargoHandling.Indexer;
 import frc.robot.subsystems.cargoHandling.Intake;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
 import frc.robot.subsystems.cargoHandling.Shooter;
-import frc.robot.subsystems.cargoHandling.Turret;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 public class CargoHandlingCommandBuilder {
 
@@ -66,50 +59,9 @@ public class CargoHandlingCommandBuilder {
             new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0), intake));
   }
 
-  public static Command getTurretAutoAimCommand(
-      Turret turret, Supplier<Pose2d> robotPose, DoubleSupplier turretShift) {
-    return new RunCommand(
-        () -> turret.setAngleRadians(findTurretAimAngle(robotPose) + turretShift.getAsDouble()),
-        turret);
-  }
-
-  public static Command getTurretSetCommand(Turret turret, DoubleSupplier angle) {
-    return new RunCommand(() -> turret.setAngleRadians(angle.getAsDouble()), turret);
-  }
-
-  public static double findTurretAimAngle(Supplier<Pose2d> robotPose) {
-    double uncorrectedAngle =
-        Math.atan(
-                (kHubCenterPosition.getY() - robotPose.get().getY())
-                    / (kHubCenterPosition.getX() - robotPose.get().getX()))
-            - robotPose.get().getRotation().getRadians();
-    if (robotPose.get().getX() <= kHubCenterPosition.getX()) {
-      return uncorrectedAngle;
-    } else {
-      return uncorrectedAngle + Math.PI;
-    }
-  }
-
-  public static Command getHoodAutoAimCommand(
-      Hood hood, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
-    return getSetHoodCommand(getHoodAutoSetpoint(distanceToHub, distanceOffset), hood);
-  }
-
-  public static DoubleSupplier getHoodAutoSetpoint(
-      DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
-    return () ->
-        InterpolatingTable.get(distanceToHub.getAsDouble() + distanceOffset.getAsDouble())
-            .hoodAngleRadians;
-  }
-
   public static Command getShooterAutoSetCommand(
-      Shooter shooter, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
-    return getShooterSetCommand(shooter, getShooterAutoSetpoint(distanceToHub, distanceOffset));
-  }
-
-  public static Command getShooterSetCommand(Shooter shooter, DoubleSupplier velocity) {
-    return new RunCommand(
-        () -> shooter.setVelocityRotationsPerSecond(velocity.getAsDouble()), shooter);
+      DoubleSupplier distanceToHub, DoubleSupplier distanceOffset, Shooter shooter) {
+    return getSetShooterCommand(getShooterAutoSetpoint(distanceToHub, distanceOffset), shooter);
   }
 
   public static DoubleSupplier getShooterAutoSetpoint(
@@ -119,56 +71,12 @@ public class CargoHandlingCommandBuilder {
             .shooterSpeedRotationsPerSecond;
   }
 
-  public static Command getEjectCommand(
-      Shooter shooter,
-      Hood hood,
-      Turret turret,
-      Indexer indexer,
-      Feeder feeder,
-      FeedServo servo,
-      Supplier<Pose2d> robotPose) {
-    return new RunCommand(() -> shooter.setVelocityRotationsPerSecond(40), shooter)
-        .alongWith(
-            new RunCommand(() -> hood.setAngleRadians(kHoodBottomPositionRadians), hood),
-            new RunCommand(() -> turret.setAngleRadians(findTurretEjectAngle(robotPose)), turret),
-            new WaitCommand(1)
-                .andThen(getIndexToShooterOnceCommand(indexer, feeder, servo, shooter)));
-  }
-
-  public static double findTurretEjectAngle(Supplier<Pose2d> robotPose) {
-    double angle = findTurretAimAngle(robotPose);
-    if (angle > 0) {
-      angle = angle - kTurretRangeRadians / 4.0;
-    } else {
-      angle = angle + kTurretRangeRadians / 4.0;
-    }
-    return angle;
-  }
-
-  // public static Command getIndexToShooterCommand(
-  //     Indexer indexer, Feeder feeder, Shooter shooter, BallCounter counter) {
-  //   return new ConditionalCommand(
-  //       getIndexToShooterOnceCommand(indexer, feeder, shooter)
-  //           .andThen(
-  //               new RunCommand(
-  //                       () ->
-  //                           indexer.setVelocityRotationsPerSecond(
-  //                               kIndexerDefaultSpeedRotationsPerSecond),
-  //                       indexer)
-  //                   .withTimeout(0.5)),
-  //       new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer)
-  //           .alongWith(new InstantCommand(() -> shooter.setVelocityRotationsPerSecond(0))),
-  //       () -> {
-  //         return counter.getNumCargo() > 0;
-  //       });
-  // }
-
-  public static Command getIndexToShooterOnceCommand(
+  public static Command getIndexToShooterCommand(
       Indexer indexer, Feeder feeder, FeedServo servo, Shooter shooter) {
     return new WaitUntilCommand(
             () -> {
               if (shooter.getSetpoint() > 80) {
-                return shooter.withinTolerance(kShooterFeedVelocityToleranceHigh);
+                return shooter.withinTolerance(kShooterFeedVelocityTolerance);
               } else {
                 return true;
               }
@@ -189,13 +97,6 @@ public class CargoHandlingCommandBuilder {
         .alongWith(
             new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder),
             new InstantCommand(() -> servo.engage(false), servo));
-  }
-
-  public static Command getZeroHoodCommand(Hood hood) {
-    return new ConditionalCommand(
-        new InstantCommand(() -> hood.setVoltage(kHoodZeroingVoltage), hood),
-        new InstantCommand(() -> hood.setVoltage(0), hood),
-        hood::getBottomLimitSwitch);
   }
 
   public static Command getSetIndexerCommand(DoubleSupplier velocity, Indexer indexer) {
@@ -222,11 +123,11 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getSetShooterCommand(DoubleSupplier velocity, Shooter shooter) {
     if (velocity.getAsDouble() == 0) {
-      return new InstantCommand(() -> shooter.setVelocityRotationsPerSecond(0), shooter);
+      return new InstantCommand(() -> shooter.setShooterVelocityRotationsPerSecond(0), shooter);
     } else {
       return new StartEndCommand(
-          () -> shooter.setVelocityRotationsPerSecond(velocity.getAsDouble()),
-          () -> shooter.setVelocityRotationsPerSecond(0),
+          () -> shooter.setShooterVelocityRotationsPerSecond(velocity.getAsDouble()),
+          () -> shooter.setShooterVelocityRotationsPerSecond(0),
           shooter);
     }
   }
@@ -254,14 +155,5 @@ public class CargoHandlingCommandBuilder {
   public static Command getIntakeArmDownCommand(IntakeArm intakeArm) {
     return new RunCommand(() -> intakeArm.setPosition(false), intakeArm)
         .withInterrupt(() -> intakeArm.atPosition(false));
-  }
-
-  public static Command getSetHoodCommand(DoubleSupplier angle, Hood hood) {
-    return new RunCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood)
-        .until(hood::atGoal);
-  }
-
-  public static Command getHoodDownCommand(Hood hood) {
-    return new InstantCommand(() -> hood.setAngleRadians(kHoodBottomPositionRadians));
   }
 }

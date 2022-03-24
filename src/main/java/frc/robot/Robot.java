@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static frc.robot.Constants.TurretConstants.*;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
@@ -35,10 +33,6 @@ public class Robot extends TimedRobot {
     IDManager.getInstance(Constants.kRobotIdFile);
 
     m_robotContainer = new RobotContainer();
-    addPeriodic(
-        () -> m_robotContainer.m_shooter.runControlLoop(),
-        Constants.ShooterConstants.kShooterLoopTimeSeconds);
-
     addPeriodic(
         () -> m_robotContainer.m_climbElevator.runControlLoop(),
         Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);

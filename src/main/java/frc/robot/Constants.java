@@ -42,12 +42,13 @@ public final class Constants {
   public static final double kRIOLoopTime = 0.02;
 
   // motor constants
-  public static final int kFalconCPR = 2048; // pulses per rotation
+  public static final double kFalconSensorUnitsPerRotation = 2048; // pulses per rotation
   public static final double kFalconWindingsResistanceOhms = 12.0 / 257;
   public static final double kFalconTorquePerAmp = 4.69 / 257;
-  public static final int kFalconOutputUnitsFull = 1023;
+  public static final double kFalconOutputUnitsFull = 1023;
   public static final double kFalconOutputUnitsPerVolt = kFalconOutputUnitsFull / kNominalVoltage;
   public static final double kFalconFreeSpeedRotationsPerSecond = 6380.0 / 60.0;
+  public static final double kSecondsPer100Ms = 0.1;
 
   public static final double kNeoFreeSpeedRotationsPerSecond = 5676.0 / 60.0;
   public static final double kNeo550FreeSpeedRotationsPerSecond = 11000.0 / 60.0;
@@ -58,7 +59,7 @@ public final class Constants {
   public static final TreeMap<Double, ShotParameter> kShootingMap =
       new TreeMap<>(
           Map.ofEntries(
-              entry(2.76, new ShotParameter(105, HoodConstants.kHoodBottomPositionRadians, 0)),
+              entry(2.76, new ShotParameter(105, 0, 0)),
               entry(3.2, new ShotParameter(120, 0.455, 0)),
               entry(3.6, new ShotParameter(123, 0.475, 0))));
 
@@ -108,7 +109,8 @@ public final class Constants {
         IDManager.getInstance().select(6.75, 6.86); // motor turns per wheel turns
     public static final double kDriveDistMetersPerMotorRev =
         kWheelCircumferenceMeters / kDriveGearRatio;
-    public static final double kDriveDistMetersPerPulse = kDriveDistMetersPerMotorRev / kFalconCPR;
+    public static final double kDriveDistMetersPerPulse =
+        kDriveDistMetersPerMotorRev / kFalconSensorUnitsPerRotation;
     //// NOTE: CTRE Encoders return velocity in units/100 ms. CTRE velocity readings should be
     // multiplied by 10 to be per second.
     //// Drive feedforward constants
@@ -140,7 +142,8 @@ public final class Constants {
     //// Turning mechanism/encoder constants
     public static final double kTurningGearRatio = 12.8; // motor turns per shaft turns
     public static final double kTurningRadiansPerMotorRev = 2 * Math.PI / kTurningGearRatio;
-    public static final double kTurningRadiansPerPulse = kTurningRadiansPerMotorRev / kFalconCPR;
+    public static final double kTurningRadiansPerPulse =
+        kTurningRadiansPerMotorRev / kFalconSensorUnitsPerRotation;
 
     //// Turning feedforward constants (unused in current implementation but useful for max speed)
     public static final double ksTurningVolts = 0.60572;
@@ -452,143 +455,95 @@ public final class Constants {
     public static final double kServoEngagedPosition = 0.15;
   }
 
-  public static final class HoodConstants {
-    public static final int kHoodSparkPort = 31;
-    public static final int kHoodSmartCurrentLimitAmps = 5;
-    public static final int kHoodImmediateCurrentLimitAmps = 10;
-
-    public static final double kHoodLoopTimeSeconds = 0.02;
-
-    public static final double kHoodGearRatio = 225; // motor turns : output/full hood turns
-    public static final double kHoodRadiansPerMotorRev = 2 * Math.PI / kHoodGearRatio;
-
-    public static final double kHoodFreeSpeedRadiansPerSecond =
-        kNeoFreeSpeedRotationsPerSecond / kHoodGearRatio * (2 * Math.PI);
-
-    public static final double kHoodBottomPositionRadians =
-        0.4363323; // from horizontal (25.21 deg)
-    public static final double kHoodTopPositionRadians = 0.51; //
-
-    public static final boolean kHoodGearBacklashCompensation = true;
-    // Hood characterization constants
-    // these are wrong rn
-    public static final double ksHoodVolts = IDManager.getInstance().select(0.14803, 0.13428);
-    public static final double kgHoodVolts = IDManager.getInstance().select(0.058609, 0.061339);
-    public static final double kvHoodVoltSecondsPerRadian =
-        IDManager.getInstance().select(1.1003, 0.99111);
-    public static final double kaHoodVoltSecondsSquaredPerRadian =
-        IDManager.getInstance().select(0.1298, 0.12369);
-
-    public static final double kHoodMaxSpeedRadiansPerSecond = 1;
-    public static final double kHoodMaxAccelerationRadiansPerSecondSquared = 2;
-
-    public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
-        new SR_TrapezoidProfile.Constraints(
-            kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
-    // Hood PID constants
-    public static final double kPHood = 50;
-    public static final double kDHood = 0;
-    public static final double kHoodPositionToleranceRadians = 0.005;
-
-    public static final double kHoodSetpointDeadbandRadians = 0.001;
-
-    public static final double kHoodZeroingVoltage = -0.5;
-  }
-
-  public static final class TurretConstants {
-    public static final double kTurretLoopTimeSeconds = 0.02;
-    public static final int kTurretTalonPort = 32;
-    public static final int kTurretSupplyCurrentLimitAmps = 5;
-    public static final int kTurretSupplyCurrentThresholdAmps = 10;
-    public static final int kTurretSupplyCurrentThresholdTimeMs = 1;
-
-    public static final int kTurretCCWSlotSensorPort = 2;
-    public static final int kTurretCWSlotSensorPort = 3;
-
-    public static final int kTurretPotentiometerChannel = 0; // Analog channel
-    // public static final double kTurretPotentiometerRangeOfMotion = Math.PI * 2;
-    // public static final double kTurretPotentiometerOffset =
-    //     IDManager.getInstance().select(-2.385 + 0.05 + 0.02, -3.011);
-    public static final double kTurretPotentiometerRangeOfMotion = Math.PI;
-    public static final double kTurretPotentiometerOffset =
-        IDManager.getInstance().select(-1.16, -3.011);
-
-    public static final double kTurretGearing = 462;
-
-    public static final double kTurretFreeSpeedRadiansPerSecond =
-        k775FreeSpeedRotationsPerSecond / kTurretGearing * 2 * Math.PI;
-
-    public static final double kVTurretVoltSecondsPerRadian =
-        IDManager.getInstance().select(1.0, 1.0);
-    public static final double kATurretVoltSecondsSquaredPerRadian =
-        IDManager.getInstance().select(0.3, 0.1);
-    public static final double kSTurretVolts = 0.9;
-
-    public static final boolean kTurretInvert = IDManager.getInstance().select(false, true);
-
-    public static final double kPTurretVoltsPerRadian = IDManager.getInstance().select(2.0, 8.0);
-    public static final double kDTurretVoltSecondsPerRadian =
-        IDManager.getInstance().select(1.0, 4.0);
-
-    public static final double kTurretPositionTolerance = 0.01;
-
-    public static final double kTurretMaxVelocityRadiansPerSecond = 2;
-    public static final double kTurretMaxAccelerationRadiansPerSecondSquared = 5;
-
-    public static final SR_TrapezoidProfile.Constraints kTurretMotionProfileConstraints =
-        new SR_TrapezoidProfile.Constraints(
-            kTurretMaxVelocityRadiansPerSecond, kTurretMaxAccelerationRadiansPerSecondSquared);
-
-    public static final double kTurretMinPositionRadians = -Math.toRadians(23);
-    public static final double kTurretMaxPositionRadians = Math.toRadians(23);
-    public static final double kTurretRangeRadians =
-        kTurretMaxPositionRadians - kTurretMinPositionRadians;
-
-    public static final double kBufferSizeRadians = Math.toRadians(25);
-  }
-
   public static final class ShooterConstants {
     public static final int kShooterTalonPort = 30;
+    public static final int kKickerTalonPort = 31;
 
-    public static final double kShooterLoopTimeSeconds = 0.01;
-    public static final double kShooterTalonCurrentLimit = 50;
+    public static final double kShooterSupplyCurrentLimitAmps = 25;
+    public static final double kShooterSupplyCurrentThresholdAmps = 30;
+    public static final double kShooterSupplyCurrentThresholdTimeSecs = 0.1;
+    public static final double kShooterStatorCurrentLimitAmps = 40;
+    public static final double kShooterStatorCurrentThresholdAmps = 45;
+    public static final double kShooterStatorCurrentThresholdTimeSecs = 0.05;
 
-    public static final int kRevEncoderPulsesPerRevolution = 2048;
-    public static final int kRevEncoderSamplesToAverage = 5;
-    public static final int kFalconPulsesPerRevolution = 2048;
+    public static final double kKickerSupplyCurrentLimitAmps = kShooterSupplyCurrentLimitAmps;
+    public static final double kKickerSupplyCurrentThresholdAmps =
+        kShooterSupplyCurrentThresholdAmps;
+    public static final double kKickerSupplyCurrentThresholdTimeSecs =
+        kShooterSupplyCurrentLimitAmps;
+    public static final double kKickerStatorCurrentLimitAmps = kShooterStatorCurrentLimitAmps;
+    public static final double kKickerStatorCurrentThresholdAmps = kShooterStatorCurrentLimitAmps;
+    public static final double kKickerStatorCurrentThresholdTimeSecs =
+        kShooterStatorCurrentThresholdTimeSecs;
 
-    public static final double kShooterRotationsPerPulse = 1.0 / kFalconPulsesPerRevolution;
-    public static final double kShooterGearRatio =
-        IDManager.getInstance().select(2.0 / 3.0, 2.0 / 3.0);
+    public static final double kShooterLoopTimeSeconds = 0.001;
+    public static final double kKickerLoopTimeSeconds = kShooterLoopTimeSeconds;
 
-    public static final double kShooterCircumferenceMeters = 0.1524 * Math.PI;
+    public static final double kShooterGearRatio = 2.0 / 3.0;
+    public static final double kKickerGearRatio = kShooterGearRatio;
+
+    public static final double kShooterCircumferenceMeters =
+        0.1524 * Math.PI; // 6 in diameter wheel
+    public static final double kKickerCircumferenceMeters = 0.0508 * Math.PI; // 2 in diameter wheel
+
     public static final double kShooterFreeSpeedRotationsPerSecond =
-        IDManager.getInstance()
-            .select(
-                kFalconFreeSpeedRotationsPerSecond / kShooterGearRatio,
-                kFalconFreeSpeedRotationsPerSecond / kShooterGearRatio);
+        kFalconFreeSpeedRotationsPerSecond / kShooterGearRatio;
+    public static final double kKickerFreeSpeedRotationsPerSecond =
+        kFalconFreeSpeedRotationsPerSecond / kKickerGearRatio;
+
     public static final double kShooterSurfaceFreeSpeedMetersPerSecond =
         kShooterFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
+    public static final double kKickerSurfaceFreeSpeedMetersPerSecond =
+        kKickerFreeSpeedRotationsPerSecond * kKickerCircumferenceMeters;
 
     public static final double kSShooterVolts = IDManager.getInstance().select(0.55769, 0.56);
-    public static final double kVShooterVoltSecondsPerMeter =
+    public static final double kVShooterVoltSecondsPerRotation =
         IDManager.getInstance().select(0.071665, 0.07);
-    public static final double kAShooterVoltSecondsSquaredPerMeter =
+    public static final double kAShooterVoltSecondsSquaredPerRotation =
         IDManager.getInstance().select(0.0057801, 0.005);
 
-    public static final double kShooterFeedforwardScale =
-        IDManager.getInstance().select(0.93, 0.93);
+    public static final double kSKickerVolts = 0.5;
+    public static final double kVKickerVoltSecondsPerRotation = 0.1;
+    public static final double kAKickerVoltSecondsSquaredPerRotation = 0;
 
-    // currently unused
-    public static final double kP = 1;
-    public static final double kD = 0;
+    public static final double kFShooterOutputUnit100MsPerSensorUnit =
+        kVShooterVoltSecondsPerRotation
+            * kFalconOutputUnitsPerVolt
+            * kSecondsPer100Ms
+            / kFalconSensorUnitsPerRotation;
+    public static final double kFKickerOutputUnit100MsPerSensorUnit =
+        kVKickerVoltSecondsPerRotation
+            * kFalconOutputUnitsPerVolt
+            * kSecondsPer100Ms
+            / kFalconSensorUnitsPerRotation;
 
-    public static final double kShooterControlVelocityTolerance = 0.5;
+    public static final double kPShooterVoltSecondsPerRotation = 4;
+    public static final double kPShooterOutputUnit100MsPerSensorUnit =
+        kPShooterVoltSecondsPerRotation
+            * kFalconOutputUnitsPerVolt
+            * kSecondsPer100Ms
+            / kFalconSensorUnitsPerRotation;
 
-    public static final double kShooterFeedVelocityToleranceHigh = 3;
-    public static final double kShooterFeedVelocityToleranceLow = 6;
+    public static final double kPKickerVoltSecondsPerRotation = 4;
+    public static final double kPKickerOutputUnit100MsPerSensorUnit =
+        kPKickerVoltSecondsPerRotation
+            * kFalconOutputUnitsPerVolt
+            * kSecondsPer100Ms
+            / kFalconSensorUnitsPerRotation;
 
-    public static final double kShooterVelocityDipThresholdRotationsPerSecond = 3;
+    public static final double kShooterControlVelocityToleranceRotationsPerSecond = 1;
+    public static final double kShooterControlVelocityToleranceSensorUnitsPer100Ms =
+        kShooterControlVelocityToleranceRotationsPerSecond * 0.1 * kFalconSensorUnitsPerRotation;
+
+    public static final double kKickerControlVelocityToleranceRotationsPerSecond =
+        kShooterControlVelocityToleranceRotationsPerSecond;
+    public static final double kKickerControlVelocityToleranceSensorUnitsPer100Ms =
+        kKickerControlVelocityToleranceRotationsPerSecond * 0.1 * kFalconSensorUnitsPerRotation;
+
+    public static final double kShooterFeedVelocityTolerance = 3;
+
+    public static final double kDefaultTangentialVelocityRatio =
+        1.0 / 3.0; // kicker tangential velocity / shooter tangential velocity
   }
 
   public static final class ClimbElevatorConstants {
@@ -628,7 +583,7 @@ public final class Constants {
         kFalconFreeSpeedRotationsPerSecond / kElevatorGearRatio * kSprocketCircumferenceMeters;
 
     public static final double kSlideDistancePerPulseMeters =
-        kElevatorDistancePerMotorRevMeters / kFalconCPR;
+        kElevatorDistancePerMotorRevMeters / kFalconSensorUnitsPerRotation;
 
     // Slide characterization constants: UNLOADED (not carrying robot)
     public static final double ksElevatorUnloadedVolts =
@@ -702,7 +657,8 @@ public final class Constants {
 
     public static final double kArmGearRatio = 57.6; // motor turns/pinion turns
     public static final double kArmRotationsPerMotorRev = 1 / kArmGearRatio;
-    public static final double kArmRotationsPerPulse = kArmRotationsPerMotorRev / kFalconCPR;
+    public static final double kArmRotationsPerPulse =
+        kArmRotationsPerMotorRev / kFalconSensorUnitsPerRotation;
 
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
 
