@@ -40,7 +40,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   private final WPI_Pigeon2 m_pigeon;
 
   private final SwerveDriveOdometry m_odometry;
-  // private final SwerveDriveOdometry m_odometryWithoutVision;
+  private final SwerveDriveOdometry m_odometryWithoutVision;
 
   private final SlewRateLimiter m_xAccelLimiterTeleop =
       new SlewRateLimiter(kTeleopMaxAccelerationMetersPerSecondSquared);
@@ -109,24 +109,22 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     m_pigeon = new WPI_Pigeon2(kPigeonPort);
 
-    m_pigeon.setYaw(0);
     m_odometry =
         new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
-    // m_odometryWithoutVision =
-    //     new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
+    m_odometryWithoutVision =
+        new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometry.resetPosition(
-        new Pose2d(new Translation2d(5, 3.9), new Rotation2d(0)),
+        new Pose2d(
+            new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
+            new Rotation2d(0)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
-    // m_odometryWithoutVision.resetPosition(
-    //     new Pose2d(
-    //         new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
-    //         new Rotation2d(0)),
-    //     Rotation2d.fromDegrees(m_pigeon.getYaw()));
-    // m_odometryWithoutVision.resetPosition(
-    //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
-    //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
+    m_odometryWithoutVision.resetPosition(
+        new Pose2d(
+            new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
+            new Rotation2d(0)),
+        Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     // m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
     // m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);
@@ -141,8 +139,6 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     m_turretAngle = turretAngle;
     SmartDashboard.putData("Field", m_field);
-    // this.zeroHeading();
-
   }
 
   /**
@@ -368,7 +364,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_backRightModule.setTurningNeutralMode(mode);
   }
 
-  @Config.ToggleSwitch(name = "Set pushable")
+  @Config.ToggleSwitch(name = "Set pushable", tabName = "RobotContainer")
   public void setPushable(boolean pushable) {
     m_pushable = pushable;
     if (m_pushable) {
@@ -485,14 +481,15 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         m_frontRightModule.getState(),
         m_backRightModule.getState());
 
-    // m_odometryWithoutVision.update(
-    //     Rotation2d.fromDegrees(m_pigeon.getYaw()),
-    //     m_frontLeftModule.getState(),
-    //     m_backRightModule.getState(),
-    //     m_frontRightModule.getState(),
-    //     m_backRightModule.getState());
+    m_odometryWithoutVision.update(
+        Rotation2d.fromDegrees(m_pigeon.getYaw()),
+        m_frontLeftModule.getState(),
+        m_backRightModule.getState(),
+        m_frontRightModule.getState(),
+        m_backRightModule.getState());
 
-    m_field.getObject("Turret").setPose(this.getTurretCenterPoseMeters());
+    m_field.getObject("Odometry without vision").setPose(m_odometryWithoutVision.getPoseMeters());
+    // m_field.getObject("Turret").setPose(this.getTurretCenterPoseMeters());
 
     Pose2d robotPose = m_odometry.getPoseMeters();
     // Pose2d lastPose;

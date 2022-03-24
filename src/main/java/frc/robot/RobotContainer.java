@@ -145,7 +145,10 @@ public class RobotContainer {
         .whenInactive(new InstantCommand(() -> m_drivetrain.setPushable(true), m_drivetrain));
   }
 
-  private void configureVisionCommands() {}
+  private void configureVisionCommands() {
+    // Cycle LED Mode when start button pressed
+    m_operator.start().whenPressed(new InstantCommand(m_vision::cycleLEDMode));
+  }
 
   private void configureCargoHandlingCommands() {
     // Control systems for hood and shooter enabled when not climbing
@@ -207,7 +210,7 @@ public class RobotContainer {
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
             CargoHandlingCommandBuilder.getIndexerSetCommand(m_indexer, m_feedServo), false)
-        .whenInactive(CargoHandlingCommandBuilder.getIndexerOffCommand(m_indexer));
+        .whenInactive(CargoHandlingCommandBuilder.getSetIndexerCommand(() -> 0, m_indexer));
 
     // Set shooter on operator left trigger: based on distance to hub
     m_operator
@@ -222,7 +225,7 @@ public class RobotContainer {
                 CargoHandlingCommandBuilder.getShooterSetCommand(
                     m_shooter, () -> m_shooterVelocityLock),
                 () -> !m_setpointLock))
-        .whenInactive(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
+        .whenInactive(CargoHandlingCommandBuilder.getSetShooterCommand(() -> 0, m_shooter));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
     m_operator
@@ -234,10 +237,9 @@ public class RobotContainer {
                         m_hood,
                         () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
                         () -> -m_distanceOffset),
-                    CargoHandlingCommandBuilder.getHoodSetCommand(m_hood, () -> m_hoodAngleLock),
+                    CargoHandlingCommandBuilder.getSetHoodCommand(() -> m_hoodAngleLock, m_hood),
                     () -> !m_setpointLock)
                 .andThen(
-                    new WaitCommand(0.4),
                     CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
                         m_indexer, m_feeder, m_feedServo, m_shooter)),
             false)

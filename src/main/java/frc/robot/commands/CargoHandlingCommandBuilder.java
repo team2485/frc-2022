@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
@@ -26,12 +27,11 @@ import frc.robot.subsystems.cargoHandling.Intake;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
 import frc.robot.subsystems.cargoHandling.Shooter;
 import frc.robot.subsystems.cargoHandling.Turret;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class CargoHandlingCommandBuilder {
-
-  public CargoHandlingCommandBuilder() {}
 
   public static Command getIntakeCommand(
       Intake intake, IntakeArm intakeArm, Indexer indexer, FeedServo servo) {
@@ -66,16 +66,6 @@ public class CargoHandlingCommandBuilder {
             new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0), intake));
   }
 
-  public static Command getIntakeArmUpCommand(IntakeArm intakeArm) {
-    return new RunCommand(() -> intakeArm.setPosition(true), intakeArm)
-        .withInterrupt(() -> intakeArm.atPosition(true));
-  }
-
-  public static Command getIntakeArmDownCommand(IntakeArm intakeArm) {
-    return new RunCommand(() -> intakeArm.setPosition(false), intakeArm)
-        .withInterrupt(() -> intakeArm.atPosition(false));
-  }
-
   public static Command getTurretAutoAimCommand(
       Turret turret, Supplier<Pose2d> robotPose, DoubleSupplier turretShift) {
     return new RunCommand(
@@ -102,12 +92,7 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getHoodAutoAimCommand(
       Hood hood, DoubleSupplier distanceToHub, DoubleSupplier distanceOffset) {
-    return getHoodSetCommand(hood, getHoodAutoSetpoint(distanceToHub, distanceOffset));
-  }
-
-  public static Command getHoodSetCommand(Hood hood, DoubleSupplier angle) {
-    return new RunCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood)
-        .until(hood::atGoal);
+    return getSetHoodCommand(getHoodAutoSetpoint(distanceToHub, distanceOffset), hood);
   }
 
   public static DoubleSupplier getHoodAutoSetpoint(
@@ -183,8 +168,6 @@ public class CargoHandlingCommandBuilder {
     return new WaitUntilCommand(
             () -> {
               if (shooter.getSetpoint() > 80) {
-                System.out.println(
-                    "high: " + shooter.withinTolerance(kShooterFeedVelocityToleranceHigh));
                 return shooter.withinTolerance(kShooterFeedVelocityToleranceHigh);
               } else {
                 return true;
@@ -192,21 +175,13 @@ public class CargoHandlingCommandBuilder {
             })
         .andThen(
             new ParallelRaceGroup(
-                new RunCommand(
-                    () ->
-                        feeder.setVelocityRotationsPerSecond(kFeederDefaultSpeedRotationsPerSecond),
-                    feeder),
+                getSetFeederCommand(() -> kFeederDefaultSpeedRotationsPerSecond, feeder),
                 new WaitCommand(0.2)
-                    .andThen(
-                        new InstantCommand(() -> servo.engage(true), servo), new WaitCommand(1))),
-            new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder)
-                .alongWith(new InstantCommand(() -> servo.engage(false), servo)),
-            new WaitCommand(0.8),
-            new InstantCommand(
-                () -> indexer.setVelocityRotationsPerSecond(kIndexerDefaultSpeedRotationsPerSecond),
-                indexer),
-            new WaitCommand(0.5),
-            new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer));
+                    .andThen(getSetServoCommand(() -> true, servo), new WaitCommand(0.5))),
+            getSetFeederCommand(() -> 0, feeder).alongWith(getSetServoCommand(() -> false, servo)),
+            new WaitCommand(0.3),
+            getSetIndexerCommand(() -> kIndexerDefaultSpeedRotationsPerSecond, indexer)
+                .withTimeout(0.5));
   }
 
   public static Command getStopFeedCommand(Indexer indexer, Feeder feeder, FeedServo servo) {
@@ -223,31 +198,70 @@ public class CargoHandlingCommandBuilder {
         hood::getBottomLimitSwitch);
   }
 
+  public static Command getSetIndexerCommand(DoubleSupplier velocity, Indexer indexer) {
+    if (velocity.getAsDouble() == 0) {
+      return new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer);
+    } else {
+      return new StartEndCommand(
+          () -> indexer.setVelocityRotationsPerSecond(velocity.getAsDouble()),
+          () -> indexer.setVelocityRotationsPerSecond(0),
+          indexer);
+    }
+  }
+
+  public static Command getSetFeederCommand(DoubleSupplier velocity, Feeder feeder) {
+    if (velocity.getAsDouble() == 0) {
+      return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder);
+    } else {
+      return new StartEndCommand(
+          () -> feeder.setVelocityRotationsPerSecond(velocity.getAsDouble()),
+          () -> feeder.setVelocityRotationsPerSecond(0),
+          feeder);
+    }
+  }
+
+  public static Command getSetShooterCommand(DoubleSupplier velocity, Shooter shooter) {
+    if (velocity.getAsDouble() == 0) {
+      return new InstantCommand(() -> shooter.setVelocityRotationsPerSecond(0), shooter);
+    } else {
+      return new StartEndCommand(
+          () -> shooter.setVelocityRotationsPerSecond(velocity.getAsDouble()),
+          () -> shooter.setVelocityRotationsPerSecond(0),
+          shooter);
+    }
+  }
+
+  public static Command getSetIntakeCommand(DoubleSupplier velocity, Intake intake) {
+    if (velocity.getAsDouble() == 0) {
+      return new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0), intake);
+    } else {
+      return new StartEndCommand(
+          () -> intake.setVelocityRotationsPerSecond(velocity.getAsDouble()),
+          () -> intake.setVelocityRotationsPerSecond(0),
+          intake);
+    }
+  }
+
+  public static Command getSetServoCommand(BooleanSupplier engaged, FeedServo servo) {
+    return new InstantCommand(() -> servo.engage(engaged.getAsBoolean()), servo);
+  }
+
+  public static Command getIntakeArmUpCommand(IntakeArm intakeArm) {
+    return new RunCommand(() -> intakeArm.setPosition(true), intakeArm)
+        .withInterrupt(() -> intakeArm.atPosition(true));
+  }
+
+  public static Command getIntakeArmDownCommand(IntakeArm intakeArm) {
+    return new RunCommand(() -> intakeArm.setPosition(false), intakeArm)
+        .withInterrupt(() -> intakeArm.atPosition(false));
+  }
+
+  public static Command getSetHoodCommand(DoubleSupplier angle, Hood hood) {
+    return new RunCommand(() -> hood.setAngleRadians(angle.getAsDouble()), hood)
+        .until(hood::atGoal);
+  }
+
   public static Command getHoodDownCommand(Hood hood) {
     return new InstantCommand(() -> hood.setAngleRadians(kHoodBottomPositionRadians));
-  }
-
-  public static Command getShooterOffCommand(Shooter shooter) {
-    return new RunCommand(() -> shooter.setVelocityRotationsPerSecond(0), shooter);
-  }
-
-  public static Command getIndexerOffCommand(Indexer indexer) {
-    return new RunCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer);
-  }
-
-  public static Command getFeederOffCommand(Feeder feeder) {
-    return new RunCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder);
-  }
-
-  public static Command getIntakeOffCommand(Intake intake) {
-    return new RunCommand(() -> intake.setVelocityRotationsPerSecond(0), intake);
-  }
-
-  public static Command getIntakeArmOffCommand(IntakeArm intakeArm) {
-    return new RunCommand(() -> intakeArm.setVoltage(0), intakeArm);
-  }
-
-  public static Command getFeedServoOpenCommand(FeedServo servo) {
-    return new InstantCommand(() -> servo.engage(false), servo);
   }
 }

@@ -81,11 +81,7 @@ public class Vision extends SubsystemBase implements Loggable {
     this.m_LEDSetMode = mode;
   }
 
-  @Log(name = "LED Set Mode", tabName = "RobotContainer")
-  public String getLEDSetModeString() {
-    return this.getLEDSetMode().toString();
-  }
-
+  @Log.ToString(name = "LED Set Mode", tabName = "RobotContainer")
   public LEDSetMode getLEDSetMode() {
     return m_LEDSetMode;
   }

@@ -3,7 +3,19 @@
     "LiveWindow": {
       "open": true
     },
+    "Shuffleboard": {
+      "RobotContainer": {
+        "open": true
+      },
+      "Vision": {
+        "open": true
+      },
+      "open": true
+    },
     "SmartDashboard": {
+      "open": true
+    },
+    "photonvision": {
       "open": true
     },
     "types": {
@@ -32,6 +44,9 @@
       "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/Shuffleboard/ClimbElevator/Bottom Slot Sensor": "Digital Input",
+      "/Shuffleboard/ClimbElevator/Top Slot Sensor": "Digital Input",
+      "/Shuffleboard/Drivetrain/Angle PID (hub tracking)": "PIDController",
       "/Shuffleboard/Drivetrain/Drive Neutral": "String Chooser",
       "/Shuffleboard/Drivetrain/Turning Neutral": "String Chooser",
       "/SmartDashboard/Field": "Field2d"
@@ -41,11 +56,14 @@
         "Robot": {
           "style": "Box/Image"
         },
+        "height": 8.229599952697754,
+        "image": "C:\\Users\\marke\\Downloads\\RapidReactFieldRender-Dark-crop.png",
         "traj": {
           "arrowSize": 0,
           "style": "Line",
           "weight": 2.0
         },
+        "width": 16.459199905395508,
         "window": {
           "name": "Field",
           "visible": true

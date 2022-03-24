@@ -20,14 +20,14 @@ public class AutoCommandBuilder {
       FeedServo servo,
       Shooter shooter,
       Hood hood) {
-    return CargoHandlingCommandBuilder.getIntakeOffCommand(intake)
+    return CargoHandlingCommandBuilder.getSetIntakeCommand(() -> 0, intake)
         .alongWith(
             CargoHandlingCommandBuilder.getIntakeArmUpCommand(intakeArm),
-            CargoHandlingCommandBuilder.getIndexerOffCommand(indexer),
-            CargoHandlingCommandBuilder.getFeederOffCommand(feeder),
-            CargoHandlingCommandBuilder.getShooterOffCommand(shooter),
+            CargoHandlingCommandBuilder.getSetIndexerCommand(() -> 0, indexer),
+            CargoHandlingCommandBuilder.getSetFeederCommand(() -> 0, feeder),
+            CargoHandlingCommandBuilder.getSetShooterCommand(() -> 0, shooter),
             CargoHandlingCommandBuilder.getHoodDownCommand(hood),
-            CargoHandlingCommandBuilder.getFeedServoOpenCommand(servo))
+            CargoHandlingCommandBuilder.getSetServoCommand(() -> true, servo))
         .withTimeout(0.5);
   }
 
@@ -74,7 +74,7 @@ public class AutoCommandBuilder {
     Command setShooter = CargoHandlingCommandBuilder.getShooterSetCommand(shooter, () -> 123);
 
     Command feedToShooterOnce =
-        CargoHandlingCommandBuilder.getHoodSetCommand(hood, () -> 0.475)
+        CargoHandlingCommandBuilder.getSetHoodCommand(() -> 0.475, hood)
             .withTimeout(0.5)
             .andThen(
                 CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
@@ -109,7 +109,7 @@ public class AutoCommandBuilder {
     Command setShooter = CargoHandlingCommandBuilder.getShooterSetCommand(shooter, () -> 123);
 
     Command feedToShooterOnce =
-        CargoHandlingCommandBuilder.getHoodSetCommand(hood, () -> 0.475)
+        CargoHandlingCommandBuilder.getSetHoodCommand(() -> 0.475, hood)
             .withTimeout(0.9)
             .andThen(
                 CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(

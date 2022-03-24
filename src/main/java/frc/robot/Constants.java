@@ -71,7 +71,7 @@ public final class Constants {
     public static final int kDriverPort = 0;
     public static final int kOperatorPort = 1;
 
-    public static final double kDriverRightXDeadband = 0.15;
+    public static final double kDriverRightXDeadband = 0.08;
     public static final double kDriverLeftXDeadband = 0.08;
     public static final double kDriverLeftYDeadband = 0.08;
 
@@ -268,7 +268,7 @@ public final class Constants {
     public static final double kVisionNominalFramerate = 45;
 
     public static final double kLensHeightMeters = 0.11;
-    public static final double kLensPitchRadians = Math.toRadians(16.9);
+    public static final double kLensPitchRadians = Math.toRadians(30);
     public static final Rotation2d kCameraPitch = new Rotation2d(kLensPitchRadians);
 
     // width of camera FOV (angle)
