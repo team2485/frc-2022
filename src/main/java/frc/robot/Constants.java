@@ -229,13 +229,6 @@ public final class Constants {
     public static final double kTeleopMaxAccelerationMetersPerSecondSquared = 3;
     public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared = 1.5 * Math.PI;
 
-    // Vision pose estimation constants
-    public static final double kVisionWeightPerSec =
-        0.85; // After one second, what % of pose average should be vision (4% in weighted avg)
-
-    public static final double kVisionMaxAngularVelocityRadians =
-        Units.degreesToRadians(8.0); // Max angular velocity before vision data is rejected
-
     public static final int kPoseHistoryCapacity = 500;
 
     public static final double kPRotation = 2;
@@ -265,13 +258,11 @@ public final class Constants {
 
   public static final class VisionConstants {
     public static final String kCameraName = "gloworm";
-    public static final double kPAngle = 0.05;
-    public static final double kDAngle = 0.01;
 
     public static final double kVisionNominalFramerate = 45;
 
-    public static final double kLensHeightMeters = 0.11;
-    public static final double kLensPitchRadians = Math.toRadians(30);
+    public static final double kLensHeightMeters = 0.56896;
+    public static final double kLensPitchRadians = Units.degreesToRadians(30);
     public static final Rotation2d kCameraPitch = new Rotation2d(kLensPitchRadians);
 
     // width of camera FOV (angle)
@@ -299,10 +290,17 @@ public final class Constants {
     public static final double kBlinkPeriodSecs = 3.0;
     public static final double kBlinkLengthSecs = 0.5;
 
-    public static final Transform2d kRobotToTurretCenterMeters =
-        new Transform2d(new Translation2d(0.0508, 0), new Rotation2d()); // in meters
+    public static final Transform2d kRobotToCameraMeters =
+        new Transform2d(
+            new Translation2d(0.321818, 0), // in meters
+            new Rotation2d());
 
-    public static final Translation2d kTurretCentertoCameraMeters = new Translation2d(0, 0);
+    // Vision pose estimation constants
+    public static final double kVisionWeightPerSec =
+        0.85; // After one second, what % of pose average should be vision (4% in weighted avg)
+
+    public static final double kVisionMaxAngularVelocityRadians =
+        Units.degreesToRadians(8.0); // Max angular velocity before vision data is rejected
   }
 
   public static final class IntakeConstants {

@@ -182,7 +182,7 @@ public class RobotContainer {
         .whileActiveContinuous(
             new ConditionalCommand(
                 CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-                    () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
+                    () -> m_drivetrain.getHubToRobotCenterDistanceMeters(),
                     () -> -m_distanceOffset,
                     m_shooter),
                 CargoHandlingCommandBuilder.getSetShooterCommand(

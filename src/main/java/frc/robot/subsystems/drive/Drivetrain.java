@@ -116,14 +116,12 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometry.resetPosition(
         new Pose2d(
-            new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
-            new Rotation2d(0)),
+            new Translation2d(kRobotBumperLengthMeters / 2, 4.1148), Rotation2d.fromDegrees(0)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     m_odometryWithoutVision.resetPosition(
         new Pose2d(
-            new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
-            new Rotation2d(0)),
+            new Translation2d(kRobotBumperLengthMeters / 2, 4.1148), Rotation2d.fromDegrees(0)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     // m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
@@ -291,14 +289,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   }
 
   @Log(name = "Hub to turret center")
-  public double getHubToTurretCenterDistanceMeters() {
-    return getTurretCenterPoseMeters().getTranslation().getDistance(kHubCenterTranslation);
-  }
-
-  public Pose2d getTurretCenterPoseMeters() {
-    return getPoseMeters().plus(kRobotToTurretCenterMeters);
-    // .plus(
-    // new Transform2d(new Translation2d(0, 0), this.getHeading())));
+  public double getHubToRobotCenterDistanceMeters() {
+    return this.getPoseMeters().getTranslation().getDistance(kHubCenterTranslation);
   }
 
   /**
@@ -388,19 +380,14 @@ public class Drivetrain extends SubsystemBase implements Loggable {
       // Calculate new robot pose
 
       Rotation2d robotRotation = historicalFieldToTarget.get().getRotation();
-      Rotation2d cameraRotation =
-          robotRotation.rotateBy(
-              kRobotToTurretCenterMeters.getRotation().plus(m_turretAngle.get()));
+      Rotation2d cameraRotation = robotRotation.rotateBy(kRobotToCameraMeters.getRotation());
+
       Transform2d fieldToTargetRotated = new Transform2d(kHubCenterTranslation, cameraRotation);
       Transform2d fieldToCamera =
           fieldToTargetRotated.plus(
               new Transform2d(data.translation.unaryMinus(), new Rotation2d()));
 
-      Transform2d visionFieldToTargetTransform =
-          fieldToCamera.plus(
-              kRobotToTurretCenterMeters
-                  .plus(new Transform2d(kTurretCentertoCameraMeters, m_turretAngle.get()))
-                  .inverse());
+      Transform2d visionFieldToTargetTransform = fieldToCamera.plus(kRobotToCameraMeters.inverse());
 
       Pose2d visionFieldToTarget =
           new Pose2d(
