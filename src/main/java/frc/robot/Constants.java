@@ -282,7 +282,7 @@ public final class Constants {
     public static final int kMinTargetCount = 2;
     public static final double kCircleFitPrecision = 0.01;
 
-    public static final double kExtraLatencySecs = 0.06;
+    public static final double kExtraLatencySecs = 0;
 
     // idle behavior
     public static final double kTargetGraceSecs =

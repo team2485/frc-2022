@@ -1,18 +1,9 @@
 {
   "NetworkTables": {
-    "LiveWindow": {
-      "open": true
-    },
     "Shuffleboard": {
       "RobotContainer": {
         "open": true
       },
-      "Vision": {
-        "open": true
-      },
-      "open": true
-    },
-    "SmartDashboard": {
       "open": true
     },
     "photonvision": {
@@ -20,59 +11,22 @@
     },
     "types": {
       "/FMSInfo": "FMSInfo",
-      "/LiveWindow/Drivetrain": "Subsystem",
-      "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[11]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[14]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[15]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[16]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[17]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[18]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[19]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[20]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[21]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[22]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[5]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
-      "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
-      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
       "/Shuffleboard/ClimbElevator/Bottom Slot Sensor": "Digital Input",
       "/Shuffleboard/ClimbElevator/Top Slot Sensor": "Digital Input",
       "/Shuffleboard/Drivetrain/Angle PID (hub tracking)": "PIDController",
-      "/Shuffleboard/Drivetrain/Drive Neutral": "String Chooser",
-      "/Shuffleboard/Drivetrain/Turning Neutral": "String Chooser",
       "/SmartDashboard/Field": "Field2d"
     },
     "windows": {
       "/SmartDashboard/Field": {
-        "Robot": {
-          "style": "Box/Image"
-        },
-        "height": 8.229599952697754,
-        "image": "C:\\Users\\marke\\Downloads\\RapidReactFieldRender-Dark-crop.png",
         "traj": {
           "arrowSize": 0,
-          "style": "Line",
-          "weight": 2.0
+          "style": "",
+          "weight": 0.0
         },
-        "width": 16.459199905395508,
         "window": {
-          "name": "Field",
           "visible": true
         }
       }
     }
-  },
-  "NetworkTables Settings": {
-    "mode": "Client",
-    "serverTeam": "2485"
   }
 }

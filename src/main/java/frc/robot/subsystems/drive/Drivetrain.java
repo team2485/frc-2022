@@ -376,16 +376,28 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   public void addVisionMeasurement(TimestampedTranslation2d data) {
     Optional<Pose2d> historicalFieldToTarget = m_poseHistory.get(data.timestamp);
 
+    m_field.getObject("Vision translation").setPose(new Pose2d(data.translation, new Rotation2d()));
     if (historicalFieldToTarget.isPresent()) {
       // Calculate new robot pose
 
       Rotation2d robotRotation = historicalFieldToTarget.get().getRotation();
       Rotation2d cameraRotation = robotRotation.rotateBy(kRobotToCameraMeters.getRotation());
 
-      Transform2d fieldToTargetRotated = new Transform2d(kHubCenterTranslation, cameraRotation);
+      Transform2d fieldToTargetRotated =
+          new Transform2d(
+              kHubCenterTranslation, cameraRotation); // Position of hub rotated by camera rotation
+
+      m_field
+          .getObject("Hub robot rotated")
+          .setPose(new Pose2d().transformBy(fieldToTargetRotated));
+
       Transform2d fieldToCamera =
           fieldToTargetRotated.plus(
-              new Transform2d(data.translation.unaryMinus(), new Rotation2d()));
+              new Transform2d(
+                  data.translation.unaryMinus(),
+                  new Rotation2d())); // pose of camera in field domain, based on vision and target
+
+      m_field.getObject("Camera pose").setPose(new Pose2d().transformBy(fieldToCamera));
 
       Transform2d visionFieldToTargetTransform = fieldToCamera.plus(kRobotToCameraMeters.inverse());
 
