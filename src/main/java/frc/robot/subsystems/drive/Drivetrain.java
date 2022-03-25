@@ -380,7 +380,11 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     if (historicalFieldToTarget.isPresent()) {
       // Calculate new robot pose
 
-      Rotation2d robotRotation = historicalFieldToTarget.get().getRotation();
+      m_field
+          .getObject("Alleged robot rotation")
+          .setPose(new Pose2d(new Translation2d(), historicalFieldToTarget.get().getRotation()));
+
+      Rotation2d robotRotation = historicalFieldToTarget.get().getRotation(); // this is off
       Rotation2d cameraRotation = robotRotation.rotateBy(kRobotToCameraMeters.getRotation());
 
       Transform2d fieldToTargetRotated =
@@ -488,9 +492,10 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         m_backRightModule.getState());
 
     m_field.getObject("Odometry without vision").setPose(m_odometryWithoutVision.getPoseMeters());
-    // m_field.getObject("Turret").setPose(this.getTurretCenterPoseMeters());
 
     Pose2d robotPose = m_odometry.getPoseMeters();
+    m_poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
+
     // Pose2d lastPose;
     // try {
     //   lastPose = m_poseHistory.getLatest().get().getPose();
@@ -498,13 +503,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     //   lastPose = robotPose;
     // }
     // m_velocity = robotPose.getTranslation().minus(lastPose.getTranslation());
-    m_poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
 
-    // System.out.println("pose: " + getPoseMeters().toString());
     m_field.setRobotPose(getPoseMeters());
-
-    // Update brake/coast mode
-    // setDriveNeutralMode(m_driveNeutralChooser.getSelected());
-    // setTurningNeutralMode(m_turningNeutralChooser.getSelected());
   }
 }
