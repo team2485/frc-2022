@@ -65,6 +65,7 @@ public class RobotContainer {
 
   // OPERATOR LOCKS
 
+  @Log(name = "Setpoint lock")
   boolean m_setpointLock = false;
 
   @Log(name = "High fender lock", width = 2, height = 1, rowIndex = 2, columnIndex = 15)
@@ -78,6 +79,14 @@ public class RobotContainer {
 
   @Log(name = "Shooter velocity lock value", width = 4, height = 1, rowIndex = 0, columnIndex = 15)
   double m_shooterVelocityLock = 0;
+
+  @Log(
+      name = "Shooter tangential ratio lock",
+      width = 4,
+      height = 1,
+      rowIndex = 0,
+      columnIndex = 15)
+  double m_shooterTangentialRatioLock = 1;
 
   @Log(name = "Bar to climb to", width = 2, height = 2, rowIndex = 2, columnIndex = 0)
   int m_barToClimbTo = 0; // 1 mid, 2 high, 3 traverse
@@ -113,7 +122,7 @@ public class RobotContainer {
             m_drivetrain));
 
     m_driver
-        .leftBumper()
+        .rightStick()
         .whileHeld(
             new DriveFacingHub(
                 m_driver::getLeftY,
@@ -167,28 +176,25 @@ public class RobotContainer {
                                     () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
                                 .withTimeout(0.5))));
 
-    // Indexer manual override
-    m_operator
-        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getIndexerSetCommand(m_indexer, m_feedServo), false)
-        .whenInactive(CargoHandlingCommandBuilder.getSetIndexerCommand(() -> 0, m_indexer));
-
     // Set shooter on operator left trigger: based on distance to hub
     m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
             new ConditionalCommand(
-                CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-                    () -> m_drivetrain.getHubToRobotCenterDistanceMeters(),
-                    () -> -m_distanceOffset,
-                    m_shooter),
-                CargoHandlingCommandBuilder.getSetShooterCommand(
-                    () -> m_shooterVelocityLock, m_shooter),
+                new InstantCommand(),
+                new InstantCommand(
+                    () -> {
+                      m_shooter.setShooterVoltage(4.5);
+                      m_shooter.setKickerVoltage(4);
+                    }),
                 () -> !m_setpointLock))
-        .whenInactive(CargoHandlingCommandBuilder.getSetShooterCommand(() -> 0, m_shooter));
+        .whenInactive(
+            new InstantCommand(
+                () -> {
+                  m_shooter.setShooterVoltage(0);
+                  m_shooter.setKickerVoltage(0);
+                }));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
     m_operator
@@ -248,7 +254,7 @@ public class RobotContainer {
                 () -> {
                   m_lowFender = true;
                   m_setpointLock = true;
-                  m_shooterVelocityLock = 50;
+                  m_shooterVelocityLock = 30;
                 }))
         .whenInactive(
             new InstantCommand(
@@ -264,7 +270,8 @@ public class RobotContainer {
                 () -> {
                   m_highFender = true;
                   m_setpointLock = true;
-                  m_shooterVelocityLock = 105;
+                  m_shooterVelocityLock = 42;
+                  m_shooterTangentialRatioLock = 1;
                 }))
         .whenInactive(
             new InstantCommand(

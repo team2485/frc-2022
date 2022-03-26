@@ -63,8 +63,7 @@ public final class Constants {
               entry(3.2, new ShotParameter(120, 0.455, 0)),
               entry(3.6, new ShotParameter(123, 0.475, 0))));
 
-  // 3.5, 123, 0.475
-  //
+  // 5 ft front bumper: 60 0.8
 
   public static final double kShootingSetpointDistance = 2.76;
 
@@ -72,9 +71,9 @@ public final class Constants {
     public static final int kDriverPort = 0;
     public static final int kOperatorPort = 1;
 
-    public static final double kDriverRightXDeadband = 0.08;
-    public static final double kDriverLeftXDeadband = 0.08;
-    public static final double kDriverLeftYDeadband = 0.08;
+    public static final double kDriverRightXDeadband = 0.1;
+    public static final double kDriverLeftXDeadband = 0.1;
+    public static final double kDriverLeftYDeadband = 0.1;
 
     public static final double kTriggerThreshold = 0.1;
   }
@@ -477,8 +476,8 @@ public final class Constants {
     public static final double kShooterLoopTimeSeconds = 0.001;
     public static final double kKickerLoopTimeSeconds = kShooterLoopTimeSeconds;
 
-    public static final double kShooterGearRatio = 2.0 / 3.0;
-    public static final double kKickerGearRatio = kShooterGearRatio;
+    public static final double kShooterGearRatio = 1.5;
+    public static final double kKickerGearRatio = 0.5;
 
     public static final double kShooterCircumferenceMeters =
         0.1524 * Math.PI; // 6 in diameter wheel
@@ -489,54 +488,63 @@ public final class Constants {
     public static final double kKickerFreeSpeedRotationsPerSecond =
         kFalconFreeSpeedRotationsPerSecond / kKickerGearRatio;
 
+    public static final double kShooterMaxSpeedRotationsPerSecond = 68; // empirical estimate
+    public static final double kKickerMaxSpeedRotationsPerSecond = 156; // empirical estimate
+
     public static final double kShooterSurfaceFreeSpeedMetersPerSecond =
         kShooterFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
     public static final double kKickerSurfaceFreeSpeedMetersPerSecond =
         kKickerFreeSpeedRotationsPerSecond * kKickerCircumferenceMeters;
 
-    public static final double kSShooterVolts = IDManager.getInstance().select(0.55769, 0.56);
-    public static final double kVShooterVoltSecondsPerRotation =
-        IDManager.getInstance().select(0.071665, 0.07);
+    public static final double kSShooterVolts = 0.5;
+    public static final double kVShooterVoltSecondsPerRotation = 0.16;
     public static final double kAShooterVoltSecondsSquaredPerRotation =
-        IDManager.getInstance().select(0.0057801, 0.005);
+        IDManager.getInstance().select(0.016047, 0.005);
 
     public static final double kSKickerVolts = 0.5;
-    public static final double kVKickerVoltSecondsPerRotation = 0.1;
-    public static final double kAKickerVoltSecondsSquaredPerRotation = 0;
+    public static final double kVKickerVoltSecondsPerRotation = 0.06252;
+    public static final double kAKickerVoltSecondsSquaredPerRotation = 0.0019767;
 
     public static final double kFShooterOutputUnit100MsPerSensorUnit =
         kVShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
-            * kSecondsPer100Ms
+            / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
     public static final double kFKickerOutputUnit100MsPerSensorUnit =
         kVKickerVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
-            * kSecondsPer100Ms
+            / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPShooterVoltSecondsPerRotation = 4;
+    public static final double kPShooterVoltSecondsPerRotation = 0; // 0.5
     public static final double kPShooterOutputUnit100MsPerSensorUnit =
         kPShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
-            * kSecondsPer100Ms
+            / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPKickerVoltSecondsPerRotation = 4;
+    public static final double kPKickerVoltSecondsPerRotation = 0;
     public static final double kPKickerOutputUnit100MsPerSensorUnit =
         kPKickerVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
-            * kSecondsPer100Ms
+            / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
     public static final double kShooterControlVelocityToleranceRotationsPerSecond = 1;
     public static final double kShooterControlVelocityToleranceSensorUnitsPer100Ms =
-        kShooterControlVelocityToleranceRotationsPerSecond * 0.1 * kFalconSensorUnitsPerRotation;
+        kShooterControlVelocityToleranceRotationsPerSecond
+            * kSecondsPer100Ms
+            * kFalconSensorUnitsPerRotation;
 
     public static final double kKickerControlVelocityToleranceRotationsPerSecond =
         kShooterControlVelocityToleranceRotationsPerSecond;
     public static final double kKickerControlVelocityToleranceSensorUnitsPer100Ms =
-        kKickerControlVelocityToleranceRotationsPerSecond * 0.1 * kFalconSensorUnitsPerRotation;
+        kKickerControlVelocityToleranceRotationsPerSecond
+            * kSecondsPer100Ms
+            * kFalconSensorUnitsPerRotation;
+
+    public static final double kShooterFeedforwardScale = 1;
+    public static final double kKickerFeedforwardScale = 0.95;
 
     public static final double kShooterFeedVelocityTolerance = 3;
 

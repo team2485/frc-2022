@@ -43,15 +43,6 @@ public class CargoHandlingCommandBuilder {
                     new InstantCommand(() -> servo.engage(false), servo)));
   }
 
-  public static Command getIndexerSetCommand(Indexer indexer, FeedServo servo) {
-    return new RunCommand(
-            () ->
-                indexer.setVelocityRotationsPerSecond(
-                    kIndexerIntakeSpeedRatio * kIntakeDefaultSpeedRotationsPerSecond),
-            indexer)
-        .alongWith(new InstantCommand(() -> servo.engage(false), servo));
-  }
-
   public static Command getStopIntakeCommand(Intake intake, IntakeArm intakeArm, Indexer indexer) {
     return getIntakeArmUpCommand(intakeArm)
         .alongWith(
@@ -61,7 +52,7 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getShooterAutoSetCommand(
       DoubleSupplier distanceToHub, DoubleSupplier distanceOffset, Shooter shooter) {
-    return getSetShooterCommand(getShooterAutoSetpoint(distanceToHub, distanceOffset), shooter);
+    return getSetShooterOnlyCommand(getShooterAutoSetpoint(distanceToHub, distanceOffset), shooter);
   }
 
   public static DoubleSupplier getShooterAutoSetpoint(
@@ -76,7 +67,7 @@ public class CargoHandlingCommandBuilder {
     return new WaitUntilCommand(
             () -> {
               if (shooter.getSetpoint() > 80) {
-                return shooter.withinTolerance(kShooterFeedVelocityTolerance);
+                return shooter.shooterWithinTolerance(kShooterFeedVelocityTolerance);
               } else {
                 return true;
               }
@@ -87,7 +78,7 @@ public class CargoHandlingCommandBuilder {
                 new WaitCommand(0.2)
                     .andThen(getSetServoCommand(() -> true, servo), new WaitCommand(0.5))),
             getSetFeederCommand(() -> 0, feeder).alongWith(getSetServoCommand(() -> false, servo)),
-            new WaitCommand(0.3),
+            new WaitCommand(0.5),
             getSetIndexerCommand(() -> kIndexerDefaultSpeedRotationsPerSecond, indexer)
                 .withTimeout(0.5));
   }
@@ -121,7 +112,7 @@ public class CargoHandlingCommandBuilder {
     }
   }
 
-  public static Command getSetShooterCommand(DoubleSupplier velocity, Shooter shooter) {
+  public static Command getSetShooterOnlyCommand(DoubleSupplier velocity, Shooter shooter) {
     if (velocity.getAsDouble() == 0) {
       return new InstantCommand(() -> shooter.setShooterVelocityRotationsPerSecond(0), shooter);
     } else {
@@ -130,6 +121,16 @@ public class CargoHandlingCommandBuilder {
           () -> shooter.setShooterVelocityRotationsPerSecond(0),
           shooter);
     }
+  }
+
+  public static Command getSetShooterCommand(
+      DoubleSupplier shooterVelocity, DoubleSupplier tangentialVelocityRatio, Shooter shooter) {
+    return new StartEndCommand(
+        () ->
+            shooter.setVelocities(
+                shooterVelocity.getAsDouble(), tangentialVelocityRatio.getAsDouble()),
+        () -> shooter.setVelocities(0, 1),
+        shooter);
   }
 
   public static Command getSetIntakeCommand(DoubleSupplier velocity, Intake intake) {

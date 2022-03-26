@@ -19,6 +19,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Shooter extends SubsystemBase implements Loggable {
@@ -54,7 +55,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     shooterTalonConfig.velocityMeasurementWindow = 1;
 
     shooterTalonConfig.slot0.kP = kPShooterOutputUnit100MsPerSensorUnit;
-    shooterTalonConfig.slot0.kF = kFShooterOutputUnit100MsPerSensorUnit;
+    shooterTalonConfig.slot0.kF = kFShooterOutputUnit100MsPerSensorUnit * kShooterFeedforwardScale;
     shooterTalonConfig.slot0.allowableClosedloopError =
         kShooterControlVelocityToleranceSensorUnitsPer100Ms;
 
@@ -82,7 +83,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     kickerTalonConfig.velocityMeasurementWindow = 1;
 
     kickerTalonConfig.slot0.kP = kPKickerOutputUnit100MsPerSensorUnit;
-    kickerTalonConfig.slot0.kF = kFKickerOutputUnit100MsPerSensorUnit;
+    kickerTalonConfig.slot0.kF = kFKickerOutputUnit100MsPerSensorUnit * kKickerFeedforwardScale;
     kickerTalonConfig.slot0.allowableClosedloopError =
         kKickerControlVelocityToleranceSensorUnitsPer100Ms;
 
@@ -117,6 +118,7 @@ public class Shooter extends SubsystemBase implements Loggable {
    *     wheel tangential velocity (m/s) 1/3 will make angular velocities equal, >1 creates topspin,
    *     <1 creates backspin
    */
+  @Config(name = "Set Velocities")
   public void setVelocities(
       double shooterVelocityRotationsPerSecond, double tangentialVelocityRatio) {
     this.setShooterVelocityRotationsPerSecond(shooterVelocityRotationsPerSecond);
@@ -141,17 +143,19 @@ public class Shooter extends SubsystemBase implements Loggable {
    *
    * @param rotationsPerSecond velocity setpoint
    */
+  @Config(name = "Set Shooter Velocity (RPS)")
   public void setShooterVelocityRotationsPerSecond(double velocityRotationsPerSecond) {
     double newVelocitySetpointRotationsPerSecond =
-        MathUtil.clamp(velocityRotationsPerSecond, 0, kShooterFreeSpeedRotationsPerSecond);
-    if (newVelocitySetpointRotationsPerSecond != m_shooterVelocitySetpointRotationsPerSecond) {
-      m_shooterVelocitySetpointRotationsPerSecond = newVelocitySetpointRotationsPerSecond;
-      m_shooterTalon.set(
-          ControlMode.Velocity,
-          newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * 0.1,
-          DemandType.ArbitraryFeedForward,
-          kSShooterVolts / kNominalVoltage);
-    }
+        MathUtil.clamp(velocityRotationsPerSecond, 0, kShooterMaxSpeedRotationsPerSecond);
+    m_shooterVelocitySetpointRotationsPerSecond = newVelocitySetpointRotationsPerSecond;
+    m_shooterTalon.set(
+        ControlMode.Velocity,
+        newVelocitySetpointRotationsPerSecond
+            * kFalconSensorUnitsPerRotation
+            * kShooterGearRatio
+            * 0.1,
+        DemandType.ArbitraryFeedForward,
+        velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }
 
   /**
@@ -159,16 +163,20 @@ public class Shooter extends SubsystemBase implements Loggable {
    *
    * @param rotationsPerSecond velocity setpoint
    */
+  @Config(name = "Set Kicker Velocity (RPS)")
   public void setKickerVelocityRotationsPerSecond(double velocityRotationsPerSecond) {
     double newVelocitySetpointRotationsPerSecond =
-        MathUtil.clamp(velocityRotationsPerSecond, 0, kKickerFreeSpeedRotationsPerSecond);
+        MathUtil.clamp(velocityRotationsPerSecond, 0, 180);
     if (newVelocitySetpointRotationsPerSecond != m_kickerVelocitySetpointRotationsPerSecond) {
       m_kickerVelocitySetpointRotationsPerSecond = newVelocitySetpointRotationsPerSecond;
       m_kickerTalon.set(
           ControlMode.Velocity,
-          newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * 0.1,
+          newVelocitySetpointRotationsPerSecond
+              * kFalconSensorUnitsPerRotation
+              * kKickerGearRatio
+              * 0.1,
           DemandType.ArbitraryFeedForward,
-          kSKickerVolts / kNominalVoltage);
+          velocityRotationsPerSecond > 0 ? kSKickerVolts / kNominalVoltage : 0);
     }
   }
 
@@ -177,6 +185,7 @@ public class Shooter extends SubsystemBase implements Loggable {
    *
    * @param voltage what voltage to apply
    */
+  @Config(name = "Set shooter voltage")
   public void setShooterVoltage(double voltage) {
     m_shooterTalon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
   }
@@ -186,6 +195,7 @@ public class Shooter extends SubsystemBase implements Loggable {
    *
    * @param voltage what voltage to apply
    */
+  @Config(name = "Set kicker voltage")
   public void setKickerVoltage(double voltage) {
     m_kickerTalon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
   }
