@@ -7,10 +7,10 @@ import io.github.oblarg.oblog.annotations.Log;
 
 public class ClimbStateMachine implements Loggable {
 
-  public enum ClimbState { // agressively extensive state machine
+  public enum ClimbState {
     kNotClimbing,
     kPreClimb,
-    kAligningToMidbar, // lining up to mid bar. No
+    kAligningToMidbar,
     kCheckpointAlignedToMidBar,
     kMovingHookToMidBar,
     kCheckpointHookedOnMidBar,

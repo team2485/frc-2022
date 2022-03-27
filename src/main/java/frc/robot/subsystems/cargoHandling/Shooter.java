@@ -219,4 +219,6 @@ public class Shooter extends SubsystemBase implements Loggable {
   public double getSetpoint() {
     return m_shooterVelocitySetpointRotationsPerSecond;
   }
+
+  public void periodic() {}
 }

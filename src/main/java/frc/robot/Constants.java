@@ -489,7 +489,7 @@ public final class Constants {
         kFalconFreeSpeedRotationsPerSecond / kKickerGearRatio;
 
     public static final double kShooterMaxSpeedRotationsPerSecond = 68; // empirical estimate
-    public static final double kKickerMaxSpeedRotationsPerSecond = 156; // empirical estimate
+    public static final double kKickerMaxSpeedRotationsPerSecond = 180; // empirical estimate
 
     public static final double kShooterSurfaceFreeSpeedMetersPerSecond =
         kShooterFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
@@ -508,24 +508,28 @@ public final class Constants {
     public static final double kFShooterOutputUnit100MsPerSensorUnit =
         kVShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
+            / kShooterGearRatio
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
     public static final double kFKickerOutputUnit100MsPerSensorUnit =
         kVKickerVoltSecondsPerRotation
+            / kKickerGearRatio
             * kFalconOutputUnitsPerVolt
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPShooterVoltSecondsPerRotation = 0; // 0.5
+    public static final double kPShooterVoltSecondsPerRotation = 0.5; // 0.5
     public static final double kPShooterOutputUnit100MsPerSensorUnit =
         kPShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
+            / kShooterGearRatio
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPKickerVoltSecondsPerRotation = 0;
+    public static final double kPKickerVoltSecondsPerRotation = 0.5; // 0.5
     public static final double kPKickerOutputUnit100MsPerSensorUnit =
         kPKickerVoltSecondsPerRotation
+            / kKickerGearRatio
             * kFalconOutputUnitsPerVolt
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
@@ -537,14 +541,15 @@ public final class Constants {
             * kFalconSensorUnitsPerRotation;
 
     public static final double kKickerControlVelocityToleranceRotationsPerSecond =
-        kShooterControlVelocityToleranceRotationsPerSecond;
+        kShooterControlVelocityToleranceRotationsPerSecond
+            * (kKickerFreeSpeedRotationsPerSecond / kShooterFreeSpeedRotationsPerSecond);
     public static final double kKickerControlVelocityToleranceSensorUnitsPer100Ms =
         kKickerControlVelocityToleranceRotationsPerSecond
             * kSecondsPer100Ms
             * kFalconSensorUnitsPerRotation;
 
-    public static final double kShooterFeedforwardScale = 1;
-    public static final double kKickerFeedforwardScale = 0.95;
+    public static final double kShooterFeedforwardScale = 0.86;
+    public static final double kKickerFeedforwardScale = 0.88;
 
     public static final double kShooterFeedVelocityTolerance = 3;
 

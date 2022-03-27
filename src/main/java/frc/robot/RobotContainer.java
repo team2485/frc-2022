@@ -254,7 +254,8 @@ public class RobotContainer {
                 () -> {
                   m_lowFender = true;
                   m_setpointLock = true;
-                  m_shooterVelocityLock = 30;
+                  m_shooterVelocityLock = 6;
+                  m_shooterTangentialRatioLock = 3.2;
                 }))
         .whenInactive(
             new InstantCommand(
@@ -270,8 +271,8 @@ public class RobotContainer {
                 () -> {
                   m_highFender = true;
                   m_setpointLock = true;
-                  m_shooterVelocityLock = 42;
-                  m_shooterTangentialRatioLock = 1;
+                  m_shooterVelocityLock = 26.75;
+                  m_shooterTangentialRatioLock = 0.86;
                 }))
         .whenInactive(
             new InstantCommand(
