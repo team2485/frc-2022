@@ -14,7 +14,7 @@ public class ClimbStateMachine implements Loggable {
     kCheckpointAlignedToMidBar,
     kMovingHookToMidBar,
     kCheckpointHookedOnMidBar,
-    kLiftingOnMidBar,
+    kClimbingOnMidBar,
     kCheckpointLiftedOnMidBar,
     kFinishingClimbOnMidBar,
     kClimbedOnMidBar,
