@@ -40,7 +40,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   private final WPI_Pigeon2 m_pigeon;
 
   private final SwerveDriveOdometry m_odometry;
-  private final SwerveDriveOdometry m_odometryWithoutVision;
+  // private final SwerveDriveOdometry m_odometryWithoutVision;
 
   private final SlewRateLimiter m_xAccelLimiterTeleop =
       new SlewRateLimiter(kTeleopMaxAccelerationMetersPerSecondSquared);
@@ -112,17 +112,17 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_odometry =
         new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
-    m_odometryWithoutVision =
-        new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
+    // m_odometryWithoutVision =
+    //     new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometry.resetPosition(
         new Pose2d(
             new Translation2d(kRobotBumperLengthMeters / 2, 4.1148), Rotation2d.fromDegrees(0)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
-    m_odometryWithoutVision.resetPosition(
-        new Pose2d(
-            new Translation2d(kRobotBumperLengthMeters / 2, 4.1148), Rotation2d.fromDegrees(0)),
-        Rotation2d.fromDegrees(m_pigeon.getYaw()));
+    // m_odometryWithoutVision.resetPosition(
+    //     new Pose2d(
+    //         new Translation2d(kRobotBumperLengthMeters / 2, 4.1148), Rotation2d.fromDegrees(0)),
+    //     Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     // m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
     // m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);
@@ -484,14 +484,15 @@ public class Drivetrain extends SubsystemBase implements Loggable {
         m_frontRightModule.getState(),
         m_backRightModule.getState());
 
-    m_odometryWithoutVision.update(
-        Rotation2d.fromDegrees(m_pigeon.getYaw()),
-        m_frontLeftModule.getState(),
-        m_backRightModule.getState(),
-        m_frontRightModule.getState(),
-        m_backRightModule.getState());
+    // m_odometryWithoutVision.update(
+    //     Rotation2d.fromDegrees(m_pigeon.getYaw()),
+    //     m_frontLeftModule.getState(),
+    //     m_backRightModule.getState(),
+    //     m_frontRightModule.getState(),
+    //     m_backRightModule.getState());
 
-    m_field.getObject("Odometry without vision").setPose(m_odometryWithoutVision.getPoseMeters());
+    // m_field.getObject("Odometry without
+    // vision").setPose(m_odometryWithoutVision.getPoseMeters());
 
     Pose2d robotPose = m_odometry.getPoseMeters();
     m_poseHistory.insert(Timer.getFPGATimestamp(), robotPose);

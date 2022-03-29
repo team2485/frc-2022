@@ -11,7 +11,6 @@ import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
@@ -23,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
+import frc.robot.commands.auto.AutoCommandBuilder;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.climb.*;
@@ -35,7 +35,7 @@ public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
 
-  private final Vision m_vision = new Vision();
+  //   private final Vision m_vision = new Vision();
 
   private final IntakeArm m_intakeArm = new IntakeArm();
   private final Intake m_intake = new Intake();
@@ -94,7 +94,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
+    // m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
     configureButtonBindings();
   }
 
@@ -106,25 +106,20 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     this.configureDrivetrainCommands();
-    this.configureVisionCommands();
     this.configureCargoHandlingCommands();
     this.configureClimbCommands();
   }
 
   private void configureDrivetrainCommands() {
-    m_climbStateMachine
-        .getClimbStateTrigger(ClimbState.kNotClimbing)
-        .or(m_climbStateMachine.getClimbStateTrigger(ClimbState.kAligningToMidbar))
-        .or(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointAlignedToMidBar))
-        .whileActiveContinuous(
-            new DriveWithController(
-                m_driver::getLeftY,
-                m_driver::getLeftX,
-                m_driver::getRightX,
-                () -> {
-                  return !m_driver.rightBumper().get();
-                },
-                m_drivetrain));
+    m_drivetrain.setDefaultCommand(
+        new DriveWithController(
+            m_driver::getLeftY,
+            m_driver::getLeftX,
+            m_driver::getRightX,
+            () -> {
+              return !m_driver.rightBumper().get();
+            },
+            m_drivetrain));
 
     m_driver
         .rightStick()
@@ -146,14 +141,6 @@ public class RobotContainer {
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kClimbingOnMidBar)
         .whenActive(new InstantCommand(() -> m_drivetrain.setPushable(true), m_drivetrain));
-  }
-
-  private void configureVisionCommands() {
-    // Cycle LED Mode when start button pressed
-    m_driver
-        .start()
-        .and(new Trigger(DriverStation::isTest))
-        .whenActive(new InstantCommand(m_vision::cycleLEDMode, m_vision));
   }
 
   private void configureCargoHandlingCommands() {
@@ -547,7 +534,19 @@ public class RobotContainer {
     //             AutoCommandBuilder.getFinishAutoCommand(
     //                 m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
 
-    return null;
+    return AutoCommandBuilder.get3BallFenderAutoRight(
+        m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter);
+
+    // WL_SwerveControllerCommand path =
+    //     PathCommandBuilder.getPathCommand(m_drivetrain, "3 Score Right Fender");
+
+    // return PathCommandBuilder.getResetOdometryCommand(m_drivetrain, path)
+    //     .andThen(
+    //         new InstantCommand(
+    //             () ->
+    // m_drivetrain.getField2d().getObject("traj").setTrajectory(path.m_trajectory),
+    //             m_drivetrain),
+    //         path);
   }
 
   // whenever the robot is disabled, drive should be turned off

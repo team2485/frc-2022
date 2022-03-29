@@ -1,21 +1,61 @@
 package frc.robot.commands.auto;
 
+import static frc.robot.commands.CargoHandlingCommandBuilder.*;
+import static frc.robot.commands.auto.PathCommandBuilder.*;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.drive.*;
 
 public class AutoCommandBuilder {
 
-  //   public static Command get2BallAutoRight(
-  //       Drivetrain drivetrain,
-  //       Intake intake,
-  //       IntakeArm intakeArm,
-  //       Indexer indexer,
-  //       Feeder feeder,
-  //       FeedServo servo,
-  //       Shooter shooter,
-  //       Hood hood) {
+  public static Command get3BallFenderAutoRight(
+      Drivetrain drivetrain,
+      Intake intake,
+      IntakeArm intakeArm,
+      Indexer indexer,
+      Feeder feeder,
+      FeedServo servo,
+      Shooter shooter) {
 
-  //     Command backUpPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Right");
+    WL_SwerveControllerCommand intakePathCommand =
+        getPathCommand(drivetrain, "3 Ball Right Fender");
+
+    WL_SwerveControllerCommand scorePathCommand =
+        getPathCommand(drivetrain, "3 Score Right Fender");
+
+    return new WaitCommand(0.5)
+        .andThen(
+            getIndexToShooterCommand(indexer, feeder, servo, shooter),
+            getResetOdometryCommand(drivetrain, intakePathCommand),
+            new InstantCommand(
+                () ->
+                    drivetrain
+                        .getField2d()
+                        .getObject("traj")
+                        .setTrajectory(intakePathCommand.m_trajectory),
+                drivetrain),
+            intakePathCommand
+                .andThen(getStopPathCommand(drivetrain), new WaitCommand(0.5))
+                .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
+            new ParallelDeadlineGroup(
+                new InstantCommand(
+                        () ->
+                            drivetrain
+                                .getField2d()
+                                .getObject("traj")
+                                .setTrajectory(scorePathCommand.m_trajectory),
+                        drivetrain)
+                    .andThen(scorePathCommand, getStopPathCommand(drivetrain)),
+                getStopIntakeCommand(intake, intakeArm, indexer)),
+            getIndexToShooterCommand(indexer, feeder, servo, shooter),
+            getIndexToShooterCommand(indexer, feeder, servo, shooter))
+        .raceWith(getSetShooterCommand(() -> 27.5, () -> 0.87, shooter));
+  }
+
   //     Command scoochOverPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Right
   // Finish");
   //     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
