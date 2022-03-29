@@ -28,6 +28,10 @@ public class FeedServo extends SubsystemBase implements Loggable {
     m_servoPositionSetpoint = position;
   }
 
+  public double getPositionSetpoint() {
+    return m_servoPositionSetpoint;
+  }
+
   @Override
   public void periodic() {
     m_servo.set(m_servoPositionSetpoint);

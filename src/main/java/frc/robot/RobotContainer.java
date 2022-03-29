@@ -176,6 +176,16 @@ public class RobotContainer {
                                     () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
                                 .withTimeout(0.5))));
 
+    m_operator.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    .whenActive(
+        
+        new InstantCommand(()->m_indexer.setVelocityRotationsPerSecond(
+            Constants.IndexerConstants.kIndexerDefaultSpeedRotationsPerSecond
+        ), m_indexer)).whenInactive(
+            new InstantCommand(()-> m_indexer.setVelocityRotationsPerSecond(0), m_indexer)
+        )
+    ;
+
     // Set shooter on operator left trigger: based on distance to hub
     m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
@@ -340,7 +350,7 @@ public class RobotContainer {
 
     // disengage ratchet
     //
-    m_driver.x().whenPressed(ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator));
+    // m_driver.x().whenPressed(ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator));
 
     // When at pre-climb state, pressing proceed will disengage ratchet and raise hooks.
     m_driver
