@@ -144,20 +144,30 @@ public final class Constants {
     public static final double kTurningRadiansPerPulse =
         kTurningRadiansPerMotorRev / kFalconSensorUnitsPerRotation;
 
-    //// Turning feedforward constants (unused in current implementation but useful for max speed)
+    //// Turning feedforward constants
     public static final double ksTurningVolts = 0.60572;
-    public static final double kvTurningVoltSecondsPerRadian = 0.20717;
-    public static final double kaTurningVoltSecondsSquaredPerRadian = 0.0068542;
+    public static final double kvTurningVoltSecondsPerRadian = 0.20175;
+    public static final double kaTurningVoltSecondsSquaredPerRadian = 0.0053;
 
     //// Turning PID constants
-    public static final double kPTurning = 1;
-    public static final double kDTurning = 0.1;
-    public static final double kFTurning =
-        IDManager.getInstance().select(0.4 * 1023 / 7674, 0.4 * 1023 / 8360);
+    public static final double kPTurningOutputUnit100MsPerSensorUnit =
+        3 * kTurningRadiansPerPulse * kFalconOutputUnitsPerVolt / kSecondsPer100Ms;
+    public static final double kDTurningOutputUnit100MsSquaredPerSensorUnit =
+        0.5 * kTurningRadiansPerPulse * kFalconOutputUnitsPerVolt / kSecondsPer100Ms;
+    public static final double kFTurningOutputUnit100MsPerSensorUnit =
+        IDManager.getInstance()
+            .select(
+                kvTurningVoltSecondsPerRadian
+                    * kTurningRadiansPerPulse
+                    * kFalconOutputUnitsPerVolt
+                    / kSecondsPer100Ms,
+                0.4 * 1023 / 8360);
 
+    public static final double kTurningPositionToleranceSensorUnits =
+        Units.degreesToRadians(2) * kFalconSensorUnitsPerRotation;
     //// Turning trapezoidal motion profile/motion magic constants
-    public static final double kModuleMaxSpeedTurningRadiansPerSecond = 4 * Math.PI;
-    public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared = 32 * Math.PI;
+    public static final double kModuleMaxSpeedTurningRadiansPerSecond = 8 * Math.PI;
+    public static final double kModuleMaxAccelerationTurningRadiansPerSecondSquared = 64 * Math.PI;
     public static final double kModuleMaxSpeedTurningPulsesPer100Ms =
         kModuleMaxSpeedTurningRadiansPerSecond / kTurningRadiansPerPulse * 0.1;
     public static final double kModuleMaxAccelerationTurningPulsesPer100MsSquared =

@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
-import frc.robot.commands.auto.AutoCommandBuilder;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.climb.*;
@@ -44,7 +43,7 @@ public class RobotContainer {
   private final FeedServo m_feedServo = new FeedServo();
   public final Shooter m_shooter = new Shooter();
 
-  private final Drivetrain m_drivetrain =
+  public final Drivetrain m_drivetrain =
       new Drivetrain(
           () -> {
             return new Rotation2d();
@@ -174,15 +173,17 @@ public class RobotContainer {
                                     () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
                                 .withTimeout(0.5))));
 
-    m_operator.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-    .whenActive(
-        
-        new InstantCommand(()->m_indexer.setVelocityRotationsPerSecond(
-            Constants.IndexerConstants.kIndexerDefaultSpeedRotationsPerSecond
-        ), m_indexer)).whenInactive(
-            new InstantCommand(()-> m_indexer.setVelocityRotationsPerSecond(0), m_indexer)
-        )
-    ;
+    m_operator
+        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whenActive(
+            new InstantCommand(
+                () ->
+                    m_indexer.setVelocityRotationsPerSecond(
+                        Constants.IndexerConstants.kIndexerDefaultSpeedRotationsPerSecond),
+                m_indexer))
+        .whenInactive(
+            new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(0), m_indexer));
 
     // Set shooter on operator left trigger: based on distance to hub
     m_operator
@@ -191,18 +192,9 @@ public class RobotContainer {
         .whileActiveContinuous(
             new ConditionalCommand(
                 new InstantCommand(),
-                new InstantCommand(
-                    () -> {
-                      m_shooter.setShooterVoltage(4.5);
-                      m_shooter.setKickerVoltage(4);
-                    }),
-                () -> !m_setpointLock))
-        .whenInactive(
-            new InstantCommand(
-                () -> {
-                  m_shooter.setShooterVoltage(0);
-                  m_shooter.setKickerVoltage(0);
-                }));
+                CargoHandlingCommandBuilder.getSetShooterCommand(
+                    () -> m_shooterVelocityLock, () -> m_shooterTangentialRatioLock, m_shooter),
+                () -> !m_setpointLock));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
     m_operator

@@ -11,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -90,6 +91,38 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_kickerTalon.configAllSettings(kickerTalonConfig);
     m_kickerTalon.setNeutralMode(NeutralMode.Coast);
     m_kickerTalon.enableVoltageCompensation(true);
+
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
+
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
   }
 
   /** @return the current talon-reported shooter velocity in rotations per second. */
