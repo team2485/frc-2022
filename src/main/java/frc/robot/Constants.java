@@ -79,8 +79,8 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kAutoMaxSpeedMetersPerSecond = 3;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2.5;
+    public static final double kAutoMaxSpeedMetersPerSecond = 2;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2;
 
     public static final double kAutoMaxAngularSpeedRadiansPerSecond =
         2.5 / DriveConstants.kTurningRadiusMeters;
@@ -649,6 +649,7 @@ public final class Constants {
   public static final class ClimbArmConstants {
     public static final double kArmControlLoopTimeSeconds = 0.01;
 
+    public static final double kArmGearingChange = 8.0 / 11.0;
     // ARM CONSTANTS
     public static final int kArmTalonPort = 41;
     public static final double kArmSupplyCurrentLimitAmps = 25;
@@ -661,7 +662,7 @@ public final class Constants {
     public static final double kArmStatorCurrentSpikeThresholdAmps = 30;
     public static final double kArmStatorCurrentSpikeDebounceTimeSeconds = 0.2;
 
-    public static final double kArmGearRatio = 57.6; // motor turns/pinion turns
+    public static final double kArmGearRatio = 57.6 * (16.0 / 22.0); // motor turns/pinion turns
     public static final double kArmRotationsPerMotorRev = 1 / kArmGearRatio;
     public static final double kArmRotationsPerPulse =
         kArmRotationsPerMotorRev / kFalconSensorUnitsPerRotation;
@@ -688,13 +689,14 @@ public final class Constants {
     public static final double kgArmTranslationVolts =
         IDManager.getInstance().select(0.25818, 0.18092);
     public static final double kvArmTranslationVoltSecondsPerMeter =
-        IDManager.getInstance().select(63.445, 62.802);
+        IDManager.getInstance().select(63.445 * kArmGearingChange, 62.802);
     public static final double kaArmTranslationVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.07, 0.04);
+        IDManager.getInstance().select(0.07 * kArmGearingChange, 0.04);
 
     public static final double kArmMaxSpeedTranslationMetersPerSecond =
-        kArmFreeSpeedMetersPerSecond * 0.9;
-    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared = 10;
+        kArmFreeSpeedMetersPerSecond * 0.9 / kArmGearingChange;
+    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared =
+        10 * kArmGearingChange;
 
     // Constraint for the motion profilied arm rotation controller
     public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsTranslation =
@@ -702,14 +704,17 @@ public final class Constants {
             kArmMaxSpeedTranslationMetersPerSecond,
             kArmMaxAccelerationTranslationMetersPerSecondSquared);
 
-    public static final double kPArmTranslationVoltsPerMeter = 400;
-    public static final double kDArmTranslationVoltSecondsPerMeter = 0.275;
+    public static final double kPArmTranslationVoltsPerMeter = 400 * kArmGearingChange;
+    public static final double kDArmTranslationVoltSecondsPerMeter = 0.275 * kArmGearingChange;
+    public static final double kIArmTranslationVoltsPerMeter = 30;
+    public static final double kArmIntegratorMaxVolts = 0.5;
     public static final double ksArmUnloadedVolts = 0.47;
     public static final double kgArmUnloadedVolts = 0.02;
-    public static final double kvArmUnloadedVoltSecondsPerMeter = 63.445;
-    public static final double kaArmUnloadedVoltSecondsSquaredPerMeter = 0.01;
+    public static final double kvArmUnloadedVoltSecondsPerMeter = 63.445 * kArmGearingChange;
+    public static final double kaArmUnloadedVoltSecondsSquaredPerMeter = 0.01 * kArmGearingChange;
 
     public static final double kArmTranslationToleranceMeters = 0.02;
-    public static final double kArmTranslationVelocityToleranceMetersPerSecond = 0.05;
+    public static final double kArmTranslationVelocityToleranceMetersPerSecond =
+        0.05 / kArmGearingChange;
   }
 }

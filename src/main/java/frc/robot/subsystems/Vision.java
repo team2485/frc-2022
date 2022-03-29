@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -48,6 +50,14 @@ public class Vision extends SubsystemBase implements Loggable {
   private double[] m_cornerY = new double[] {};
 
   private Timer m_targetGraceTimer = new Timer(); // times amount of time since target loss
+  DoubleArrayLogEntry m_target1TopLeftCornerLog =
+      new DoubleArrayLogEntry(DataLogManager.getLog(), "/vision/target1/topLeft");
+  DoubleArrayLogEntry m_target1TopRightCornerLog =
+      new DoubleArrayLogEntry(DataLogManager.getLog(), "/vision/target1/topRight");
+  DoubleArrayLogEntry m_target1BottomLeftCornerLog =
+      new DoubleArrayLogEntry(DataLogManager.getLog(), "/vision/target1/bottomLeft");
+  DoubleArrayLogEntry m_target1BottomRightCornerLog =
+      new DoubleArrayLogEntry(DataLogManager.getLog(), "/vision/target1/bottomRight");
 
   public Vision() {
     m_targetGraceTimer.start();
@@ -91,6 +101,7 @@ public class Vision extends SubsystemBase implements Loggable {
    * AlwaysOn. If current LED mode is AlwaysOn, turn to Auto.
    */
   public void cycleLEDMode() {
+    System.out.println("Led mode: " + m_LEDSetMode);
     switch (m_LEDSetMode) {
       case kAuto:
         this.setLEDMode(LEDSetMode.kAlwaysOff);
@@ -197,6 +208,16 @@ public class Vision extends SubsystemBase implements Loggable {
           if (cornerTranslation != null) {
             cameraToTargetTranslations.add(cornerTranslation);
           }
+        }
+        if (targetIndex == 0) {
+          m_target1TopLeftCornerLog.append(
+              new double[] {corners.get(0).getX(), corners.get(0).getY()});
+          m_target1TopRightCornerLog.append(
+              new double[] {corners.get(1).getX(), corners.get(1).getY()});
+          m_target1BottomLeftCornerLog.append(
+              new double[] {corners.get(2).getX(), corners.get(2).getY()});
+          m_target1BottomRightCornerLog.append(
+              new double[] {corners.get(3).getX(), corners.get(3).getY()});
         }
       }
 

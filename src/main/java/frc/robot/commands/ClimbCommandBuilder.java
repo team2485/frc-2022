@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.Constants;
+import frc.robot.subsystems.cargoHandling.IntakeArm;
 import frc.robot.subsystems.climb.ClimbArm;
 import frc.robot.subsystems.climb.ClimbElevator;
 import java.util.function.BooleanSupplier;
@@ -56,7 +56,7 @@ public class ClimbCommandBuilder {
   // after raise hook command, drivers drive robot back to contact bar, then press proceed
   // button to lower hook to be on bar, which is another driver checkpoint.
   public static Command getHookOnMidBarCommand(ClimbElevator elevator) {
-    return getMoveElevatorCommand(Units.inchesToMeters(18.5), elevator);
+    return getMoveElevatorCommand(Units.inchesToMeters(18.5), 0.008, elevator);
   }
 
   // Pull hook down to raise robot. Triggered by driver presssing proceed button. After this driver
@@ -70,7 +70,7 @@ public class ClimbCommandBuilder {
   public static Command getArmOnNextBarCommand(ClimbElevator elevator, ClimbArm arm) {
     return new InstantCommand(arm::restartTimer)
         .andThen(
-            new RunCommand(() -> arm.setVoltage(-10 * arm.getTimerTime())).withTimeout(1.2),
+            new RunCommand(() -> arm.setVoltage(-7.2 * arm.getTimerTime())).withTimeout(1.2),
             new InstantCommand(() -> arm.setVoltage(0)),
             new WaitCommand(0.5),
             getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator));
@@ -88,10 +88,9 @@ public class ClimbCommandBuilder {
                 Units.inchesToMeters(0.64901028), arm), // pull arm back to settle on bar
             new InstantCommand(() -> elevator.setMode(false), elevator),
             getMoveElevatorCommand(Units.inchesToMeters(5.75), elevator), // unload hook
-            getTranslateArmCommand(0.656, arm)
+            getTranslateArmCommand(0.657, arm)
                 .alongWith(
-                    new WaitUntilCommand(
-                            () -> arm.getTranslationMeters() > Units.inchesToMeters(10))
+                    new WaitUntilCommand(() -> arm.getTranslationMeters() > Units.inchesToMeters(3))
                         .andThen(
                             getMoveElevatorCommand(
                                 kElevatorSlotSensorBottomPosition, elevator))), // lower hook
@@ -105,12 +104,12 @@ public class ClimbCommandBuilder {
         .andThen(
             getMoveElevatorCommand(Units.inchesToMeters(3.2), elevator),
             new InstantCommand(() -> arm.setMode(false), arm),
-            new RunCommand(() -> arm.setVoltage(-6), arm)
+            new RunCommand(() -> arm.setVoltage(-10), arm)
                 .until(() -> arm.getTranslationMeters() < 0.22), // push arm forward
             new InstantCommand(() -> arm.setVoltage(0), arm),
             getMoveElevatorCommand(
                 Units.inchesToMeters(13), elevator), // extend elevator to release arm
-            new RunCommand(() -> arm.setVoltage(-4), arm)
+            new RunCommand(() -> arm.setVoltage(-6), arm)
                 .until(() -> arm.getTranslationMeters() < 0.05),
             new InstantCommand(() -> arm.setVoltage(0), arm),
             new ParallelRaceGroup(
@@ -121,12 +120,18 @@ public class ClimbCommandBuilder {
   }
 
   // Push rack forward a bit to ensure not contacting low bar
-  public static Command getPushArmForwardAtEndCommand(ClimbArm arm, ClimbElevator elevator) {
+  public static Command getPushArmForwardAtEndCommand(
+      ClimbArm arm, ClimbElevator elevator, IntakeArm intakeArm) {
     return getMoveElevatorCommand(
             Units.inchesToMeters(3.5), elevator) // climb up to remove arm contact
         .andThen(
-            new RunCommand(() -> arm.setVoltage(-0.4 * Constants.kNominalVoltage)).withTimeout(1),
-            new InstantCommand(() -> arm.setVoltage(0))); // push arm forward some arbitrary amount
+            new RunCommand(() -> arm.setVoltage(-10))
+                .until(() -> arm.getTranslationMeters() < 0.22),
+            new InstantCommand(() -> arm.setVoltage(0)),
+            getMoveElevatorCommand(Units.inchesToMeters(13), elevator),
+            CargoHandlingCommandBuilder.getIntakeArmUpCommand(
+                intakeArm)); // extend elevator to release arm); // push arm forward some arbitrary
+    // amount
   }
 
   public static Command getEngageRatchetCommand(ClimbElevator elevator) {
@@ -145,6 +150,13 @@ public class ClimbCommandBuilder {
                     positionMeters,
                     kElevatorPositionToleranceMeters,
                     elevator.getPositionMeters()));
+  }
+
+  private static Command getMoveElevatorCommand(
+      double positionMeters, double positionToleranceMeters, ClimbElevator elevator) {
+    return new RunCommand(() -> elevator.setPositionMeters(positionMeters), elevator)
+        .withInterrupt(
+            () -> atGoal(positionMeters, positionToleranceMeters, elevator.getPositionMeters()));
   }
 
   private static Command getTranslateArmCommand(double translationMeters, ClimbArm arm) {
