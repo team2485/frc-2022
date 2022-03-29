@@ -280,7 +280,7 @@ public class RobotContainer {
                   m_highFender = true;
                   m_setpointLock = true;
                   m_shooterVelocityLock = 26.75;
-                  m_shooterTangentialRatioLock = 0.86;
+                  m_shooterTangentialRatioLock = 0.865;
                 }))
         .whenInactive(
             new InstantCommand(
@@ -544,8 +544,9 @@ public class RobotContainer {
     //             AutoCommandBuilder.getFinishAutoCommand(
     //                 m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
 
-    return AutoCommandBuilder.get3BallFenderAutoRight(
-        m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter);
+    return null;
+    // return AutoCommandBuilder.get3BallFenderAutoRight(
+    //     m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter);
 
     // WL_SwerveControllerCommand path =
     //     PathCommandBuilder.getPathCommand(m_drivetrain, "3 Score Right Fender");
