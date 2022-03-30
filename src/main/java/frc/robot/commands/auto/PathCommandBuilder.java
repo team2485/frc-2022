@@ -21,7 +21,8 @@ public class PathCommandBuilder {
 
     // create controller for robot angle
     var thetaController =
-        new ProfiledPIDController(kPAutoThetaController, 0.5, 0, kAutoThetaControllerConstraints);
+        new ProfiledPIDController(
+            kPAutoThetaController, 0, kDAutoThetaController, kAutoThetaControllerConstraints);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     // create command to follow path
@@ -30,8 +31,8 @@ public class PathCommandBuilder {
             path,
             drivetrain::getPoseMeters,
             kDriveKinematics,
-            new PIDController(kPAutoXController, 0, 0),
-            new PIDController(kPAutoYController, 0, 0),
+            new PIDController(kPAutoXController, kIAutoXController, kDAutoXController),
+            new PIDController(kPAutoYController, kIAutoXController, kDAutoYController),
             thetaController,
             drivetrain::setModuleStates,
             drivetrain);

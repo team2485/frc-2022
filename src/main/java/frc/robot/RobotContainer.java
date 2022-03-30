@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
+import frc.robot.commands.auto.AutoCommandBuilder;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.climb.*;
@@ -536,9 +537,8 @@ public class RobotContainer {
     //             AutoCommandBuilder.getFinishAutoCommand(
     //                 m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
 
-    return null;
-    // return AutoCommandBuilder.get3BallFenderAutoRight(
-    //     m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter);
+    return AutoCommandBuilder.get3BallFenderAutoRight(
+        m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter);
 
     // WL_SwerveControllerCommand path =
     //     PathCommandBuilder.getPathCommand(m_drivetrain, "3 Score Right Fender");

@@ -74,9 +74,9 @@ public class CargoHandlingCommandBuilder {
             })
         .andThen(
             new ParallelRaceGroup(
-                getSetFeederCommand(() -> kFeederDefaultSpeedRotationsPerSecond, feeder),
+                getSetFeederCommand(() -> 50, feeder),
                 new WaitCommand(0.2)
-                    .andThen(getSetServoCommand(() -> true, servo), new WaitCommand(0.5))),
+                    .andThen(getSetServoCommand(() -> true, servo), new WaitCommand(0.4))),
             getSetFeederCommand(() -> 0, feeder).alongWith(getSetServoCommand(() -> false, servo)),
             new WaitCommand(0.5),
             getSetIndexerCommand(() -> kIndexerDefaultSpeedRotationsPerSecond, indexer)

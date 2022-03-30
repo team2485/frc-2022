@@ -39,7 +39,7 @@ public class AutoCommandBuilder {
                         .setTrajectory(intakePathCommand.m_trajectory),
                 drivetrain),
             intakePathCommand
-                .andThen(getStopPathCommand(drivetrain), new WaitCommand(0.5))
+                .andThen(getStopPathCommand(drivetrain), new WaitCommand(1.5))
                 .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
             new ParallelDeadlineGroup(
                 new InstantCommand(

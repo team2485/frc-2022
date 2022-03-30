@@ -93,7 +93,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_kickerTalon.enableVoltageCompensation(true);
 
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+    m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
@@ -109,7 +109,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
     m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
     m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
     m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
     m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);

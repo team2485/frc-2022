@@ -145,8 +145,7 @@ public class SwerveModule implements Loggable {
    * @param desiredState
    */
   public void setDesiredState(SwerveModuleState desiredState, boolean inverted) {
-    SwerveModuleState state =
-        desiredState; // SwerveModuleState.optimize(desiredState, this.getIntegratedHeading());
+    SwerveModuleState state = SwerveModuleState.optimize(desiredState, this.getIntegratedHeading());
     this.setSpeedMetersPerSecond(
         inverted ? -state.speedMetersPerSecond : state.speedMetersPerSecond);
     this.setHeading(state.angle);

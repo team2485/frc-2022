@@ -83,12 +83,17 @@ public final class Constants {
     public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2;
 
     public static final double kAutoMaxAngularSpeedRadiansPerSecond =
-        2.5 / DriveConstants.kTurningRadiusMeters;
+        1.5 / DriveConstants.kTurningRadiusMeters;
     public static final double kAutoMaxAngularAccelerationRadiansPerSecondSquared = 1 * Math.PI;
 
-    public static final double kPAutoXController = 2;
-    public static final double kPAutoYController = 2;
-    public static final double kPAutoThetaController = 5;
+    public static final double kPAutoXController = 5;
+    public static final double kIAutoXController = 0.05;
+    public static final double kDAutoXController = 0.5;
+    public static final double kPAutoYController = 5;
+    public static final double kIAutoYController = 0.05;
+    public static final double kDAutoYController = 0.5;
+    public static final double kPAutoThetaController = 10;
+    public static final double kDAutoThetaController = 0.5;
 
     // Constraint for the motion profilied robot angle controller
     public static final TrapezoidProfile.Constraints kAutoThetaControllerConstraints =
@@ -151,9 +156,9 @@ public final class Constants {
 
     //// Turning PID constants
     public static final double kPTurningOutputUnit100MsPerSensorUnit =
-        3 * kTurningRadiansPerPulse * kFalconOutputUnitsPerVolt / kSecondsPer100Ms;
+        1.5 * kTurningRadiansPerPulse * kFalconOutputUnitsPerVolt / kSecondsPer100Ms;
     public static final double kDTurningOutputUnit100MsSquaredPerSensorUnit =
-        0.5 * kTurningRadiansPerPulse * kFalconOutputUnitsPerVolt / kSecondsPer100Ms;
+        0.2 * kTurningRadiansPerPulse * kFalconOutputUnitsPerVolt / kSecondsPer100Ms;
     public static final double kFTurningOutputUnit100MsPerSensorUnit =
         IDManager.getInstance()
             .select(
@@ -438,7 +443,7 @@ public final class Constants {
         kNeo550FreeSpeedRotationsPerSecond / kFeederGearRatio;
 
     public static final double kFeederDefaultSpeedRotationsPerSecond =
-        kFeederFreeSpeedRotationsPerSecond / 2;
+        kFeederFreeSpeedRotationsPerSecond * 0.75;
 
     public static final double kFeederPulleyCircumferenceMeters = 0.0191008 * Math.PI;
 
@@ -458,8 +463,8 @@ public final class Constants {
     public static final double kFeederVelocityToleranceRotationsPerSecond = 1;
 
     public static final int kFeederServoPort = 1;
-    public static final double kServoDisengagedPosition = 0.45;
-    public static final double kServoEngagedPosition = 0.15;
+    public static final double kServoDisengagedPosition = 0.43;
+    public static final double kServoEngagedPosition = 0.2;
   }
 
   public static final class ShooterConstants {
@@ -499,7 +504,7 @@ public final class Constants {
         kFalconFreeSpeedRotationsPerSecond / kKickerGearRatio;
 
     public static final double kShooterMaxSpeedRotationsPerSecond = 68; // empirical estimate
-    public static final double kKickerMaxSpeedRotationsPerSecond = 156; // empirical estimate
+    public static final double kKickerMaxSpeedRotationsPerSecond = 180; // empirical estimate
 
     public static final double kShooterSurfaceFreeSpeedMetersPerSecond =
         kShooterFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
@@ -518,24 +523,28 @@ public final class Constants {
     public static final double kFShooterOutputUnit100MsPerSensorUnit =
         kVShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
+            / kShooterGearRatio
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
     public static final double kFKickerOutputUnit100MsPerSensorUnit =
         kVKickerVoltSecondsPerRotation
+            / kKickerGearRatio
             * kFalconOutputUnitsPerVolt
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPShooterVoltSecondsPerRotation = 0; // 0.5
+    public static final double kPShooterVoltSecondsPerRotation = 0.5; // 0.5
     public static final double kPShooterOutputUnit100MsPerSensorUnit =
         kPShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
+            / kShooterGearRatio
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPKickerVoltSecondsPerRotation = 0;
+    public static final double kPKickerVoltSecondsPerRotation = 0.5; // 0.5
     public static final double kPKickerOutputUnit100MsPerSensorUnit =
         kPKickerVoltSecondsPerRotation
+            / kKickerGearRatio
             * kFalconOutputUnitsPerVolt
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
@@ -547,14 +556,15 @@ public final class Constants {
             * kFalconSensorUnitsPerRotation;
 
     public static final double kKickerControlVelocityToleranceRotationsPerSecond =
-        kShooterControlVelocityToleranceRotationsPerSecond;
+        kShooterControlVelocityToleranceRotationsPerSecond
+            * (kKickerFreeSpeedRotationsPerSecond / kShooterFreeSpeedRotationsPerSecond);
     public static final double kKickerControlVelocityToleranceSensorUnitsPer100Ms =
         kKickerControlVelocityToleranceRotationsPerSecond
             * kSecondsPer100Ms
             * kFalconSensorUnitsPerRotation;
 
-    public static final double kShooterFeedforwardScale = 1;
-    public static final double kKickerFeedforwardScale = 0.95;
+    public static final double kShooterFeedforwardScale = 0.86;
+    public static final double kKickerFeedforwardScale = 0.88;
 
     public static final double kShooterFeedVelocityTolerance = 3;
 
