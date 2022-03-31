@@ -464,7 +464,7 @@ public final class Constants {
 
     public static final int kFeederServoPort = 1;
     public static final double kServoDisengagedPosition = 0.43;
-    public static final double kServoEngagedPosition = 0.2;
+    public static final double kServoEngagedPosition = 0.19;
   }
 
   public static final class ShooterConstants {
@@ -478,13 +478,12 @@ public final class Constants {
     public static final double kShooterStatorCurrentThresholdAmps = 45;
     public static final double kShooterStatorCurrentThresholdTimeSecs = 0.05;
 
-    public static final double kKickerSupplyCurrentLimitAmps = kShooterSupplyCurrentLimitAmps;
-    public static final double kKickerSupplyCurrentThresholdAmps =
-        kShooterSupplyCurrentThresholdAmps;
+    public static final double kKickerSupplyCurrentLimitAmps = 40;
+    public static final double kKickerSupplyCurrentThresholdAmps = 45;
     public static final double kKickerSupplyCurrentThresholdTimeSecs =
         kShooterSupplyCurrentLimitAmps;
-    public static final double kKickerStatorCurrentLimitAmps = kShooterStatorCurrentLimitAmps;
-    public static final double kKickerStatorCurrentThresholdAmps = kShooterStatorCurrentLimitAmps;
+    public static final double kKickerStatorCurrentLimitAmps = 60;
+    public static final double kKickerStatorCurrentThresholdAmps = 65;
     public static final double kKickerStatorCurrentThresholdTimeSecs =
         kShooterStatorCurrentThresholdTimeSecs;
 

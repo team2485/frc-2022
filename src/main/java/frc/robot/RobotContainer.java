@@ -10,11 +10,11 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -44,11 +44,7 @@ public class RobotContainer {
   private final FeedServo m_feedServo = new FeedServo();
   public final Shooter m_shooter = new Shooter();
 
-  public final Drivetrain m_drivetrain =
-      new Drivetrain(
-          () -> {
-            return new Rotation2d();
-          });
+  public final Drivetrain m_drivetrain = new Drivetrain();
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
@@ -92,10 +88,21 @@ public class RobotContainer {
   @Log(name = "Bar to climb to", width = 2, height = 2, rowIndex = 2, columnIndex = 0)
   int m_barToClimbTo = 0; // 1 mid, 2 high, 3 traverse
 
+  @Log(name = "Auto Chooser", width = 2, height = 2, rowIndex = 4, columnIndex = 0)
+  private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
     configureButtonBindings();
+
+    m_autoChooser.setDefaultOption(
+        "3 Ball Right Side",
+        AutoCommandBuilder.get3BallFenderAutoRight(
+            m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter));
+    m_autoChooser.addOption(
+        "2 Ball Left Side",
+        AutoCommandBuilder.get2BallFenderAutoLeft(
+            m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter));
   }
 
   /**
@@ -537,8 +544,7 @@ public class RobotContainer {
     //             AutoCommandBuilder.getFinishAutoCommand(
     //                 m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
 
-    return AutoCommandBuilder.get3BallFenderAutoRight(
-        m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter);
+    return m_autoChooser.getSelected();
 
     // WL_SwerveControllerCommand path =
     //     PathCommandBuilder.getPathCommand(m_drivetrain, "3 Score Right Fender");

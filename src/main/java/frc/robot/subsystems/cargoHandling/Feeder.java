@@ -38,7 +38,7 @@ public class Feeder extends SubsystemBase implements Loggable {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kFeederSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kFeederImmediateCurrentLimitAmps);
-    m_spark.setIdleMode(IdleMode.kBrake);
+    m_spark.setIdleMode(IdleMode.kCoast);
     m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
     m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
     m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20

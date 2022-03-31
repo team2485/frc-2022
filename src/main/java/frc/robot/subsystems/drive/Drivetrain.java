@@ -29,7 +29,6 @@ import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class Drivetrain extends SubsystemBase implements Loggable {
   private final SwerveModule m_frontLeftModule;
@@ -69,9 +68,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Log(name = "Angle PID (hub tracking)")
   private final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
 
-  private Supplier<Rotation2d> m_turretAngle;
-
-  public Drivetrain(Supplier<Rotation2d> turretAngle) {
+  public Drivetrain() {
     m_frontLeftModule =
         new SwerveModule(
             kFLDriveTalonPort,
@@ -135,7 +132,6 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_rotationController.setTolerance(kRotationTolerance);
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
-    m_turretAngle = turretAngle;
     SmartDashboard.putData("Field", m_field);
   }
 

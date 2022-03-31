@@ -56,6 +56,36 @@ public class AutoCommandBuilder {
         .raceWith(getSetShooterCommand(() -> 27.5, () -> 0.87, shooter));
   }
 
+  public static Command get2BallFenderAutoLeft(
+      Drivetrain drivetrain,
+      Intake intake,
+      IntakeArm intakeArm,
+      Indexer indexer,
+      Feeder feeder,
+      FeedServo servo,
+      Shooter shooter) {
+
+    WL_SwerveControllerCommand pathCommand = getPathCommand(drivetrain, "2 Ball Left Fender");
+
+    return new WaitCommand(0.5)
+        .andThen(
+            getResetOdometryCommand(drivetrain, pathCommand),
+            new InstantCommand(
+                () ->
+                    drivetrain
+                        .getField2d()
+                        .getObject("traj")
+                        .setTrajectory(pathCommand.m_trajectory),
+                drivetrain),
+            pathCommand
+                .andThen(getStopPathCommand(drivetrain), new WaitCommand(1.5))
+                .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
+            getStopIntakeCommand(intake, intakeArm, indexer),
+            getIndexToShooterCommand(indexer, feeder, servo, shooter),
+            getIndexToShooterCommand(indexer, feeder, servo, shooter))
+        .alongWith(getSetShooterCommand(() -> 27.5, () -> 0.87, shooter));
+  }
+
   //     Command scoochOverPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Right
   // Finish");
   //     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
