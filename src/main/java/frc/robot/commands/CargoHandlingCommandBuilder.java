@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
 import frc.robot.subsystems.cargoHandling.FeedServo;
 import frc.robot.subsystems.cargoHandling.Feeder;
@@ -62,25 +61,16 @@ public class CargoHandlingCommandBuilder {
             .shooterSpeedRotationsPerSecond;
   }
 
-  public static Command getIndexToShooterCommand(
-      Indexer indexer, Feeder feeder, FeedServo servo, Shooter shooter) {
-    return new WaitUntilCommand(
-            () -> {
-              if (shooter.getSetpoint() > 80) {
-                return shooter.shooterWithinTolerance(kShooterFeedVelocityTolerance);
-              } else {
-                return true;
-              }
-            })
+  public static Command getIndexToShooterCommand(Indexer indexer, Feeder feeder, FeedServo servo) {
+    return new ParallelRaceGroup(
+            getSetFeederCommand(() -> 50, feeder),
+            new WaitCommand(0.2)
+                .andThen(getSetServoCommand(() -> true, servo), new WaitCommand(0.4)))
         .andThen(
-            new ParallelRaceGroup(
-                getSetFeederCommand(() -> 50, feeder),
-                new WaitCommand(0.2)
-                    .andThen(getSetServoCommand(() -> true, servo), new WaitCommand(0.4))),
             getSetFeederCommand(() -> 0, feeder).alongWith(getSetServoCommand(() -> false, servo)),
             new WaitCommand(0.5),
             getSetIndexerCommand(() -> kIndexerDefaultSpeedRotationsPerSecond, indexer)
-                .withTimeout(0.5));
+                .withTimeout(0.8));
   }
 
   public static Command getStopFeedCommand(Indexer indexer, Feeder feeder, FeedServo servo) {

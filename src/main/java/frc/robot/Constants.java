@@ -65,7 +65,8 @@ public final class Constants {
 
   // 5 ft front bumper: 60 0.8
 
-  public static final double kShootingSetpointDistance = 2.76;
+  public static final double kShootingFenderSetpointShooter = 27.5;
+  public static final double kShootingFenderSetpointTangentialRatio = 0.55;
 
   public static final class OIConstants {
     public static final int kDriverPort = 0;
@@ -367,7 +368,7 @@ public final class Constants {
     public static final double kIntakeArmBottomPositionRadians =
         IDManager.getInstance().select(-0.277, -0.2618); // from horizontal
     public static final double kIntakeArmTopPositionRadians =
-        IDManager.getInstance().select(2.0017, 2.0071); // change later
+        IDManager.getInstance().select(2.014, 2.0071); // change later
     public static final double kIntakeArmTipPositionRadians =
         IDManager.getInstance().select(1.25, 1.6);
 
@@ -406,8 +407,8 @@ public final class Constants {
   public static final class IndexerConstants {
     public static final int kIndexerSparkPort = 22;
     public static final double kIndexerLoopTimeSeconds = 0.02;
-    public static final int kIndexerSmartCurrentLimitAmps = 20;
-    public static final int kIndexerImmediateCurrentLimitAmps = 25;
+    public static final int kIndexerSmartCurrentLimitAmps = 25;
+    public static final int kIndexerImmediateCurrentLimitAmps = 30;
 
     public static final double kIndexerGearRatio = 4; // motor turns : output/full hood turns
 
@@ -532,7 +533,7 @@ public final class Constants {
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPShooterVoltSecondsPerRotation = 0.5; // 0.5
+    public static final double kPShooterVoltSecondsPerRotation = 1; // 0.5
     public static final double kPShooterOutputUnit100MsPerSensorUnit =
         kPShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
@@ -540,7 +541,7 @@ public final class Constants {
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPKickerVoltSecondsPerRotation = 0.5; // 0.5
+    public static final double kPKickerVoltSecondsPerRotation = 1; // 0.5
     public static final double kPKickerOutputUnit100MsPerSensorUnit =
         kPKickerVoltSecondsPerRotation
             / kKickerGearRatio

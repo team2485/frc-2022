@@ -64,7 +64,7 @@ public class WL_SwerveControllerCommand extends CommandBase {
       SwerveDriveKinematics kinematics,
       PIDController xController,
       PIDController yController,
-      ProfiledPIDController thetaController,
+      SR_ProfiledPIDController thetaController,
       Consumer<SwerveModuleState[]> outputModuleStates,
       Subsystem... requirements) {
     m_trajectory = trajectory;

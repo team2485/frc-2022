@@ -26,7 +26,6 @@ import frc.robot.subsystems.Vision.TimestampedTranslation2d;
 import frc.team2485.WarlordsLib.PoseHistory;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 import java.util.Optional;
 
@@ -352,7 +351,6 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_backRightModule.setTurningNeutralMode(mode);
   }
 
-  @Config.ToggleSwitch(name = "Set pushable", tabName = "RobotContainer")
   public void setPushable(boolean pushable) {
     m_pushable = pushable;
     if (m_pushable) {
