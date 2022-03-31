@@ -237,27 +237,6 @@ public class RobotContainer {
                   m_distanceOffset -= 0.1;
                 }));
 
-    // Shift turret to right
-    m_operator
-        .rightPOV()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_angleShift += 0.04;
-                }));
-
-    // Shift turret to left
-    m_operator
-        .leftPOV()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_angleShift -= 0.04;
-                  ;
-                }));
-
     m_operator
         .a()
         .whenActive(
