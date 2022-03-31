@@ -8,6 +8,7 @@ import static frc.robot.Constants.VisionConstants.*;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -55,6 +56,9 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Log private double m_desiredYSpeed;
 
   @Log private boolean m_pushable;
+
+  private ProfiledPIDController m_autoThetaController = new ProfiledPIDController(
+            kPAutoThetaController, 0, kDAutoThetaController, kAutoThetaControllerConstraints);
 
   // @Log(name = "Drive Neutral")
   private SendableChooser<NeutralMode> m_driveNeutralChooser = new SendableChooser<NeutralMode>();
