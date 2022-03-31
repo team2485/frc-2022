@@ -190,7 +190,6 @@ public class SwerveModule implements Loggable {
    *
    * @return current heading in degrees
    */
-  @Log(name = "current heading motion profile setpoint")
   private double getHeadingSetpointDegrees() {
     return Units.radiansToDegrees(m_turningMotor.getClosedLoopTarget() * kTurningRadiansPerPulse);
   }
