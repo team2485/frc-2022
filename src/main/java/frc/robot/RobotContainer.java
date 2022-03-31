@@ -181,6 +181,10 @@ public class RobotContainer {
                                     () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
                                 .withTimeout(0.5))));
 
+    m_driver.upperPOV().whileActiveContinuous(
+        CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm)
+    );
+
     m_operator
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))

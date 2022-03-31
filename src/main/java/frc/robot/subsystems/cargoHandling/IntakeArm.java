@@ -130,6 +130,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_armSetpointPosition = top;
   }
 
+
   public boolean atPosition(boolean top) {
     if (top) {
       return Math.abs(this.getAngleRadians() - kIntakeArmTopPositionRadians)

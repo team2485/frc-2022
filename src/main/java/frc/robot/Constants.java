@@ -366,7 +366,7 @@ public final class Constants {
         1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
     public static final double kIntakeArmBottomPositionRadians =
-        IDManager.getInstance().select(-0.277, -0.2618); // from horizontal
+        IDManager.getInstance().select(-0.278, -0.2618); // from horizontal
     public static final double kIntakeArmTopPositionRadians =
         IDManager.getInstance().select(2.014, 2.0071); // change later
     public static final double kIntakeArmTipPositionRadians =
