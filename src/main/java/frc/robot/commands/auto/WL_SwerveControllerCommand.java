@@ -11,6 +11,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ProfiledPIDController;
+
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -34,7 +37,7 @@ public class WL_SwerveControllerCommand extends CommandBase {
   public final PathPlannerTrajectory m_trajectory;
   private final Supplier<Pose2d> m_pose;
   private final SwerveDriveKinematics m_kinematics;
-  private final HolonomicDriveController m_controller;
+  private final SR_HolonomicDriveController m_controller;
   private final Consumer<SwerveModuleState[]> m_outputModuleStates;
 
   public PathPlannerState m_desiredState;
@@ -62,16 +65,16 @@ public class WL_SwerveControllerCommand extends CommandBase {
       PathPlannerTrajectory trajectory,
       Supplier<Pose2d> pose,
       SwerveDriveKinematics kinematics,
-      PIDController xController,
-      PIDController yController,
-      ProfiledPIDController thetaController,
+      SR_PIDController xController,
+      SR_PIDController yController,
+      SR_ProfiledPIDController thetaController,
       Consumer<SwerveModuleState[]> outputModuleStates,
       Subsystem... requirements) {
     m_trajectory = trajectory;
     m_pose = pose;
     m_kinematics = kinematics;
 
-    m_controller = new HolonomicDriveController(xController, yController, thetaController);
+    m_controller = new SR_HolonomicDriveController(xController, yController, thetaController);
 
     m_outputModuleStates = outputModuleStates;
 

@@ -20,20 +20,16 @@ public class PathCommandBuilder {
     // put trajectory on Glass's Field2d widget
 
     // create controller for robot angle
-    var thetaController =
-        new ProfiledPIDController(
-            kPAutoThetaController, 0, kDAutoThetaController, kAutoThetaControllerConstraints);
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
+ 
     // create command to follow path
     WL_SwerveControllerCommand pathCommand =
         new WL_SwerveControllerCommand(
             path,
             drivetrain::getPoseMeters,
             kDriveKinematics,
-            new PIDController(kPAutoXController, kIAutoXController, kDAutoXController),
-            new PIDController(kPAutoYController, kIAutoXController, kDAutoYController),
-            thetaController,
+            drivetrain.m_xController,
+            drivetrain.m_yController, 
+            drivetrain.m_rotationControllerAuto,
             drivetrain::setModuleStates,
             drivetrain);
 

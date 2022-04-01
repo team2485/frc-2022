@@ -55,9 +55,9 @@ public class RobotContainer {
 
   // OPERATOR ADJUSTMENTS
   @Log(name = "Distance offset", width = 2, height = 1, rowIndex = 2, columnIndex = 17)
-  double m_distanceOffset = 0;
+  double m_shooterOffset = 0;
 
-  @Log(name = "Angle shift", width = 2, height = 1, rowIndex = 3, columnIndex = 17)
+  // @Log(name = "Angle shift", width = 2, height = 1, rowIndex = 3, columnIndex = 17)
   double m_angleShift = 0;
 
   // OPERATOR LOCKS
@@ -201,7 +201,7 @@ public class RobotContainer {
             new ConditionalCommand(
                 new InstantCommand(),
                 CargoHandlingCommandBuilder.getSetShooterCommand(
-                    () -> m_shooterVelocityLock, () -> m_shooterTangentialRatioLock, m_shooter),
+                    () -> m_shooterVelocityLock + m_shooterOffset, () -> m_shooterTangentialRatioLock, m_shooter),
                 () -> !m_setpointLock));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
@@ -221,7 +221,7 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_distanceOffset += 0.1;
+                  m_shooterOffset += 0.3;
                 }));
 
     // Make robot think it's further when aiming
@@ -231,7 +231,7 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_distanceOffset -= 0.1;
+                  m_shooterOffset -= 0.3;
                 }));
 
     m_operator
@@ -276,7 +276,7 @@ public class RobotContainer {
                 () -> {
                   m_highFender = false;
                   m_setpointLock = false;
-                  m_distanceOffset = 0;
+                  m_shooterOffset = 0;
                   m_angleShift = 0;
                   m_shooterVelocityLock = 0;
                 }));

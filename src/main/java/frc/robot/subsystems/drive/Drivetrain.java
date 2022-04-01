@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Vision.TimestampedTranslation2d;
 import frc.team2485.WarlordsLib.PoseHistory;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ProfiledPIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
@@ -65,8 +66,15 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
   public final Field2d m_field = new Field2d();
 
-  @Log(name = "Angle PID (hub tracking)")
-  private final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
+  @Log(name = "Angle PID hub facing")
+  public final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
+
+  public final SR_ProfiledPIDController m_rotationControllerAuto = new SR_ProfiledPIDController(kPAutoThetaController, 0, kDAutoThetaController, kAutoThetaControllerConstraints);
+  @Log(name = "X PID")
+  public final SR_PIDController m_xController = new SR_PIDController(kPAutoXController, kIAutoXController, kDAutoXController);
+
+  @Log(name = "Y PID")
+  public final SR_PIDController m_yController = new SR_PIDController(kPAutoYController, kIAutoYController, kDAutoYController);
 
   public Drivetrain() {
     m_frontLeftModule =
