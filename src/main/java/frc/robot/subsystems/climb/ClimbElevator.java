@@ -180,6 +180,10 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     m_voltageSetpoint = voltage;
   }
 
+  public void abort() {
+    m_talon.set(ControlMode.Disabled, 0);
+  }
+
   public void enable(boolean enabled) {
     m_enabled = enabled;
     if (enabled) {
@@ -266,6 +270,8 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
           m_lastVelocitySetpoint = m_pidControllerUnloaded.getSetpoint().velocity;
         }
       }
+    } else {
+      m_talon.set(ControlMode.PercentOutput, 0);
     }
   }
 

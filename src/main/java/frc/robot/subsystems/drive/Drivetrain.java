@@ -69,7 +69,9 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Log(name = "Angle PID hub facing")
   public final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
 
-  public final SR_ProfiledPIDController m_rotationControllerAuto = new SR_ProfiledPIDController(kPAutoThetaController, 0, kDAutoThetaController, kAutoThetaControllerConstraints);
+  @Log(name = "Angle PID auto")
+  public final SR_ProfiledPIDController m_rotationControllerAuto = new SR_ProfiledPIDController(kPAutoThetaController, 0.0, kDAutoThetaController, kAutoThetaControllerConstraints);
+
   @Log(name = "X PID")
   public final SR_PIDController m_xController = new SR_PIDController(kPAutoXController, kIAutoXController, kDAutoXController);
 

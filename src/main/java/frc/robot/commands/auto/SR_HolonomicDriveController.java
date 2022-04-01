@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
+import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ProfiledPIDController;
 
 /**
  * This holonomic drive controller can be used to follow trajectories using a holonomic drivetrain
@@ -21,15 +23,15 @@ import edu.wpi.first.math.trajectory.Trajectory;
  * point toward. This heading reference is profiled for smoothness.
  */
 @SuppressWarnings("MemberName")
-public class HolonomicDriveController {
+public class SR_HolonomicDriveController {
   private Pose2d m_poseError = new Pose2d();
   private Rotation2d m_rotationError = new Rotation2d();
   private Pose2d m_poseTolerance = new Pose2d();
   private boolean m_enabled = true;
 
-  private final PIDController m_xController;
-  private final PIDController m_yController;
-  private final ProfiledPIDController m_thetaController;
+  private final SR_PIDController m_xController;
+  private final SR_PIDController m_yController;
+  private final SR_ProfiledPIDController m_thetaController;
 
   private boolean m_firstRun = true;
 
@@ -41,8 +43,8 @@ public class HolonomicDriveController {
    * @param thetaController A profiled PID controller to respond to error in angle.
    */
   @SuppressWarnings("ParameterName")
-  public HolonomicDriveController(
-      PIDController xController, PIDController yController, ProfiledPIDController thetaController) {
+  public SR_HolonomicDriveController(
+      SR_PIDController xController, SR_PIDController yController, SR_ProfiledPIDController thetaController) {
     m_xController = xController;
     m_yController = yController;
     m_thetaController = thetaController;

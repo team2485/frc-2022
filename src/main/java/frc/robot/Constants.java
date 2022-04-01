@@ -97,8 +97,8 @@ public final class Constants {
     public static final double kDAutoThetaController = 0.5;
 
     // Constraint for the motion profilied robot angle controller
-    public static final TrapezoidProfile.Constraints kAutoThetaControllerConstraints =
-        new TrapezoidProfile.Constraints(
+    public static final SR_TrapezoidProfile.Constraints kAutoThetaControllerConstraints =
+        new SR_TrapezoidProfile.Constraints(
             kAutoMaxAngularSpeedRadiansPerSecond,
             kAutoMaxAngularAccelerationRadiansPerSecondSquared);
   }

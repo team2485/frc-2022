@@ -11,6 +11,7 @@ import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -18,6 +19,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PerpetualCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -91,6 +94,7 @@ public class RobotContainer {
   @Log(name = "Auto Chooser", width = 2, height = 2, rowIndex = 4, columnIndex = 0)
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
 
+    Timer m_autoTimer = new Timer();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     configureButtonBindings();
@@ -102,7 +106,7 @@ public class RobotContainer {
     m_autoChooser.addOption(
         "2 Ball Left Side",
         AutoCommandBuilder.get2BallFenderAutoLeft(
-            m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter));
+            m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_autoTimer));
   }
 
   /**
@@ -234,11 +238,7 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-<<<<<<< HEAD
                   m_shooterOffset -= 0.3;
-=======
-                  m_distanceOffset -= 0.1;
->>>>>>> 276704890f741f044848f44b443d14c281dce586
                 }));
 
     m_operator
@@ -321,15 +321,19 @@ public class RobotContainer {
                     new InstantCommand(() -> m_climbArm.enable(true), m_climbArm)));
 
     // turn off climb mode
-    m_driver
-        .leftPOV()
-        .and(m_driver.back())
-        .whileActiveOnce(
-            new InstantCommand(m_climbStateMachine::disableClimb)
+    m_driver.x()
+        .whenActive(
+            new PerpetualCommand(
+            new RunCommand(m_climbStateMachine::disableClimb)
                 .alongWith(
-                    new InstantCommand(() -> m_climbElevator.enable(false), m_climbElevator),
-                    new InstantCommand(() -> m_climbArm.enable(false), m_climbArm))
-                .andThen(ClimbCommandBuilder.getEngageRatchetCommand(m_climbElevator)));
+                    new RunCommand(() -> 
+                    {m_climbElevator.enable(false);
+                        }, m_climbElevator),
+
+                    new RunCommand(() -> {
+                        m_climbArm.enable(false);
+                        }, m_climbArm))), false
+                );
 
     // disengage ratchet
     //

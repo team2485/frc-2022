@@ -4,6 +4,8 @@ import static frc.robot.Constants.*;
 import static frc.robot.commands.CargoHandlingCommandBuilder.*;
 import static frc.robot.commands.auto.PathCommandBuilder.*;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -75,12 +77,12 @@ public class AutoCommandBuilder {
       Indexer indexer,
       Feeder feeder,
       FeedServo servo,
-      Shooter shooter) {
+      Shooter shooter, Timer timer) {
 
     WL_SwerveControllerCommand pathCommand = getPathCommand(drivetrain, "2 Ball Left Fender");
 
-    return new WaitCommand(0.5)
-        .andThen(
+    return 
+    new InstantCommand(()-> {timer.reset(); timer.start();}).andThen(new WaitCommand(0.5),
             getResetOdometryCommand(drivetrain, pathCommand),
             new InstantCommand(
                 () ->
@@ -89,7 +91,7 @@ public class AutoCommandBuilder {
                         .getObject("traj")
                         .setTrajectory(pathCommand.m_trajectory),
                 drivetrain),
-            pathCommand
+            pathCommand.withInterrupt(()-> timer.get() > 8)
                 .andThen(getStopPathCommand(drivetrain), new WaitCommand(1.5))
                 .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
             getStopIntakeCommand(intake, intakeArm, indexer),

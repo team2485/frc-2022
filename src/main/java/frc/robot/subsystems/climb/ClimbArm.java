@@ -173,6 +173,10 @@ public class ClimbArm extends SubsystemBase implements Loggable {
     return m_voltageRampTimer.get();
   }
 
+  public void abort() {
+    m_talon.set(ControlMode.Disabled, 0);
+  }
+
   public void enable(boolean enabled) {
     m_enabled = enabled;
     if (enabled) {
