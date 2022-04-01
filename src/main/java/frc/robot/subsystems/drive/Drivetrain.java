@@ -8,7 +8,6 @@ import static frc.robot.Constants.VisionConstants.*;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -70,13 +69,17 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   public final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
 
   @Log(name = "Angle PID auto")
-  public final SR_ProfiledPIDController m_rotationControllerAuto = new SR_ProfiledPIDController(kPAutoThetaController, 0.0, kDAutoThetaController, kAutoThetaControllerConstraints);
+  public final SR_ProfiledPIDController m_rotationControllerAuto =
+      new SR_ProfiledPIDController(
+          kPAutoThetaController, 0.0, kDAutoThetaController, kAutoThetaControllerConstraints);
 
   @Log(name = "X PID")
-  public final SR_PIDController m_xController = new SR_PIDController(kPAutoXController, kIAutoXController, kDAutoXController);
+  public final SR_PIDController m_xController =
+      new SR_PIDController(kPAutoXController, kIAutoXController, kDAutoXController);
 
   @Log(name = "Y PID")
-  public final SR_PIDController m_yController = new SR_PIDController(kPAutoYController, kIAutoYController, kDAutoYController);
+  public final SR_PIDController m_yController =
+      new SR_PIDController(kPAutoYController, kIAutoYController, kDAutoYController);
 
   public Drivetrain() {
     m_frontLeftModule =
@@ -147,7 +150,6 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     m_xController.setIntegratorRange(0, kAutoXYIntegratorMaxMetersPerSecond);
     m_yController.setIntegratorRange(0, kAutoXYIntegratorMaxMetersPerSecond);
-
 
     SmartDashboard.putData("Field", m_field);
   }
@@ -367,17 +369,6 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_frontRightModule.setTurningNeutralMode(mode);
     m_backLeftModule.setTurningNeutralMode(mode);
     m_backRightModule.setTurningNeutralMode(mode);
-  }
-
-  public void setPushable(boolean pushable) {
-    m_pushable = pushable;
-    if (m_pushable) {
-      this.setDriveNeutralMode(NeutralMode.Coast);
-      this.setTurningNeutralMode(NeutralMode.Brake);
-    } else {
-      this.setDriveNeutralMode(NeutralMode.Brake);
-      this.setTurningNeutralMode(NeutralMode.Brake);
-    }
   }
 
   /** Returns the Field2d object. */

@@ -44,7 +44,9 @@ public class SR_HolonomicDriveController {
    */
   @SuppressWarnings("ParameterName")
   public SR_HolonomicDriveController(
-      SR_PIDController xController, SR_PIDController yController, SR_ProfiledPIDController thetaController) {
+      SR_PIDController xController,
+      SR_PIDController yController,
+      SR_ProfiledPIDController thetaController) {
     m_xController = xController;
     m_yController = yController;
     m_thetaController = thetaController;

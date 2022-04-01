@@ -5,8 +5,6 @@ import static frc.robot.Constants.DriveConstants.*;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.drive.Drivetrain;
@@ -20,7 +18,7 @@ public class PathCommandBuilder {
     // put trajectory on Glass's Field2d widget
 
     // create controller for robot angle
- 
+
     // create command to follow path
     WL_SwerveControllerCommand pathCommand =
         new WL_SwerveControllerCommand(
@@ -28,7 +26,7 @@ public class PathCommandBuilder {
             drivetrain::getPoseMeters,
             kDriveKinematics,
             drivetrain.m_xController,
-            drivetrain.m_yController, 
+            drivetrain.m_yController,
             drivetrain.m_rotationControllerAuto,
             drivetrain::setModuleStates,
             drivetrain);

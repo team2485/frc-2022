@@ -2,7 +2,6 @@ package frc.robot.commands.auto;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -13,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
 import frc.team2485.WarlordsLib.sendableRichness.SR_ProfiledPIDController;
-
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 

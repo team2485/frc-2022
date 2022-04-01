@@ -11,8 +11,8 @@ import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -94,7 +94,7 @@ public class RobotContainer {
   @Log(name = "Auto Chooser", width = 2, height = 2, rowIndex = 4, columnIndex = 0)
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
 
-    Timer m_autoTimer = new Timer();
+  Timer m_autoTimer = new Timer();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     configureButtonBindings();
@@ -106,7 +106,14 @@ public class RobotContainer {
     m_autoChooser.addOption(
         "2 Ball Left Side",
         AutoCommandBuilder.get2BallFenderAutoLeft(
-            m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_autoTimer));
+            m_drivetrain,
+            m_intake,
+            m_intakeArm,
+            m_indexer,
+            m_feeder,
+            m_feedServo,
+            m_shooter,
+            m_autoTimer));
   }
 
   /**
@@ -144,14 +151,6 @@ public class RobotContainer {
                 m_drivetrain));
 
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
-
-    m_climbStateMachine
-        .getClimbStateTrigger(ClimbState.kNotClimbing)
-        .whenActive(new InstantCommand(() -> m_drivetrain.setPushable(false), m_drivetrain));
-
-    m_climbStateMachine
-        .getClimbStateTrigger(ClimbState.kClimbingOnMidBar)
-        .whenActive(new InstantCommand(() -> m_drivetrain.setPushable(true), m_drivetrain));
   }
 
   private void configureCargoHandlingCommands() {
@@ -185,9 +184,9 @@ public class RobotContainer {
                                     () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
                                 .withTimeout(0.5))));
 
-    m_driver.upperPOV().whileActiveContinuous(
-        CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm)
-    );
+    m_driver
+        .upperPOV()
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
 
     m_operator
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
@@ -209,7 +208,9 @@ public class RobotContainer {
             new ConditionalCommand(
                 new InstantCommand(),
                 CargoHandlingCommandBuilder.getSetShooterCommand(
-                    () -> m_shooterVelocityLock + m_shooterOffset, () -> m_shooterTangentialRatioLock, m_shooter),
+                    () -> m_shooterVelocityLock + m_shooterOffset,
+                    () -> m_shooterTangentialRatioLock,
+                    m_shooter),
                 () -> !m_setpointLock));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
@@ -321,19 +322,24 @@ public class RobotContainer {
                     new InstantCommand(() -> m_climbArm.enable(true), m_climbArm)));
 
     // turn off climb mode
-    m_driver.x()
+    m_driver
+        .leftPOV()
+        .and(m_driver.back())
         .whenActive(
             new PerpetualCommand(
-            new RunCommand(m_climbStateMachine::disableClimb)
-                .alongWith(
-                    new RunCommand(() -> 
-                    {m_climbElevator.enable(false);
-                        }, m_climbElevator),
-
-                    new RunCommand(() -> {
-                        m_climbArm.enable(false);
-                        }, m_climbArm))), false
-                );
+                new RunCommand(m_climbStateMachine::disableClimb)
+                    .alongWith(
+                        new RunCommand(
+                            () -> {
+                              m_climbElevator.enable(false);
+                            },
+                            m_climbElevator),
+                        new RunCommand(
+                            () -> {
+                              m_climbArm.enable(false);
+                            },
+                            m_climbArm))),
+            false);
 
     // disengage ratchet
     //

@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
@@ -89,10 +88,10 @@ public final class Constants {
 
     public static final double kPAutoXController = 5;
     public static final double kIAutoXController = 0.05;
-    public static final double kDAutoXController = 0.5;
+    public static final double kDAutoXController = 0.2;
     public static final double kPAutoYController = 5;
     public static final double kIAutoYController = 0.05;
-    public static final double kDAutoYController = 0.5;
+    public static final double kDAutoYController = 0.2;
 
     public static final double kAutoXYIntegratorMaxMetersPerSecond = 0.5;
     public static final double kPAutoThetaController = 10;
