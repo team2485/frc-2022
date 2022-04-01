@@ -109,8 +109,8 @@ public class WL_SwerveControllerCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return Math.abs(m_pose.get().minus(m_trajectory.getEndState().poseMeters).getX()) < 0.2
-        && Math.abs(m_pose.get().minus(m_trajectory.getEndState().poseMeters).getY()) < 0.2
+    return Math.abs(m_pose.get().minus(m_trajectory.getEndState().poseMeters).getX()) < 0.4
+        && Math.abs(m_pose.get().minus(m_trajectory.getEndState().poseMeters).getY()) < 0.4
         && Math.abs(
                 m_pose
                     .get()

@@ -62,27 +62,27 @@ public class RobotContainer {
 
   // OPERATOR LOCKS
 
-  @Log(name = "Setpoint lock")
   boolean m_setpointLock = false;
 
-  @Log(name = "High fender lock", width = 2, height = 1, rowIndex = 2, columnIndex = 15)
+  @Log(name = "High fender lock", width = 4, height = 2, rowIndex = 0, columnIndex = 15)
   boolean m_highFender = false;
 
-  @Log(name = "Low fender lock", width = 2, height = 1, rowIndex = 3, columnIndex = 15)
+  @Log(name = "Low fender lock", width = 4, height = 2, rowIndex = 2, columnIndex = 15)
   boolean m_lowFender = false;
 
   // @Log(name = "Eject lock", width = 3, height = 1, rowIndex = 5, columnIndex = 12)
   // boolean m_eject = false;
 
-  @Log(name = "Shooter velocity lock value", width = 4, height = 1, rowIndex = 0, columnIndex = 15)
+  //   @Log(name = "Shooter velocity lock value", width = 4, height = 1, rowIndex = 0, columnIndex =
+  // 15)
   double m_shooterVelocityLock = 0;
 
-  @Log(
-      name = "Shooter tangential ratio lock",
-      width = 4,
-      height = 1,
-      rowIndex = 0,
-      columnIndex = 15)
+  //   @Log(
+  //       name = "Shooter tangential ratio lock",
+  //       width = 4,
+  //       height = 1,
+  //       rowIndex = 0,
+  //       columnIndex = 15)
   double m_shooterTangentialRatioLock = 1;
 
   @Log(name = "Bar to climb to", width = 2, height = 2, rowIndex = 2, columnIndex = 0)
@@ -181,6 +181,10 @@ public class RobotContainer {
                                     () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
                                 .withTimeout(0.5))));
 
+    m_driver.upperPOV().whileActiveContinuous(
+        CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm)
+    );
+
     m_operator
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
@@ -209,8 +213,7 @@ public class RobotContainer {
         .rightBumper()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getIndexToShooterCommand(
-                m_indexer, m_feeder, m_feedServo, m_shooter),
+            CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder, m_feedServo),
             false)
         .whenInactive(
             CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo));
@@ -231,7 +234,11 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
+<<<<<<< HEAD
                   m_shooterOffset -= 0.3;
+=======
+                  m_distanceOffset -= 0.1;
+>>>>>>> 276704890f741f044848f44b443d14c281dce586
                 }));
 
     m_operator
@@ -258,8 +265,8 @@ public class RobotContainer {
                 () -> {
                   m_highFender = true;
                   m_setpointLock = true;
-                  m_shooterVelocityLock = 26.75;
-                  m_shooterTangentialRatioLock = 0.865;
+                  m_shooterVelocityLock = kShootingFenderSetpointShooter;
+                  m_shooterTangentialRatioLock = kShootingFenderSetpointTangentialRatio;
                 }))
         .whenInactive(
             new InstantCommand(

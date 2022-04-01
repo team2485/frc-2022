@@ -1,11 +1,13 @@
 package frc.robot.commands.auto;
 
+import static frc.robot.Constants.*;
 import static frc.robot.commands.CargoHandlingCommandBuilder.*;
 import static frc.robot.commands.auto.PathCommandBuilder.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.drive.*;
@@ -28,8 +30,13 @@ public class AutoCommandBuilder {
         getPathCommand(drivetrain, "3 Score Right Fender");
 
     return new WaitCommand(0.5)
+        .andThen(getIndexToShooterCommand(indexer, feeder, servo), new WaitCommand(0.5))
+        .raceWith(
+            getSetShooterCommand(
+                () -> kShootingFenderSetpointShooter,
+                () -> kShootingFenderSetpointTangentialRatio,
+                shooter))
         .andThen(
-            getIndexToShooterCommand(indexer, feeder, servo, shooter),
             getResetOdometryCommand(drivetrain, intakePathCommand),
             new InstantCommand(
                 () ->
@@ -51,9 +58,14 @@ public class AutoCommandBuilder {
                         drivetrain)
                     .andThen(scorePathCommand, getStopPathCommand(drivetrain)),
                 getStopIntakeCommand(intake, intakeArm, indexer)),
-            getIndexToShooterCommand(indexer, feeder, servo, shooter),
-            getIndexToShooterCommand(indexer, feeder, servo, shooter))
-        .raceWith(getSetShooterCommand(() -> 27.5, () -> 0.87, shooter));
+            new ParallelRaceGroup(
+                getIndexToShooterCommand(indexer, feeder, servo)
+                    .andThen(getIndexToShooterCommand(indexer, feeder, servo))
+                    .raceWith(
+                        getSetShooterCommand(
+                            () -> 27.9,
+                            () -> 0.55,
+                            shooter))));
   }
 
   public static Command get2BallFenderAutoLeft(
@@ -81,9 +93,13 @@ public class AutoCommandBuilder {
                 .andThen(getStopPathCommand(drivetrain), new WaitCommand(1.5))
                 .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
             getStopIntakeCommand(intake, intakeArm, indexer),
-            getIndexToShooterCommand(indexer, feeder, servo, shooter),
-            getIndexToShooterCommand(indexer, feeder, servo, shooter))
-        .alongWith(getSetShooterCommand(() -> 27.5, () -> 0.87, shooter));
+            getIndexToShooterCommand(indexer, feeder, servo),
+            getIndexToShooterCommand(indexer, feeder, servo))
+        .alongWith(
+            getSetShooterCommand(
+                () -> 27.9,
+                () -> 0.55,
+                shooter));
   }
 
   //     Command scoochOverPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Right

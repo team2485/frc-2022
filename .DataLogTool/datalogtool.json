@@ -1,9 +1,8 @@
 {
   "download": {
-    "localDir": "C:\\Users\\marke\\Robotics\\Data logs",
     "serverTeam": "2485"
   },
   "output": {
-    "outputFolder": "C:\\Users\\marke\\Robotics\\Data logs"
+    "outputFolder": "C:\\Users\\marke\\Robotics\\frc-2022\\Data Logs"
   }
 }
