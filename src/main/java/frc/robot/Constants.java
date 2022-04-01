@@ -93,8 +93,12 @@ public final class Constants {
     public static final double kPAutoYController = 5;
     public static final double kIAutoYController = 0.05;
     public static final double kDAutoYController = 0.5;
+
+    public static final double kAutoXYIntegratorMaxMetersPerSecond = 0.5;
     public static final double kPAutoThetaController = 10;
-    public static final double kDAutoThetaController = 0.5;
+    public static final double kIAutoThetaController = 0.1;
+    public static final double kAutoThetaIntegratorMaxRadiansPerSecond = 0.2;
+    public static final double kDAutoThetaController = 0.1;
 
     // Constraint for the motion profilied robot angle controller
     public static final SR_TrapezoidProfile.Constraints kAutoThetaControllerConstraints =

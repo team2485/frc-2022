@@ -142,6 +142,13 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_rotationController.setTolerance(kRotationTolerance);
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
+    m_rotationControllerAuto.enableContinuousInput(-Math.PI, Math.PI);
+    m_rotationControllerAuto.setIntegratorRange(0, kAutoThetaIntegratorMaxRadiansPerSecond);
+
+    m_xController.setIntegratorRange(0, kAutoXYIntegratorMaxMetersPerSecond);
+    m_yController.setIntegratorRange(0, kAutoXYIntegratorMaxMetersPerSecond);
+
+
     SmartDashboard.putData("Field", m_field);
   }
 
