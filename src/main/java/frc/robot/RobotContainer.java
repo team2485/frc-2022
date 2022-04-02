@@ -57,8 +57,11 @@ public class RobotContainer {
   // Distance offset to change distance by for auto-aim -- used to adjust
 
   // OPERATOR ADJUSTMENTS
-  @Log(name = "Distance offset", width = 2, height = 1, rowIndex = 2, columnIndex = 17)
+  @Log(name = "Distance offset", width = 4, height = 1, rowIndex = 4, columnIndex = 16)
   double m_shooterOffset = 0;
+
+  @Log(name = "Kicker ratio offset", width = 4, height = 1, rowIndex = 5, columnIndex = 16)
+  double m_kickerRatioOffset = 0;
 
   // @Log(name = "Angle shift", width = 2, height = 1, rowIndex = 3, columnIndex = 17)
   double m_angleShift = 0;
@@ -114,6 +117,20 @@ public class RobotContainer {
             m_feedServo,
             m_shooter,
             m_autoTimer));
+    m_autoChooser.addOption(
+        "Back up",
+        // PathCommandBuilder.getResetOdometryCommand(m_drivetrain,
+        // PathCommandBuilder.getPathCommand(m_drivetrain, "2 Ball Left Side")).andThen(
+        // CargoHandlingCommandBuilder.getSetShooterCommand(
+        //         () -> 35, () -> 0.8, m_shooter) // full send
+        //     .raceWith(
+        //         new WaitCommand(3)
+        //             .andThen(
+        //                 CargoHandlingCommandBuilder.getIndexToShooterCommand(
+        //                     m_indexer, m_feeder, m_feedServo),
+        //                 new WaitCommand(1)))
+        //     .andThen(
+        new RunCommand(() -> m_drivetrain.drive(-1, 0, 0, false)).withTimeout(2.5));
   }
 
   /**
@@ -209,7 +226,7 @@ public class RobotContainer {
                 new InstantCommand(),
                 CargoHandlingCommandBuilder.getSetShooterCommand(
                     () -> m_shooterVelocityLock + m_shooterOffset,
-                    () -> m_shooterTangentialRatioLock,
+                    () -> m_shooterTangentialRatioLock + m_kickerRatioOffset,
                     m_shooter),
                 () -> !m_setpointLock));
 
@@ -230,6 +247,7 @@ public class RobotContainer {
             new InstantCommand(
                 () -> {
                   m_shooterOffset += 0.3;
+                  m_kickerRatioOffset += 0.1;
                 }));
 
     // Make robot think it's further when aiming
@@ -240,6 +258,7 @@ public class RobotContainer {
             new InstantCommand(
                 () -> {
                   m_shooterOffset -= 0.3;
+                  m_kickerRatioOffset -= 0.1;
                 }));
 
     m_operator

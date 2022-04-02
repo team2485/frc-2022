@@ -64,7 +64,7 @@ public final class Constants {
 
   // 5 ft front bumper: 60 0.8
 
-  public static final double kShootingFenderSetpointShooter = 27.5;
+  public static final double kShootingFenderSetpointShooter = 27.6;
   public static final double kShootingFenderSetpointTangentialRatio = 0.55;
 
   public static final class OIConstants {
@@ -108,7 +108,9 @@ public final class Constants {
 
   public static final class ModuleConstants {
     // Drive control constants
-    public static final double kDriveCurrentLimitAmps = 35;
+    public static final double kDriveSupplyCurrentLimitAmps = 35;
+    public static final double kDriveStatorCurrentLimitAmps = 60;
+    public static final double kDriveStatorCurrentThresholdTimeSecs = 0.1;
 
     //// Drive mechanism/encoder constants
     public static final double kWheelDiameterMeters = 0.1016;
@@ -139,13 +141,17 @@ public final class Constants {
     public static final double kaDriveVoltSecondsSquaredPerMeter =
         IDManager.getInstance().select(0.30189, 0.37446);
 
+    public static final double ksDriveVoltsBackLeft = 0.5;
+
     public static final double kvMaxVelocity = 12 / kvDriveVoltSecondsPerMeter;
     public static final double kaMaxAcceleration = 12 / kaDriveVoltSecondsSquaredPerMeter;
 
     //// Drive PID constants
     public static final double kPDrive = 0.1;
     // Turning control constants
-    public static final double kTurningCurrentLimitAmps = 10;
+    public static final double kTurningSupplyCurrentLimitAmps = 20;
+    public static final double kTurningStatorCurrentLimitAmps = 60;
+    public static final double kTurningStatorCurrentThresholdTimeSecs = 0.1;
 
     //// Turning mechanism/encoder constants
     public static final double kTurningGearRatio = 12.8; // motor turns per shaft turns
@@ -369,9 +375,9 @@ public final class Constants {
         1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
     public static final double kIntakeArmBottomPositionRadians =
-        IDManager.getInstance().select(-0.278, -0.2618); // from horizontal
+        IDManager.getInstance().select(-0.204, -0.2618); // from horizontal
     public static final double kIntakeArmTopPositionRadians =
-        IDManager.getInstance().select(2.014, 2.0071); // change later
+        IDManager.getInstance().select(2.019, 2.0071); // change later
     public static final double kIntakeArmTipPositionRadians =
         IDManager.getInstance().select(1.25, 1.6);
 

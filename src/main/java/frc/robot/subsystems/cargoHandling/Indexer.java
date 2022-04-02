@@ -9,7 +9,6 @@ import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Indexer extends SubsystemBase implements Loggable {
@@ -47,7 +46,7 @@ public class Indexer extends SubsystemBase implements Loggable {
   }
 
   /** @return the current velocity in rotations per second. */
-  @Log(name = "Current velocity (RPS)")
+  // @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
     return m_spark.getEncoder().getVelocity() / (60.0 * kIndexerGearRatio);
   }
@@ -57,7 +56,7 @@ public class Indexer extends SubsystemBase implements Loggable {
    *
    * @param rotationsPerSecond velocity setpoint
    */
-  @Config(name = "Set Velocity (RPS)")
+  // @Config(name = "Set Velocity (RPS)")
   public void setVelocityRotationsPerSecond(double rotationsPerSecond) {
     m_voltageOverride = false;
     m_velocitySetpointRotationsPerSecond = rotationsPerSecond;
@@ -68,18 +67,18 @@ public class Indexer extends SubsystemBase implements Loggable {
    *
    * @param voltage what voltage to apply
    */
-  @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
+  // @Config.NumberSlider(name = "Set voltage", min = -12, max = 12)
   public void setVoltage(double voltage) {
     m_voltageOverride = true;
     m_voltageSetpoint = voltage;
   }
 
-  @Log(name = "Stator current")
+  // @Log(name = "Stator current")
   public double getStatorCurrent() {
     return m_spark.getOutputCurrent();
   }
 
-  @Log(name = "At setpoint")
+  // @Log(name = "At setpoint")
   public boolean atSetpoint() {
     return Math.abs(getVelocityRotationsPerSecond() - m_velocitySetpointRotationsPerSecond)
         < kIndexerVelocityToleranceRotationsPerSecond;

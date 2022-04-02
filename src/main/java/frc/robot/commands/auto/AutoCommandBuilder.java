@@ -32,11 +32,7 @@ public class AutoCommandBuilder {
 
     return new WaitCommand(0.5)
         .andThen(getIndexToShooterCommand(indexer, feeder, servo), new WaitCommand(0.5))
-        .raceWith(
-            getSetShooterCommand(
-                () -> kShootingFenderSetpointShooter,
-                () -> kShootingFenderSetpointTangentialRatio,
-                shooter))
+        .raceWith(getSetShooterCommand(() -> 27.2, () -> 0.5, shooter))
         .andThen(
             getResetOdometryCommand(drivetrain, intakePathCommand),
             new InstantCommand(
@@ -62,7 +58,7 @@ public class AutoCommandBuilder {
             new ParallelRaceGroup(
                 getIndexToShooterCommand(indexer, feeder, servo)
                     .andThen(getIndexToShooterCommand(indexer, feeder, servo))
-                    .raceWith(getSetShooterCommand(() -> 27.9, () -> 0.55, shooter))));
+                    .raceWith(getSetShooterCommand(() -> 27.9, () -> 0.52, shooter))));
   }
 
   public static Command get2BallFenderAutoLeft(
@@ -94,13 +90,17 @@ public class AutoCommandBuilder {
                 drivetrain),
             pathCommand
                 .withInterrupt(() -> timer.get() > 8)
-                .andThen(getStopPathCommand(drivetrain), new WaitCommand(1.5))
+                .andThen(getStopPathCommand(drivetrain), new WaitCommand(0.5))
                 .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
             getStopIntakeCommand(intake, intakeArm, indexer),
             getIndexToShooterCommand(indexer, feeder, servo),
             getIndexToShooterCommand(indexer, feeder, servo))
-        .alongWith(getSetShooterCommand(() -> 27.9, () -> 0.55, shooter));
+        .alongWith(getSetShooterCommand(() -> 27.9, () -> 0.52, shooter));
   }
+
+  //   public static Command getSwordfishAuto() {
+  //     return new RunCommand(()-> m_intak.)
+  //   }
 
   //     Command scoochOverPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Right
   // Finish");

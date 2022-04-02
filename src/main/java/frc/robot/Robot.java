@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
     LiveWindow.disableAllTelemetry();
     VideoSource video = CameraServer.startAutomaticCapture();
     video.setVideoMode(new VideoMode(PixelFormat.kMJPEG, 320, 240, 120));
-    video.setFPS(10);
+    video.setFPS(5);
 
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);

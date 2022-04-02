@@ -54,8 +54,11 @@ public class SwerveModule implements Loggable {
     // -- voltage compensation, current limiting, P term, brake mode
     TalonFXConfiguration driveMotorConfig = new TalonFXConfiguration();
     driveMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
-    driveMotorConfig.supplyCurrLimit.currentLimit = kDriveCurrentLimitAmps;
+    driveMotorConfig.supplyCurrLimit.currentLimit = kDriveSupplyCurrentLimitAmps;
     driveMotorConfig.supplyCurrLimit.enable = true;
+    driveMotorConfig.statorCurrLimit.currentLimit = kDriveStatorCurrentLimitAmps;
+    driveMotorConfig.statorCurrLimit.triggerThresholdCurrent = kDriveStatorCurrentLimitAmps;
+    driveMotorConfig.statorCurrLimit.triggerThresholdTime = kDriveStatorCurrentThresholdTimeSecs;
     driveMotorConfig.slot0.kP = kPDrive;
     driveMotorConfig.slot0.allowableClosedloopError = 0.01 / kDriveDistMetersPerPulse / 10;
     driveMotorConfig.velocityMeasurementWindow = 1;
@@ -84,8 +87,12 @@ public class SwerveModule implements Loggable {
     // -- voltage compensation, current limiting, P D F terms, motion magic, brake mode
     TalonFXConfiguration turningMotorConfig = new TalonFXConfiguration();
     turningMotorConfig.voltageCompSaturation = Constants.kNominalVoltage;
-    turningMotorConfig.supplyCurrLimit.currentLimit = kTurningCurrentLimitAmps;
+    turningMotorConfig.supplyCurrLimit.currentLimit = kTurningSupplyCurrentLimitAmps;
     turningMotorConfig.supplyCurrLimit.enable = true;
+    turningMotorConfig.statorCurrLimit.currentLimit = kTurningStatorCurrentLimitAmps;
+    turningMotorConfig.statorCurrLimit.triggerThresholdCurrent = kTurningStatorCurrentLimitAmps;
+    turningMotorConfig.statorCurrLimit.triggerThresholdTime =
+        kTurningStatorCurrentThresholdTimeSecs;
     turningMotorConfig.slot0.kP = kPTurningOutputUnit100MsPerSensorUnit;
     turningMotorConfig.slot0.kD = kDTurningOutputUnit100MsSquaredPerSensorUnit;
     turningMotorConfig.slot0.kF = kFTurningOutputUnit100MsPerSensorUnit;

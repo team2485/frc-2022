@@ -78,8 +78,8 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kIntakeArmSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kIntakeArmImmediateCurrentLimitAmps);
-    m_topLimitSwitch.enableLimitSwitch(true);
-    m_bottomLimitSwitch.enableLimitSwitch(true);
+    m_topLimitSwitch.enableLimitSwitch(false);
+    m_bottomLimitSwitch.enableLimitSwitch(false);
     m_spark.setIdleMode(IdleMode.kBrake);
 
     m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
@@ -162,10 +162,13 @@ public class IntakeArm extends SubsystemBase implements Loggable {
         // System.out.println("Going down");
 
         if (this.getAngleRadians() > kIntakeArmTipPositionRadians) {
-          outputVoltage = -5;
+          outputVoltage = -7;
         } else {
-          outputVoltage = -4;
+          outputVoltage = -5;
         }
+
+      } else if (!m_armPosition && !m_armSetpointPosition) {
+        outputVoltage = -1;
       }
 
       if (outputVoltage != m_lastOutputVoltage) {

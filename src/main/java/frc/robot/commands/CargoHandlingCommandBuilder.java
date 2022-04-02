@@ -91,6 +91,13 @@ public class CargoHandlingCommandBuilder {
     }
   }
 
+  public static Command getOuttakeCommand(Indexer indexer) {
+    return new StartEndCommand(
+        () -> indexer.setVelocityRotationsPerSecond(-3),
+        () -> indexer.setVelocityRotationsPerSecond(0),
+        indexer);
+  }
+
   public static Command getSetFeederCommand(DoubleSupplier velocity, Feeder feeder) {
     if (velocity.getAsDouble() == 0) {
       return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder);
