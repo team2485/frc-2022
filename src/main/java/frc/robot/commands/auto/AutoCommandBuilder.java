@@ -22,7 +22,8 @@ public class AutoCommandBuilder {
       Indexer indexer,
       Feeder feeder,
       FeedServo servo,
-      Shooter shooter) {
+      Shooter shooter,
+      Timer timer) {
 
     WL_SwerveControllerCommand intakePathCommand =
         getPathCommand(drivetrain, "3 Ball Right Fender");
@@ -30,8 +31,15 @@ public class AutoCommandBuilder {
     WL_SwerveControllerCommand scorePathCommand =
         getPathCommand(drivetrain, "3 Score Right Fender");
 
-    return new WaitCommand(0.5)
-        .andThen(getIndexToShooterCommand(indexer, feeder, servo), new WaitCommand(0.5))
+    return new InstantCommand(
+            () -> {
+              timer.reset();
+              timer.start();
+            })
+        .andThen(
+            new WaitCommand(0.5),
+            getIndexToShooterCommand(indexer, feeder, servo),
+            new WaitCommand(0.5))
         .raceWith(getSetShooterCommand(() -> 27.2, () -> 0.5, shooter))
         .andThen(
             getResetOdometryCommand(drivetrain, intakePathCommand),
@@ -43,7 +51,15 @@ public class AutoCommandBuilder {
                         .setTrajectory(intakePathCommand.m_trajectory),
                 drivetrain),
             intakePathCommand
-                .andThen(getStopPathCommand(drivetrain), new WaitCommand(1.5))
+                .withInterrupt(() -> timer.get() > 8)
+                .andThen(
+                    new InstantCommand(
+                        () -> {
+                          timer.reset();
+                          timer.start();
+                        }),
+                    getStopPathCommand(drivetrain),
+                    new WaitCommand(1.5))
                 .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
             new ParallelDeadlineGroup(
                 new InstantCommand(
@@ -53,7 +69,9 @@ public class AutoCommandBuilder {
                                 .getObject("traj")
                                 .setTrajectory(scorePathCommand.m_trajectory),
                         drivetrain)
-                    .andThen(scorePathCommand, getStopPathCommand(drivetrain)),
+                    .andThen(
+                        scorePathCommand.withInterrupt(() -> timer.get() > 5),
+                        getStopPathCommand(drivetrain)),
                 getStopIntakeCommand(intake, intakeArm, indexer)),
             new ParallelRaceGroup(
                 getIndexToShooterCommand(indexer, feeder, servo)
