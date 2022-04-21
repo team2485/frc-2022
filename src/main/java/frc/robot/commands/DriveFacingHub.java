@@ -43,9 +43,6 @@ public class DriveFacingHub extends CommandBase {
   @Override
   public void execute() {
 
-    SmartDashboard.putNumber("xbox right x", m_xSpeedSupplier.getAsDouble());
-    SmartDashboard.putNumber("xbox left x", m_ySpeedSupplier.getAsDouble());
-
     final double xSpeed =
         Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband)
             * kTeleopMaxSpeedMetersPerSecond;

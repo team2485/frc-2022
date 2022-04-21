@@ -25,10 +25,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Vision.TimestampedTranslation2d;
 import frc.team2485.WarlordsLib.PoseHistory;
 import frc.team2485.WarlordsLib.sendableRichness.SR_PIDController;
+import frc.team2485.WarlordsLib.sendableRichness.SR_ProfiledPIDController;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class Drivetrain extends SubsystemBase implements Loggable {
   private final SwerveModule m_frontLeftModule;
@@ -55,6 +55,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   @Log private double m_desiredXSpeed;
   @Log private double m_desiredYSpeed;
 
+  @Log private boolean m_pushable;
+
   // @Log(name = "Drive Neutral")
   private SendableChooser<NeutralMode> m_driveNeutralChooser = new SendableChooser<NeutralMode>();
 
@@ -63,12 +65,23 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
   public final Field2d m_field = new Field2d();
 
-  @Log(name = "Angle PID (hub tracking)")
-  private final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
+  @Log(name = "Angle PID hub facing")
+  public final SR_PIDController m_rotationController = new SR_PIDController(kPRotation, 0, 0);
 
-  private Supplier<Rotation2d> m_turretAngle;
+  @Log(name = "Angle PID auto")
+  public final SR_ProfiledPIDController m_rotationControllerAuto =
+      new SR_ProfiledPIDController(
+          kPAutoThetaController, 0.0, kDAutoThetaController, kAutoThetaControllerConstraints);
 
-  public Drivetrain(Supplier<Rotation2d> turretAngle) {
+  @Log(name = "X PID")
+  public final SR_PIDController m_xController =
+      new SR_PIDController(kPAutoXController, kIAutoXController, kDAutoXController);
+
+  @Log(name = "Y PID")
+  public final SR_PIDController m_yController =
+      new SR_PIDController(kPAutoYController, kIAutoYController, kDAutoYController);
+
+  public Drivetrain() {
     m_frontLeftModule =
         new SwerveModule(
             kFLDriveTalonPort,
@@ -106,24 +119,20 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     m_pigeon = new WPI_Pigeon2(kPigeonPort);
 
-    m_pigeon.setYaw(0);
     m_odometry =
         new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     // m_odometryWithoutVision =
     //     new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(m_pigeon.getYaw()));
     m_odometry.resetPosition(
-        new Pose2d(new Translation2d(5, 3.9), new Rotation2d(0)),
+        new Pose2d(
+            new Translation2d(kRobotBumperLengthMeters / 2, 4.1148), Rotation2d.fromDegrees(0)),
         Rotation2d.fromDegrees(m_pigeon.getYaw()));
 
     // m_odometryWithoutVision.resetPosition(
     //     new Pose2d(
-    //         new Translation2d(kRobotBumperLengthMeters / 2, kRobotBumperWidthMeters / 2),
-    //         new Rotation2d(0)),
+    //         new Translation2d(kRobotBumperLengthMeters / 2, 4.1148), Rotation2d.fromDegrees(0)),
     //     Rotation2d.fromDegrees(m_pigeon.getYaw()));
-    // m_odometryWithoutVision.resetPosition(
-    //     new Pose2d(new Translation2d(0, 4.1148), new Rotation2d(0)),
-    //     Rotation2d.fromDegrees(m_pigeon.getFusedHeading()));
 
     // m_driveNeutralChooser.setDefaultOption("Brake", NeutralMode.Brake);
     // m_driveNeutralChooser.addOption("Coast", NeutralMode.Coast);
@@ -136,10 +145,13 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     m_rotationController.setTolerance(kRotationTolerance);
     m_rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
-    m_turretAngle = turretAngle;
-    SmartDashboard.putData("Field", m_field);
-    // this.zeroHeading();
+    m_rotationControllerAuto.enableContinuousInput(-Math.PI, Math.PI);
+    m_rotationControllerAuto.setIntegratorRange(0, kAutoThetaIntegratorMaxRadiansPerSecond);
 
+    m_xController.setIntegratorRange(0, kAutoXYIntegratorMaxMetersPerSecond);
+    m_yController.setIntegratorRange(0, kAutoXYIntegratorMaxMetersPerSecond);
+
+    SmartDashboard.putData("Field", m_field);
   }
 
   /**
@@ -158,14 +170,26 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     // if not being fed a speed, set all wheels pointing toward center to minimize pushability
     if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
-      m_frontLeftModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
-      m_frontRightModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
-      m_backLeftModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
-      m_backRightModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      if (m_pushable) {
+        m_frontLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_frontRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_backLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_backRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+      } else {
+        m_frontLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+        m_frontRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+        m_backLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+        m_backRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      }
+
     } else {
       SwerveModuleState[] states =
           kDriveKinematics.toSwerveModuleStates(
@@ -208,13 +232,25 @@ public class Drivetrain extends SubsystemBase implements Loggable {
 
     // if not being fed a speed, set all wheels pointing toward center to minimize pushability
     if (xVelocity == 0 && yVelocity == 0 && angularVelocity == 0) {
-      m_frontLeftModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
-      m_frontRightModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
-      m_backLeftModule.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
-      m_backRightModule.setDesiredState(
-          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+      if (m_pushable) {
+        m_frontLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_frontRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_backLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+        m_backRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(0)), false);
+      } else {
+        m_frontLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+        m_frontRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+        m_backLeftModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), false);
+        m_backRightModule.setDesiredState(
+            new SwerveModuleState(0, Rotation2d.fromDegrees(45)), false);
+      }
     } else {
       SwerveModuleState[] states =
           kDriveKinematics.toSwerveModuleStates(
@@ -268,14 +304,8 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   }
 
   @Log(name = "Hub to turret center")
-  public double getHubToTurretCenterDistanceMeters() {
-    return getTurretCenterPoseMeters().getTranslation().getDistance(kHubCenterTranslation);
-  }
-
-  public Pose2d getTurretCenterPoseMeters() {
-    return getPoseMeters().plus(kRobotToTurretCenterMeters);
-    // .plus(
-    // new Transform2d(new Translation2d(0, 0), this.getHeading())));
+  public double getHubToRobotCenterDistanceMeters() {
+    return this.getPoseMeters().getTranslation().getDistance(kHubCenterTranslation);
   }
 
   /**
@@ -349,23 +379,34 @@ public class Drivetrain extends SubsystemBase implements Loggable {
   public void addVisionMeasurement(TimestampedTranslation2d data) {
     Optional<Pose2d> historicalFieldToTarget = m_poseHistory.get(data.timestamp);
 
+    m_field.getObject("Vision translation").setPose(new Pose2d(data.translation, new Rotation2d()));
     if (historicalFieldToTarget.isPresent()) {
       // Calculate new robot pose
 
-      Rotation2d robotRotation = historicalFieldToTarget.get().getRotation();
-      Rotation2d cameraRotation =
-          robotRotation.rotateBy(
-              kRobotToTurretCenterMeters.getRotation().plus(m_turretAngle.get()));
-      Transform2d fieldToTargetRotated = new Transform2d(kHubCenterTranslation, cameraRotation);
+      m_field
+          .getObject("Alleged robot rotation")
+          .setPose(new Pose2d(new Translation2d(), historicalFieldToTarget.get().getRotation()));
+
+      Rotation2d robotRotation = historicalFieldToTarget.get().getRotation(); // this is off
+      Rotation2d cameraRotation = robotRotation.rotateBy(kRobotToCameraMeters.getRotation());
+
+      Transform2d fieldToTargetRotated =
+          new Transform2d(
+              kHubCenterTranslation, cameraRotation); // Position of hub rotated by camera rotation
+
+      m_field
+          .getObject("Hub robot rotated")
+          .setPose(new Pose2d().transformBy(fieldToTargetRotated));
+
       Transform2d fieldToCamera =
           fieldToTargetRotated.plus(
-              new Transform2d(data.translation.unaryMinus(), new Rotation2d()));
+              new Transform2d(
+                  data.translation.unaryMinus(),
+                  new Rotation2d())); // pose of camera in field domain, based on vision and target
 
-      Transform2d visionFieldToTargetTransform =
-          fieldToCamera.plus(
-              kRobotToTurretCenterMeters
-                  .plus(new Transform2d(kTurretCentertoCameraMeters, m_turretAngle.get()))
-                  .inverse());
+      m_field.getObject("Camera pose").setPose(new Pose2d().transformBy(fieldToCamera));
+
+      Transform2d visionFieldToTargetTransform = fieldToCamera.plus(kRobotToCameraMeters.inverse());
 
       Pose2d visionFieldToTarget =
           new Pose2d(
@@ -453,9 +494,12 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     //     m_frontRightModule.getState(),
     //     m_backRightModule.getState());
 
-    m_field.getObject("Turret").setPose(this.getTurretCenterPoseMeters());
+    // m_field.getObject("Odometry without
+    // vision").setPose(m_odometryWithoutVision.getPoseMeters());
 
     Pose2d robotPose = m_odometry.getPoseMeters();
+    m_poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
+
     // Pose2d lastPose;
     // try {
     //   lastPose = m_poseHistory.getLatest().get().getPose();
@@ -463,13 +507,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
     //   lastPose = robotPose;
     // }
     // m_velocity = robotPose.getTranslation().minus(lastPose.getTranslation());
-    m_poseHistory.insert(Timer.getFPGATimestamp(), robotPose);
 
-    // System.out.println("pose: " + getPoseMeters().toString());
     m_field.setRobotPose(getPoseMeters());
-
-    // Update brake/coast mode
-    // setDriveNeutralMode(m_driveNeutralChooser.getSelected());
-    // setTurningNeutralMode(m_turningNeutralChooser.getSelected());
   }
 }

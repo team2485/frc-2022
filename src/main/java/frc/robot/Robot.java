@@ -4,13 +4,12 @@
 
 package frc.robot;
 
-import static frc.robot.Constants.TurretConstants.*;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,10 +35,6 @@ public class Robot extends TimedRobot {
 
     m_robotContainer = new RobotContainer();
     addPeriodic(
-        () -> m_robotContainer.m_shooter.runControlLoop(),
-        Constants.ShooterConstants.kShooterLoopTimeSeconds);
-
-    addPeriodic(
         () -> m_robotContainer.m_climbElevator.runControlLoop(),
         Constants.ClimbElevatorConstants.kElevatorControlLoopTimeSeconds);
 
@@ -54,9 +49,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    DataLogManager.start();
     LiveWindow.disableAllTelemetry();
     VideoSource video = CameraServer.startAutomaticCapture();
     video.setVideoMode(new VideoMode(PixelFormat.kMJPEG, 320, 240, 120));
+    video.setFPS(5);
+
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);
   }
@@ -79,6 +77,7 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
+    CommandScheduler.getInstance().cancelAll();
     m_robotContainer.disabledInit();
   }
 
@@ -123,6 +122,8 @@ public class Robot extends TimedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+
+    CommandScheduler.getInstance().enable();
     // m_robotContainer.configureDriveCoastMode();
 
   }

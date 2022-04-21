@@ -38,7 +38,7 @@ public class Feeder extends SubsystemBase implements Loggable {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kFeederSmartCurrentLimitAmps);
     m_spark.setSecondaryCurrentLimit(kFeederImmediateCurrentLimitAmps);
-    m_spark.setIdleMode(IdleMode.kBrake);
+    m_spark.setIdleMode(IdleMode.kCoast);
     m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
     m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
     m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20
@@ -47,7 +47,7 @@ public class Feeder extends SubsystemBase implements Loggable {
   /** @return the current velocity in rotations per second. */
   @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
-    return m_spark.getEncoder().getVelocity() / 60.0;
+    return m_spark.getEncoder().getVelocity() / (60.0 * kFeederGearRatio);
   }
 
   /**

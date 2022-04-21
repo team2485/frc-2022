@@ -28,7 +28,7 @@ public class ClimbArm extends SubsystemBase implements Loggable {
   private final SR_ProfiledPIDController m_pidControllerTranslation =
       new SR_ProfiledPIDController(
           kPArmTranslationVoltsPerMeter,
-          0,
+          kIArmTranslationVoltsPerMeter,
           kDArmTranslationVoltSecondsPerMeter,
           kArmControllerConstraintsTranslation,
           kArmControlLoopTimeSeconds);
@@ -90,7 +90,7 @@ public class ClimbArm extends SubsystemBase implements Loggable {
 
     m_pidControllerTranslation.setTolerance(
         kArmTranslationToleranceMeters, kArmTranslationVelocityToleranceMetersPerSecond);
-
+    m_pidControllerTranslation.setIntegratorRange(0, kArmIntegratorMaxVolts);
     this.resetAbsoluteRotation(0);
 
     m_loaded = true;
@@ -171,6 +171,10 @@ public class ClimbArm extends SubsystemBase implements Loggable {
 
   public double getTimerTime() {
     return m_voltageRampTimer.get();
+  }
+
+  public void abort() {
+    m_talon.set(ControlMode.Disabled, 0);
   }
 
   public void enable(boolean enabled) {

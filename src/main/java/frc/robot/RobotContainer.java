@@ -10,17 +10,19 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PerpetualCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoCommandBuilder;
@@ -44,14 +46,8 @@ public class RobotContainer {
   private final Feeder m_feeder = new Feeder();
   private final FeedServo m_feedServo = new FeedServo();
   public final Shooter m_shooter = new Shooter();
-  private final Hood m_hood = new Hood();
-  private final Turret m_turret = new Turret();
 
-  private final Drivetrain m_drivetrain =
-      new Drivetrain(
-          () -> {
-            return new Rotation2d();
-          });
+  public final Drivetrain m_drivetrain = new Drivetrain();
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
@@ -61,45 +57,80 @@ public class RobotContainer {
   // Distance offset to change distance by for auto-aim -- used to adjust
 
   // OPERATOR ADJUSTMENTS
-  @Log(name = "Distance offset", width = 2, height = 1, rowIndex = 2, columnIndex = 17)
-  double m_distanceOffset = 0;
+  @Log(name = "Distance offset", width = 4, height = 1, rowIndex = 4, columnIndex = 16)
+  double m_shooterOffset = 0;
 
-  @Log(name = "Turret shift", width = 2, height = 1, rowIndex = 3, columnIndex = 17)
-  double m_turretShift = 0;
+  @Log(name = "Kicker ratio offset", width = 4, height = 1, rowIndex = 5, columnIndex = 16)
+  double m_kickerRatioOffset = 0;
+
+  // @Log(name = "Angle shift", width = 2, height = 1, rowIndex = 3, columnIndex = 17)
+  double m_angleShift = 0;
 
   // OPERATOR LOCKS
-  @Log(name = "Setpoint lock", width = 2, height = 2, rowIndex = 0, columnIndex = 13)
+
   boolean m_setpointLock = false;
 
-  @Log(name = "Last setpoint lock", width = 3, height = 1, rowIndex = 4, columnIndex = 15)
-  boolean m_lastSetpointLock = false;
+  @Log(name = "High fender lock", width = 4, height = 2, rowIndex = 0, columnIndex = 15)
+  boolean m_highFender = false;
 
-  @Log(name = "3.2 meter lock", width = 2, height = 1, rowIndex = 2, columnIndex = 15)
-  boolean m_fixedSetpoint = false;
-
-  @Log(name = "Low shot lock", width = 2, height = 1, rowIndex = 3, columnIndex = 15)
-  boolean m_lowShot = false;
+  @Log(name = "Low fender lock", width = 4, height = 2, rowIndex = 2, columnIndex = 15)
+  boolean m_lowFender = false;
 
   // @Log(name = "Eject lock", width = 3, height = 1, rowIndex = 5, columnIndex = 12)
   // boolean m_eject = false;
 
-  @Log(name = "Shooter velocity lock value", width = 4, height = 1, rowIndex = 0, columnIndex = 15)
+  //   @Log(name = "Shooter velocity lock value", width = 4, height = 1, rowIndex = 0, columnIndex =
+  // 15)
   double m_shooterVelocityLock = 0;
 
-  @Log(name = "Hood angle lock value", width = 4, height = 1, rowIndex = 1, columnIndex = 15)
-  double m_hoodAngleLock = 0;
-
-  boolean m_turretOverride = false;
-
-  double m_turretOverrideAngle = 0;
+  //   @Log(
+  //       name = "Shooter tangential ratio lock",
+  //       width = 4,
+  //       height = 1,
+  //       rowIndex = 0,
+  //       columnIndex = 15)
+  double m_shooterTangentialRatioLock = 1;
 
   @Log(name = "Bar to climb to", width = 2, height = 2, rowIndex = 2, columnIndex = 0)
   int m_barToClimbTo = 0; // 1 mid, 2 high, 3 traverse
 
+  @Log(name = "Auto Chooser", width = 2, height = 2, rowIndex = 4, columnIndex = 0)
+  private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
+
+  Timer m_autoTimer = new Timer();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // m_vision.setTranslationConsumer(m_drivetrain::addVisionMeasurement);
     configureButtonBindings();
+
+    m_autoChooser.setDefaultOption(
+        "3 Ball Right Side",
+        AutoCommandBuilder.get3BallFenderAutoRight(
+            m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter));
+    m_autoChooser.addOption(
+        "2 Ball Left Side",
+        AutoCommandBuilder.get2BallFenderAutoLeft(
+            m_drivetrain,
+            m_intake,
+            m_intakeArm,
+            m_indexer,
+            m_feeder,
+            m_feedServo,
+            m_shooter,
+            m_autoTimer));
+    m_autoChooser.addOption(
+        "Back up",
+        // PathCommandBuilder.getResetOdometryCommand(m_drivetrain,
+        // PathCommandBuilder.getPathCommand(m_drivetrain, "2 Ball Left Side")).andThen(
+        // CargoHandlingCommandBuilder.getSetShooterCommand(
+        //         () -> 35, () -> 0.8, m_shooter) // full send
+        //     .raceWith(
+        //         new WaitCommand(3)
+        //             .andThen(
+        //                 CargoHandlingCommandBuilder.getIndexToShooterCommand(
+        //                     m_indexer, m_feeder, m_feedServo),
+        //                 new WaitCommand(1)))
+        //     .andThen(
+        new RunCommand(() -> m_drivetrain.drive(-1, 0, 0, false)).withTimeout(2.5));
   }
 
   /**
@@ -110,7 +141,6 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     this.configureDrivetrainCommands();
-    // this.configureVisionCommands();
     this.configureCargoHandlingCommands();
     this.configureClimbCommands();
   }
@@ -127,7 +157,7 @@ public class RobotContainer {
             m_drivetrain));
 
     m_driver
-        .leftBumper()
+        .rightStick()
         .whileHeld(
             new DriveFacingHub(
                 m_driver::getLeftY,
@@ -140,32 +170,7 @@ public class RobotContainer {
     m_driver.x().whenPressed(new InstantCommand(m_drivetrain::zeroHeading));
   }
 
-  private void configureVisionCommands() {}
-
   private void configureCargoHandlingCommands() {
-    // Control systems for hood and shooter enabled when not climbing
-    m_climbStateMachine
-        .getClimbStateTrigger(ClimbState.kNotClimbing)
-        .whenActive(new InstantCommand(() -> m_shooter.enable(true), m_shooter))
-        .whenInactive(new InstantCommand(() -> m_shooter.enable(false), m_shooter));
-
-    // // // Default commands for turret and hood are to auto-aim based on robot pose/distance
-    m_climbStateMachine
-        .getClimbStateTrigger(ClimbState.kNotClimbing)
-        .whenActive(new InstantCommand(() -> m_turret.enable(true), m_turret))
-        .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getTurretAutoAimCommand(
-                m_turret, m_drivetrain::getTurretCenterPoseMeters, () -> -m_turretShift)
-            // CargoHandlingCommandBuilder.getTurretSetCommand(
-            //         m_turret, () -> m_turretOverrideAngle)
-            //     .alongWith(new PrintCommand("turret set")),
-            )
-        .whenInactive(
-            new InstantCommand(() -> m_turret.setAngleRadians(0), m_turret)
-                .andThen(
-                    new WaitUntilCommand(() -> Math.abs(m_turret.getFilteredAngleRadians()) < 0.03),
-                    new InstantCommand(() -> m_turret.enable(false), m_turret)));
-
     // Puts intake arm down at start of climb
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
@@ -196,60 +201,44 @@ public class RobotContainer {
                                     () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
                                 .withTimeout(0.5))));
 
+    m_driver
+        .upperPOV()
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
+
+    m_operator
+        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+        .whenActive(
+            new InstantCommand(
+                () ->
+                    m_indexer.setVelocityRotationsPerSecond(
+                        Constants.IndexerConstants.kIndexerDefaultSpeedRotationsPerSecond),
+                m_indexer))
+        .whenInactive(
+            new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(0), m_indexer));
+
     // Set shooter on operator left trigger: based on distance to hub
     m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
             new ConditionalCommand(
-                CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-                    m_shooter,
-                    () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
-                    () -> -m_distanceOffset),
-                CargoHandlingCommandBuilder.getShooterSetCommand(
-                    m_shooter, () -> m_shooterVelocityLock),
-                () -> !m_setpointLock))
-        .whenInactive(CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter));
+                new InstantCommand(),
+                CargoHandlingCommandBuilder.getSetShooterCommand(
+                    () -> m_shooterVelocityLock + m_shooterOffset,
+                    () -> m_shooterTangentialRatioLock + m_kickerRatioOffset,
+                    m_shooter),
+                () -> !m_setpointLock));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
     m_operator
         .rightBumper()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whileActiveContinuous(
-            new ConditionalCommand(
-                    CargoHandlingCommandBuilder.getHoodAutoAimCommand(
-                        m_hood,
-                        () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
-                        () -> -m_distanceOffset),
-                    CargoHandlingCommandBuilder.getHoodSetCommand(m_hood, () -> m_hoodAngleLock),
-                    () -> !m_setpointLock)
-                .andThen(
-                    new WaitCommand(0.4),
-                    CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(
-                        m_indexer, m_feeder, m_feedServo, m_shooter)),
+            CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder, m_feedServo),
             false)
         .whenInactive(
-            CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
-                .alongWith(CargoHandlingCommandBuilder.getHoodDownCommand(m_hood)));
-
-    // Eject on operator X button
-    // m_operator
-    //     .x()
-    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-    //     .whileActiveContinuous(
-    //         CargoHandlingCommandBuilder.getEjectCommand(
-    //             m_shooter,
-    //             m_hood,
-    //             m_turret,
-    //             m_indexer,
-    //             m_feeder,
-    //             m_feedServo,
-    //             m_drivetrain::getPoseMeters))
-    //     .whenInactive(
-    //         CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo)
-    //             .alongWith(
-    //                 CargoHandlingCommandBuilder.getHoodDownCommand(m_hood),
-    //                 CargoHandlingCommandBuilder.getShooterOffCommand(m_shooter)));
+            CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo));
 
     m_operator
         .upperPOV()
@@ -257,7 +246,8 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_distanceOffset += 0.1;
+                  m_shooterOffset += 0.3;
+                  m_kickerRatioOffset += 0.1;
                 }));
 
     // Make robot think it's further when aiming
@@ -267,54 +257,8 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_distanceOffset -= 0.1;
-                }));
-
-    // Shift turret to right
-    m_operator
-        .rightPOV()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_turretShift += 0.04;
-                }));
-
-    // Shift turret to left
-    m_operator
-        .leftPOV()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_turretShift -= 0.04;
-                  ;
-                }));
-
-    // lock current shooter setpoints in place
-    m_operator
-        .b()
-        .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_setpointLock = true;
-                  m_lastSetpointLock = true;
-                  m_shooterVelocityLock =
-                      CargoHandlingCommandBuilder.getShooterAutoSetpoint(
-                              () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
-                              () -> m_distanceOffset)
-                          .getAsDouble();
-                  m_hoodAngleLock =
-                      CargoHandlingCommandBuilder.getHoodAutoSetpoint(
-                              () -> m_drivetrain.getHubToTurretCenterDistanceMeters(),
-                              () -> m_distanceOffset)
-                          .getAsDouble();
-                }))
-        .whenInactive(
-            new InstantCommand(
-                () -> {
-                  m_setpointLock = false;
-                  m_lastSetpointLock = false;
+                  m_shooterOffset -= 0.3;
+                  m_kickerRatioOffset -= 0.1;
                 }));
 
     m_operator
@@ -322,19 +266,16 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_lowShot = true;
+                  m_lowFender = true;
                   m_setpointLock = true;
-                  m_shooterVelocityLock = 50;
-                  m_hoodAngleLock = 0.46;
-                  m_turretOverride = true;
-                  m_turretOverrideAngle = 0;
+                  m_shooterVelocityLock = 6;
+                  m_shooterTangentialRatioLock = 3.2;
                 }))
         .whenInactive(
             new InstantCommand(
                 () -> {
-                  m_lowShot = false;
+                  m_lowFender = false;
                   m_setpointLock = false;
-                  m_turretOverride = false;
                 }));
 
     m_operator
@@ -342,15 +283,15 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_fixedSetpoint = true;
+                  m_highFender = true;
                   m_setpointLock = true;
-                  m_shooterVelocityLock = 105;
-                  m_hoodAngleLock = HoodConstants.kHoodBottomPositionRadians;
+                  m_shooterVelocityLock = kShootingFenderSetpointShooter;
+                  m_shooterTangentialRatioLock = kShootingFenderSetpointTangentialRatio;
                 }))
         .whenInactive(
             new InstantCommand(
                 () -> {
-                  m_fixedSetpoint = false;
+                  m_highFender = false;
                   m_setpointLock = false;
                 }));
 
@@ -360,12 +301,11 @@ public class RobotContainer {
         .whenActive(
             new InstantCommand(
                 () -> {
-                  m_fixedSetpoint = false;
+                  m_highFender = false;
                   m_setpointLock = false;
-                  m_distanceOffset = 0;
-                  m_turretShift = 0;
+                  m_shooterOffset = 0;
+                  m_angleShift = 0;
                   m_shooterVelocityLock = 0;
-                  m_hoodAngleLock = 0;
                 }));
   }
 
@@ -398,40 +338,46 @@ public class RobotContainer {
             new InstantCommand(m_climbStateMachine::enableClimb)
                 .alongWith(
                     new InstantCommand(() -> m_climbElevator.enable(true), m_climbElevator),
-                    new InstantCommand(() -> m_climbArm.enable(true), m_climbArm))
-                .andThen(ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator)));
+                    new InstantCommand(() -> m_climbArm.enable(true), m_climbArm)));
 
     // turn off climb mode
     m_driver
         .leftPOV()
         .and(m_driver.back())
-        .whileActiveOnce(
-            new InstantCommand(m_climbStateMachine::disableClimb)
-                .alongWith(
-                    new InstantCommand(() -> m_climbElevator.enable(false), m_climbElevator),
-                    new InstantCommand(() -> m_climbArm.enable(false), m_climbArm))
-                .andThen(ClimbCommandBuilder.getEngageRatchetCommand(m_climbElevator)));
+        .whenActive(
+            new PerpetualCommand(
+                new RunCommand(m_climbStateMachine::disableClimb)
+                    .alongWith(
+                        new RunCommand(
+                            () -> {
+                              m_climbElevator.enable(false);
+                            },
+                            m_climbElevator),
+                        new RunCommand(
+                            () -> {
+                              m_climbArm.enable(false);
+                            },
+                            m_climbArm))),
+            false);
 
     // disengage ratchet
     //
-    m_driver.x().whenPressed(ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator));
 
     // When at pre-climb state, pressing proceed will disengage ratchet and raise hooks.
     m_driver
-        .b()
+        .rightBumper()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kPreClimb))
         .whenActive(
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kAligningToMidbar)
                 .andThen(
-                    ClimbCommandBuilder.getDisengageRatchetCommand(m_climbElevator)
-                        .alongWith(ClimbCommandBuilder.getDisengageArmCommand(m_climbArm)),
+                    ClimbCommandBuilder.getDisengageArmCommand(m_climbArm),
                     ClimbCommandBuilder.getRaiseHookCommand(m_climbElevator),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointAlignedToMidBar)));
 
     // When at aligned to mid bar checkpoint, pressing proceed will lower hooks onto mid bar.
     m_driver
-        .b()
+        .rightBumper()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointAlignedToMidBar))
         .whenActive(
             m_climbStateMachine
@@ -442,49 +388,72 @@ public class RobotContainer {
 
     // When at hooked on mid bar checkpoint, pressing proceed will climb on the mid bar.
     m_driver
+        .a()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnMidBar))
+        .whenActive(
+            m_climbStateMachine
+                .getSetStateCommand(ClimbState.kClimbingOnMidBar)
+                .alongWith(
+                    new InstantCommand(
+                        () -> {
+                          m_barToClimbTo = 1;
+                        }))
+                .andThen(
+                    ClimbCommandBuilder.getLiftOnMidBarCommand(m_climbElevator),
+                    m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar)));
+
+    m_driver
         .b()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnMidBar))
         .whenActive(
             m_climbStateMachine
-                .getSetStateCommand(ClimbState.kLiftingOnMidBar)
+                .getSetStateCommand(ClimbState.kClimbingOnMidBar)
+                .alongWith(
+                    new InstantCommand(
+                        () -> {
+                          m_barToClimbTo = 2;
+                        }))
                 .andThen(
                     ClimbCommandBuilder.getLiftOnMidBarCommand(m_climbElevator),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar)));
+
+    m_driver
+        .y()
+        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnMidBar))
+        .whenActive(
+            m_climbStateMachine
+                .getSetStateCommand(ClimbState.kClimbingOnMidBar)
+                .alongWith(
+                    new InstantCommand(
+                        () -> {
+                          m_barToClimbTo = 3;
+                        }))
+                .andThen(
+                    ClimbCommandBuilder.getLiftOnMidBarCommand(m_climbElevator),
+                    m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar)));
+
+    // .or(m_driver.b())
+    // .or(m_driver.y())
+    // .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnMidBar))
+    // .whenActive(
+    //     m_climbStateMachine
+    //         .getSetStateCommand(ClimbState.kClimbingOnMidBar)
+    //         .andThen(
+    //             ClimbCommandBuilder.getLiftOnMidBarCommand(m_climbElevator),
+    //             m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar)));
 
     // When at hooked on mid bar checkpoint, pressing repeat will move back to pre-climb state
 
     // driver can try hooking onto mid bar again).
     m_driver
-        .x()
+        .leftBumper()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnMidBar))
-        .whenActive(m_climbStateMachine.getSetStateCommand(ClimbState.kPreClimb));
-
-    m_driver
-        .y()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar))
         .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_barToClimbTo = 3;
-                }));
-
-    m_driver
-        .b()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar))
-        .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_barToClimbTo = 2;
-                }));
-
-    m_driver
-        .a()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar))
-        .whenActive(
-            new InstantCommand(
-                () -> {
-                  m_barToClimbTo = 1;
-                }));
+            m_climbStateMachine
+                .getSetStateCommand(ClimbState.kAligningToMidbar)
+                .andThen(
+                    ClimbCommandBuilder.getRaiseHookCommand(m_climbElevator),
+                    m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointAlignedToMidBar)));
 
     // when at climbed on mid bar checkpoint, pressing proceed will move arms to high bar
     m_climbStateMachine
@@ -542,8 +511,8 @@ public class RobotContainer {
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kFinishingClimbOnHighBar)
                 .andThen(
-                    ClimbCommandBuilder.getPushArmForwardAtEndCommand(m_climbArm, m_climbElevator),
-                    ClimbCommandBuilder.getEngageRatchetAndLowerCommand(m_climbElevator),
+                    ClimbCommandBuilder.getPushArmForwardAtEndCommand(
+                        m_climbArm, m_climbElevator, m_intakeArm),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kClimbedOnHighBar)));
 
     // When at arms on traverse bar checkpoint, pressing proceed will pull back arms and up
@@ -566,9 +535,15 @@ public class RobotContainer {
             m_climbStateMachine
                 .getSetStateCommand(ClimbState.kFinishingClimbOnTraverseBar)
                 .andThen(
-                    ClimbCommandBuilder.getPushArmForwardAtEndCommand(m_climbArm, m_climbElevator),
-                    ClimbCommandBuilder.getEngageRatchetAndLowerCommand(m_climbElevator),
+                    ClimbCommandBuilder.getPushArmForwardAtEndCommand(
+                        m_climbArm, m_climbElevator, m_intakeArm),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kClimbedOnTraverseBar)));
+
+    // m_climbStateMachine.getClimbStateTrigger(ClimbState.kClimbedOnHighBar).or(
+    //     m_climbStateMachine.getClimbStateTrigger(ClimbState.kClimbedOnTraverseBar).whenActive(
+
+    //     )
+    // )
   }
 
   /**
@@ -577,21 +552,25 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    Command auto =
-        AutoCommandBuilder.get2BallAutoLeft(
-                m_drivetrain,
-                m_intake,
-                m_intakeArm,
-                m_indexer,
-                m_feeder,
-                m_feedServo,
-                m_shooter,
-                m_hood)
-            .andThen(
-                AutoCommandBuilder.getFinishAutoCommand(
-                    m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
+    // Command auto =
+    //     AutoCommandBuilder.get2BallAutoLeft(
+    //             m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter)
+    //         .andThen(
+    //             AutoCommandBuilder.getFinishAutoCommand(
+    //                 m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
 
-    return auto;
+    return m_autoChooser.getSelected();
+
+    // WL_SwerveControllerCommand path =
+    //     PathCommandBuilder.getPathCommand(m_drivetrain, "3 Score Right Fender");
+
+    // return PathCommandBuilder.getResetOdometryCommand(m_drivetrain, path)
+    //     .andThen(
+    //         new InstantCommand(
+    //             () ->
+    // m_drivetrain.getField2d().getObject("traj").setTrajectory(path.m_trajectory),
+    //             m_drivetrain),
+    //         path);
   }
 
   // whenever the robot is disabled, drive should be turned off
