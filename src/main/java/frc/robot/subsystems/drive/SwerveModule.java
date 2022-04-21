@@ -252,6 +252,16 @@ public class SwerveModule implements Loggable {
     m_turningMotor.set(ControlMode.MotionMagic, referencePulses);
   }
 
+  @Log(name = "Drive motor temperature")
+  public double getDriveMotorTemperatureCelsius() {
+    return m_driveMotor.getTemperature();
+  }
+
+  @Log(name = "Turning motor temperature")
+  public double getTurningMotorTemperatureCelsius() {
+    return m_turningMotor.getTemperature();
+  }
+
   /**
    * Returns current speed.
    *

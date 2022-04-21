@@ -227,9 +227,7 @@ public final class Constants {
     public static final int kBLCANCoderPort = 11;
     public static final Rotation2d kBLCANCoderZero =
         IDManager.getInstance()
-            .select(
-                Rotation2d.fromDegrees(178.1158 - 42.8878 + 167.1679 + 95.3613),
-                Rotation2d.fromDegrees(-167.7 + 4.33));
+            .select(Rotation2d.fromDegrees(46.79 + 180), Rotation2d.fromDegrees(-167.7 + 4.33));
 
     // Drivebase dimensions
     public static final double kWheelbaseLengthMeters = 0.635; // meters
@@ -248,7 +246,7 @@ public final class Constants {
     // Max speed teleoperated
     public static final double kTeleopMaxSpeedMetersPerSecond = 3; // meters per second
     public static final double kTeleopMaxAngularSpeedRadiansPerSecond =
-        2 / kTurningRadiusMeters; // radians per second
+        1.5 / kTurningRadiusMeters; // radians per second
 
     public static final double kTeleopMaxAccelerationMetersPerSecondSquared = 3;
     public static final double kTeleopMaxAngularAccelerationRadiansPerSecondSquared = 1.5 * Math.PI;

@@ -14,13 +14,16 @@
       "/Shuffleboard/ClimbElevator/Bottom Slot Sensor": "Digital Input",
       "/Shuffleboard/ClimbElevator/Top Slot Sensor": "Digital Input",
       "/Shuffleboard/Drivetrain/Angle PID (hub tracking)": "PIDController",
+      "/Shuffleboard/Drivetrain/Angle PID hub facing": "PIDController",
+      "/Shuffleboard/Drivetrain/X PID": "PIDController",
+      "/Shuffleboard/Drivetrain/Y PID": "PIDController",
+      "/Shuffleboard/RobotContainer/Auto Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d"
     },
     "windows": {
       "/SmartDashboard/Field": {
         "traj": {
           "arrowSize": 0,
-          "style": "",
           "weight": 0.0
         },
         "window": {
@@ -28,5 +31,9 @@
         }
       }
     }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client",
+    "serverTeam": "2485"
   }
 }
