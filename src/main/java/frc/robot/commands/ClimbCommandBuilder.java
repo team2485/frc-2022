@@ -143,20 +143,20 @@ public class ClimbCommandBuilder {
   }
 
   private static Command getMoveElevatorCommand(double positionMeters, ClimbElevator elevator) {
-    return new RunCommand(() -> elevator.setPositionMeters(positionMeters), elevator)
+    return new RunCommand(() -> elevator.setPositionMeters(-positionMeters), elevator)
         .withInterrupt(
             () ->
                 atGoal(
-                    positionMeters,
+                    -positionMeters,
                     kElevatorPositionToleranceMeters,
                     elevator.getPositionMeters()));
   }
 
   private static Command getMoveElevatorCommand(
       double positionMeters, double positionToleranceMeters, ClimbElevator elevator) {
-    return new RunCommand(() -> elevator.setPositionMeters(positionMeters), elevator)
+    return new RunCommand(() -> elevator.setPositionMeters(-positionMeters), elevator)
         .withInterrupt(
-            () -> atGoal(positionMeters, positionToleranceMeters, elevator.getPositionMeters()));
+            () -> atGoal(-positionMeters, positionToleranceMeters, elevator.getPositionMeters()));
   }
 
   private static Command getTranslateArmCommand(double translationMeters, ClimbArm arm) {

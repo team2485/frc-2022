@@ -153,13 +153,13 @@ public class Shooter extends SubsystemBase implements Loggable {
    */
   @Config(name = "Set Velocities")
   public void setVelocities(
-      double shooterVelocityRotationsPerSecond, double tangentialVelocityRatio) {
+      double shooterVelocityRotationsPerSecond) {
     this.setShooterVelocityRotationsPerSecond(shooterVelocityRotationsPerSecond);
-    this.setKickerVelocityRotationsPerSecond(
-        shooterVelocityRotationsPerSecond
-            * kShooterCircumferenceMeters // desired shooter tangential velocity m/s
-            * tangentialVelocityRatio // desired kicker tangential velocity m/s
-            / kKickerCircumferenceMeters); // desired kicker angular velocity rots/sec
+    // this.setKickerVelocityRotationsPerSecond(
+    //     shooterVelocityRotationsPerSecond
+    //         * kShooterCircumferenceMeters // desired shooter tangential velocity m/s
+    //         * tangentialVelocityRatio // desired kicker tangential velocity m/s
+    //         / kKickerCircumferenceMeters); // desired kicker angular velocity rots/sec
   }
 
   /**
@@ -167,9 +167,9 @@ public class Shooter extends SubsystemBase implements Loggable {
    *
    * @param shooterVelocityRotationsPerSecond desired shooter velocity
    */
-  public void setVelocities(double shooterVelocityRotationsPerSecond) {
-    this.setVelocities(shooterVelocityRotationsPerSecond, kDefaultTangentialVelocityRatio);
-  }
+  // public void setVelocities(double shooterVelocityRotationsPerSecond) {
+  //   this.setVelocities(shooterVelocityRotationsPerSecond, kDefaultTangentialVelocityRatio);
+  // }
 
   /**
    * Sets the velocity setpoint for the shooter.

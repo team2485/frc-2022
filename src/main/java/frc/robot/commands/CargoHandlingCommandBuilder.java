@@ -125,8 +125,8 @@ public class CargoHandlingCommandBuilder {
     return new StartEndCommand(
         () ->
             shooter.setVelocities(
-                shooterVelocity.getAsDouble(), tangentialVelocityRatio.getAsDouble()),
-        () -> shooter.setVelocities(0, 1),
+                shooterVelocity.getAsDouble()),
+        () -> shooter.setVelocities(0),
         shooter);
   }
 

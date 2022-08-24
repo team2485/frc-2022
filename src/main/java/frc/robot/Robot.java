@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
@@ -28,10 +30,13 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
+  private final WPI_TalonFX m_talon;
+
   // private final AnalogPotentiometer m_potentiometer = new AnalogPotentiometer(0, 5, 0);
 
   public Robot() {
     IDManager.getInstance(Constants.kRobotIdFile);
+    m_talon = new WPI_TalonFX(30);
 
     m_robotContainer = new RobotContainer();
     addPeriodic(
@@ -72,6 +77,7 @@ public class Robot extends TimedRobot {
     Logger.updateEntries();
     NetworkTableInstance.getDefault().flush();
     // System.out.println("Potentiometer reading: " + m_potentiometer.get());
+
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

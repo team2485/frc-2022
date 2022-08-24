@@ -64,7 +64,7 @@ public final class Constants {
 
   // 5 ft front bumper: 60 0.8
 
-  public static final double kShootingFenderSetpointShooter = 27.6;
+  public static final double kShootingFenderSetpointShooter = 24.25;
   public static final double kShootingFenderSetpointTangentialRatio = 0.55;
 
   public static final class OIConstants {
@@ -479,14 +479,14 @@ public final class Constants {
     public static final int kShooterTalonPort = 30;
     public static final int kKickerTalonPort = 31;
 
-    public static final double kShooterSupplyCurrentLimitAmps = 25;
-    public static final double kShooterSupplyCurrentThresholdAmps = 30;
+    public static final double kShooterSupplyCurrentLimitAmps = 65;
+    public static final double kShooterSupplyCurrentThresholdAmps = 75;
     public static final double kShooterSupplyCurrentThresholdTimeSecs = 0.1;
-    public static final double kShooterStatorCurrentLimitAmps = 40;
-    public static final double kShooterStatorCurrentThresholdAmps = 45;
+    public static final double kShooterStatorCurrentLimitAmps = 70;
+    public static final double kShooterStatorCurrentThresholdAmps = 75;
     public static final double kShooterStatorCurrentThresholdTimeSecs = 0.05;
 
-    public static final double kKickerSupplyCurrentLimitAmps = 40;
+    public static final double kKickerSupplyCurrentLimitAmps = 40;  
     public static final double kKickerSupplyCurrentThresholdAmps = 45;
     public static final double kKickerSupplyCurrentThresholdTimeSecs =
         kShooterSupplyCurrentLimitAmps;
@@ -519,9 +519,9 @@ public final class Constants {
         kKickerFreeSpeedRotationsPerSecond * kKickerCircumferenceMeters;
 
     public static final double kSShooterVolts = 0.5;
-    public static final double kVShooterVoltSecondsPerRotation = 0.16;
+    public static final double kVShooterVoltSecondsPerRotation = 0.25;
     public static final double kAShooterVoltSecondsSquaredPerRotation =
-        IDManager.getInstance().select(0.016047, 0.005);
+        IDManager.getInstance().select(0.05, 0.005);
 
     public static final double kSKickerVolts = 0.5;
     public static final double kVKickerVoltSecondsPerRotation = 0.06252;
@@ -548,7 +548,7 @@ public final class Constants {
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPKickerVoltSecondsPerRotation = 1; // 0.5
+    public static final double kPKickerVoltSecondsPerRotation = 0.5; // 0.5
     public static final double kPKickerOutputUnit100MsPerSensorUnit =
         kPKickerVoltSecondsPerRotation
             / kKickerGearRatio
@@ -560,7 +560,7 @@ public final class Constants {
     public static final double kShooterControlVelocityToleranceSensorUnitsPer100Ms =
         kShooterControlVelocityToleranceRotationsPerSecond
             * kSecondsPer100Ms
-            * kFalconSensorUnitsPerRotation;
+            * kFalconSensorUnitsPerRotation;    
 
     public static final double kKickerControlVelocityToleranceRotationsPerSecond =
         kShooterControlVelocityToleranceRotationsPerSecond
@@ -594,8 +594,8 @@ public final class Constants {
     public static final int kElevatorSlotSensorTopPort = 0; // dio
     public static final int kElevatorSlotSensorBottomPort = 1; // dio
 
-    public static final double kElevatorTopStopPosition = Units.inchesToMeters(21.25);
-    public static final double kElevatorBottomStopPosition = Units.inchesToMeters(0);
+    public static final double kElevatorTopStopPosition = Units.inchesToMeters(0);
+    public static final double kElevatorBottomStopPosition = Units.inchesToMeters(-21.25);
 
     public static final double kElevatorSlotSensorTopPosition = Units.inchesToMeters(20.75);
     public static final double kElevatorSlotSensorBottomPosition = Units.inchesToMeters(0.25);
@@ -624,7 +624,7 @@ public final class Constants {
     public static final double kgElevatorUnloadedVolts =
         IDManager.getInstance().select(0.0906651, 0.010378);
     public static final double kvElevatorUnloadedVoltSecondsPerMeter =
-        IDManager.getInstance().select(33.22, 30.0);
+        IDManager.getInstance().select(33.5, 30.0);
     public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter =
         IDManager.getInstance().select(0.01, 0.01);
 
@@ -639,7 +639,7 @@ public final class Constants {
     // --
     // retracting the elevator moves the robot up.
     public static final double kvElevatorLoadedVoltSecondsPerMeter =
-        IDManager.getInstance().select(30, 30);
+        IDManager.getInstance().select(31.5, 30.0);
     public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter =
         IDManager.getInstance()
             .select(
@@ -651,7 +651,7 @@ public final class Constants {
     public static final double kPElevatorLoadedVoltsPerMeter = 100;
     public static final double kDElevatorLoadedVoltSecondsPerMeter = 10;
 
-    public static final double kElevatorPositionToleranceMeters = 0.005;
+    public static final double kElevatorPositionToleranceMeters = 0.008;
     public static final double kElevatorVelocityToleranceMetersPerSecond = 0.01;
 
     public static final double kElevatorMaxSpeedMetersPerSecond =

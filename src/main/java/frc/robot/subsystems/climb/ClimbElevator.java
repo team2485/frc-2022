@@ -45,6 +45,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
           kElevatorControllerConstraintsLoaded,
           kElevatorControlLoopTimeSeconds);
 
+  @Log(name = "last velocity setpoint")
   private double m_lastVelocitySetpoint = 0;
 
   // @Log(name = "Elevator feedforward unloaded")
@@ -84,6 +85,9 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
+  @Log(name = "output")
+  double outputPercentage;
+
   @Log(name = "enabled")
   private boolean m_enabled = false;
 
@@ -108,7 +112,6 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     m_talon.enableVoltageCompensation(true);
     m_talon.setNeutralMode(NeutralMode.Brake);
 
-    m_talon.setInverted(true);
 
     m_pidControllerUnloaded.setTolerance(
         kElevatorPositionToleranceMeters, kElevatorVelocityToleranceMetersPerSecond);
@@ -127,9 +130,27 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     Shuffleboard.getTab("ClimbElevator").add("FF Loaded", m_feedforwardLoaded);
   }
 
+  @Log(name="is inverted")
+  public boolean isInverted(){
+    return m_talon.getInverted();
+  }
+
+  public void invertTalon(){
+    if(m_talon.getInverted()){
+      m_talon.setInverted(false);
+    }else{
+      m_talon.setInverted(true);
+    }
+  }
+
+  @Log(name = "error")
+  public double getError(){
+    return Math.abs(m_positionSetpointMeters - this.getPositionMeters());
+  }
+
   @Config(name = "Set elevator position")
   public void setPositionMeters(double position) {
-    m_voltageOverride = false;
+    m_voltageOverride = false;  
     m_positionSetpointMeters =
         MathUtil.clamp(position, kElevatorBottomStopPosition, kElevatorTopStopPosition);
 
@@ -146,6 +167,7 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
   }
 
   @Config(name = "Reset elevator positon")
+
   public void resetPositionMeters(double position) {
     m_talon.setSelectedSensorPosition(position / kSlideDistancePerPulseMeters);
   }
@@ -251,11 +273,11 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
                   kElevatorControlLoopTimeSeconds);
         }
 
-        double outputPercentage =
+         outputPercentage =
             (feedbackOutputVoltage + feedforwardOutputVoltage) / Constants.kNominalVoltage;
 
         if (!m_limitOverride) {
-          outputPercentage = this.limitOnSlotSensors(outputPercentage);
+          // outputPercentage = this.limitOnSlotSensors(outputPercentage);
         }
 
         m_feedbackOutput = feedbackOutputVoltage;
@@ -275,17 +297,26 @@ public class ClimbElevator extends SubsystemBase implements Loggable {
     }
   }
 
-  public double limitOnSlotSensors(double voltage) {
-    boolean topSlotSensorTripped = m_topSlotSensor.get();
-    boolean bottomSlotSensorTripped = m_bottomSlotSensor.get();
+  // public double limitOnSlotSensors(double voltage) {
+  //   boolean topSlotSensorTripped = m_topSlotSensor.get();
+  //   boolean bottomSlotSensorTripped = m_bottomSlotSensor.get();
 
-    if (bottomSlotSensorTripped && voltage < 0) {
-      return 0;
-    } else if (topSlotSensorTripped && voltage > 0) {
-      return 0;
-    } else {
-      return voltage;
-    }
+  //   if (bottomSlotSensorTripped && voltage < 0) {
+  //     return 0;
+  //   } else if (topSlotSensorTripped && voltage > 0) {
+  //     return 0;
+  //   } else {
+  //     return voltage;
+  //   }
+  // }
+
+  @Log(name = "top tripped")
+  public boolean topTripped(){
+    return m_topSlotSensor.get();
+  }
+  @Log(name = "bottom tripped")
+  public boolean bottomTripped(){
+    return m_bottomSlotSensor.get();
   }
 
   public void updatePositionOnSlotSensors() {

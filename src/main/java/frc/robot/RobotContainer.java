@@ -10,6 +10,7 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
@@ -52,6 +53,7 @@ public class RobotContainer {
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
   public final ClimbStateMachine m_climbStateMachine = new ClimbStateMachine();
+  public WPI_TalonFX m_talon = new WPI_TalonFX(40);
 
   // SHOOTER SETPOINT FIELDS
   // Distance offset to change distance by for auto-aim -- used to adjust
@@ -364,6 +366,10 @@ public class RobotContainer {
     //
 
     // When at pre-climb state, pressing proceed will disengage ratchet and raise hooks.
+
+    m_driver.x().and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kPreClimb)).whenActive(new InstantCommand(m_climbElevator::invertTalon));
+    m_driver.getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold).whenActive(new InstantCommand(()->m_climbElevator.setPositionMeters(0)));
+
     m_driver
         .rightBumper()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kPreClimb))
