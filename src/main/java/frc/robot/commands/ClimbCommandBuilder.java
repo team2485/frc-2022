@@ -128,7 +128,7 @@ public class ClimbCommandBuilder {
             new RunCommand(() -> arm.setVoltage(-10))
                 .until(() -> arm.getTranslationMeters() < 0.22),
             new InstantCommand(() -> arm.setVoltage(0)),
-            getMoveElevatorCommand(Units.inchesToMeters(13), elevator),
+            getMoveElevatorCommand(Units.inchesToMeters(18.5), elevator),
             CargoHandlingCommandBuilder.getIntakeArmUpCommand(
                 intakeArm)); // extend elevator to release arm); // push arm forward some arbitrary
     // amount
