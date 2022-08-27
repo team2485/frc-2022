@@ -64,7 +64,7 @@ public final class Constants {
 
   // 5 ft front bumper: 60 0.8
 
-  public static final double kShootingFenderSetpointShooter = 24.25;
+  public static final double kShootingFenderSetpointShooter = 24;
   public static final double kShootingFenderSetpointTangentialRatio = 0.55;
 
   public static final class OIConstants {
@@ -519,7 +519,7 @@ public final class Constants {
         kKickerFreeSpeedRotationsPerSecond * kKickerCircumferenceMeters;
 
     public static final double kSShooterVolts = 0.5;
-    public static final double kVShooterVoltSecondsPerRotation = 0.25;
+    public static final double kVShooterVoltSecondsPerRotation = 0.235;
     public static final double kAShooterVoltSecondsSquaredPerRotation =
         IDManager.getInstance().select(0.05, 0.005);
 
@@ -624,7 +624,7 @@ public final class Constants {
     public static final double kgElevatorUnloadedVolts =
         IDManager.getInstance().select(0.0906651, 0.010378);
     public static final double kvElevatorUnloadedVoltSecondsPerMeter =
-        IDManager.getInstance().select(33.5, 30.0);
+        IDManager.getInstance().select(33.80, 30.0);
     public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter =
         IDManager.getInstance().select(0.01, 0.01);
 
@@ -634,21 +634,21 @@ public final class Constants {
     public static final double kgElevatorLoadedVolts =
         IDManager.getInstance()
             .select(
-                -0.56969,
+                -0.7,
                 -0.50); // this is negative because gravity fights the downward motion when loaded
     // --
     // retracting the elevator moves the robot up.
     public static final double kvElevatorLoadedVoltSecondsPerMeter =
-        IDManager.getInstance().select(31.5, 30.0);
+        IDManager.getInstance().select(42.0, 30.0);
     public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter =
         IDManager.getInstance()
             .select(
                 0.18, 0.18); // these are recalc gains -- the ka from sysid was lost in the noise
 
-    public static final double kPElevatorUnloadedVoltsPerMeter = 100;
+    public static final double kPElevatorUnloadedVoltsPerMeter = 100                                                                        ;
     public static final double kDElevatorUnloadedVoltSecondsPerMeter = 0.05;
 
-    public static final double kPElevatorLoadedVoltsPerMeter = 100;
+    public static final double kPElevatorLoadedVoltsPerMeter = 280;
     public static final double kDElevatorLoadedVoltSecondsPerMeter = 10;
 
     public static final double kElevatorPositionToleranceMeters = 0.008;

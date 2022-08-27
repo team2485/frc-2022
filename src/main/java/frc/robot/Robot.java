@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.climb.ClimbElevator;
 import frc.team2485.WarlordsLib.IDManager;
 import io.github.oblarg.oblog.Logger;
 
@@ -32,11 +33,12 @@ public class Robot extends TimedRobot {
 
   private final WPI_TalonFX m_talon;
 
+
   // private final AnalogPotentiometer m_potentiometer = new AnalogPotentiometer(0, 5, 0);
 
   public Robot() {
     IDManager.getInstance(Constants.kRobotIdFile);
-    m_talon = new WPI_TalonFX(30);
+    m_talon = new WPI_TalonFX(41);
 
     m_robotContainer = new RobotContainer();
     addPeriodic(
@@ -59,6 +61,7 @@ public class Robot extends TimedRobot {
     VideoSource video = CameraServer.startAutomaticCapture();
     video.setVideoMode(new VideoMode(PixelFormat.kMJPEG, 320, 240, 120));
     video.setFPS(5);
+    // m_climbElevator.setPositionMeters(0);
 
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);
@@ -77,6 +80,7 @@ public class Robot extends TimedRobot {
     Logger.updateEntries();
     NetworkTableInstance.getDefault().flush();
     // System.out.println("Potentiometer reading: " + m_potentiometer.get());
+    // m_talon.set(0.2);
 
   }
 

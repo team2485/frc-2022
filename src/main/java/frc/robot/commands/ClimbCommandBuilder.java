@@ -63,7 +63,7 @@ public class ClimbCommandBuilder {
   // can choose to proceed to high bar or climb on mid bar.
   public static Command getLiftOnMidBarCommand(ClimbElevator elevator) {
     return new InstantCommand(() -> elevator.setMode(true), elevator)
-        .andThen(getMoveElevatorCommand(Units.inchesToMeters(3.25), elevator));
+        .andThen(getMoveElevatorCommand(Units.inchesToMeters(3.1), elevator));
   }
 
   // Swing arm up, and then reset absolute rotation.
@@ -116,7 +116,7 @@ public class ClimbCommandBuilder {
                 new RunCommand(() -> arm.setVoltage(-0.7), arm),
                 new WaitUntilCommand(() -> arm.getStatorCurrentSpike(5))),
             new InstantCommand(() -> arm.setVoltage(0), arm),
-            getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator)); // climb vertically
+            getMoveElevatorCommand(Units.inchesToMeters(2.85), elevator)); // climb vertically
   }
 
   // Push rack forward a bit to ensure not contacting low bar
@@ -142,10 +142,10 @@ public class ClimbCommandBuilder {
     return getEngageRatchetCommand(elevator).andThen(new InstantCommand(() -> {}, elevator));
   }
 
-  private static Command getMoveElevatorCommand(double positionMeters, ClimbElevator elevator) {
+  private static Command  getMoveElevatorCommand(double positionMeters, ClimbElevator elevator) {
     return new RunCommand(() -> elevator.setPositionMeters(-positionMeters), elevator)
         .withInterrupt(
-            () ->
+            () -> 
                 atGoal(
                     -positionMeters,
                     kElevatorPositionToleranceMeters,

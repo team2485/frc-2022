@@ -103,6 +103,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     configureButtonBindings();
+    m_climbElevator.setPositionMeters(0);
 
     m_autoChooser.setDefaultOption(
         "3 Ball Right Side",
