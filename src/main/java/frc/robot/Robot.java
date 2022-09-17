@@ -11,10 +11,14 @@ import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.CargoHandlingCommandBuilder;
 import frc.team2485.WarlordsLib.IDManager;
+import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import io.github.oblarg.oblog.Logger;
 
 /**
@@ -26,7 +30,11 @@ import io.github.oblarg.oblog.Logger;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
+  // IntakeArm m_intakeArm = new IntakeArm();
+
   private final RobotContainer m_robotContainer;
+
+  // CommandXboxController m_drive = new CommandXboxController(0);
 
   // private final AnalogPotentiometer m_potentiometer = new AnalogPotentiometer(0, 5, 0);
 
@@ -117,6 +125,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // m_robotContainer.teleopPeriodic();
+
+
   }
 
   @Override
@@ -133,5 +143,8 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     // m_robotContainer.testPeriodic();
+
+    // m_drive.b().whenActive(CargoHandlingCommandBuilder.toggleArmCommand(m_intakeArm));
+
   }
 }
