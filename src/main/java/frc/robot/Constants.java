@@ -486,7 +486,7 @@ public final class Constants {
     public static final double kShooterStatorCurrentThresholdAmps = 75;
     public static final double kShooterStatorCurrentThresholdTimeSecs = 0.05;
 
-    public static final double kKickerSupplyCurrentLimitAmps = 40;  
+    public static final double kKickerSupplyCurrentLimitAmps = 40;
     public static final double kKickerSupplyCurrentThresholdAmps = 45;
     public static final double kKickerSupplyCurrentThresholdTimeSecs =
         kShooterSupplyCurrentLimitAmps;
@@ -560,7 +560,7 @@ public final class Constants {
     public static final double kShooterControlVelocityToleranceSensorUnitsPer100Ms =
         kShooterControlVelocityToleranceRotationsPerSecond
             * kSecondsPer100Ms
-            * kFalconSensorUnitsPerRotation;    
+            * kFalconSensorUnitsPerRotation;
 
     public static final double kKickerControlVelocityToleranceRotationsPerSecond =
         kShooterControlVelocityToleranceRotationsPerSecond
@@ -645,7 +645,7 @@ public final class Constants {
             .select(
                 0.18, 0.18); // these are recalc gains -- the ka from sysid was lost in the noise
 
-    public static final double kPElevatorUnloadedVoltsPerMeter = 100                                                                        ;
+    public static final double kPElevatorUnloadedVoltsPerMeter = 100;
     public static final double kDElevatorUnloadedVoltSecondsPerMeter = 0.05;
 
     public static final double kPElevatorLoadedVoltsPerMeter = 280;

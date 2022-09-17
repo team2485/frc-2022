@@ -27,7 +27,7 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getIntakeCommand(
       Intake intake, IntakeArm intakeArm, Indexer indexer, FeedServo servo) {
-    return getIntakeArmDownCommand(intakeArm)
+    return getArmUpCommand(intakeArm)
         .alongWith(
             new RunCommand(
                     () ->
@@ -43,7 +43,7 @@ public class CargoHandlingCommandBuilder {
   }
 
   public static Command getStopIntakeCommand(Intake intake, IntakeArm intakeArm, Indexer indexer) {
-    return getIntakeArmUpCommand(intakeArm)
+    return getArmDownCommand(intakeArm)
         .alongWith(
             new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0), indexer),
             new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0), intake));
@@ -123,9 +123,7 @@ public class CargoHandlingCommandBuilder {
   public static Command getSetShooterCommand(
       DoubleSupplier shooterVelocity, DoubleSupplier tangentialVelocityRatio, Shooter shooter) {
     return new StartEndCommand(
-        () ->
-            shooter.setVelocities(
-                shooterVelocity.getAsDouble()),
+        () -> shooter.setVelocities(shooterVelocity.getAsDouble()),
         () -> shooter.setVelocities(0),
         shooter);
   }
@@ -145,13 +143,11 @@ public class CargoHandlingCommandBuilder {
     return new InstantCommand(() -> servo.engage(engaged.getAsBoolean()), servo);
   }
 
-  public static Command getIntakeArmUpCommand(IntakeArm intakeArm) {
-    return new RunCommand(() -> intakeArm.setPosition(true), intakeArm)
-        .withInterrupt(() -> intakeArm.atPosition(true));
+  public static Command getArmUpCommand(IntakeArm intakeArm) {
+    return new InstantCommand(() -> intakeArm.setArmUp(), intakeArm);
   }
 
-  public static Command getIntakeArmDownCommand(IntakeArm intakeArm) {
-    return new RunCommand(() -> intakeArm.setPosition(false), intakeArm)
-        .withInterrupt(() -> intakeArm.atPosition(false));
+  public static Command getArmDownCommand(IntakeArm intakeArm) {
+    return new InstantCommand(() -> intakeArm.setArmDown(), intakeArm);
   }
 }

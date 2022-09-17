@@ -177,7 +177,7 @@ public class RobotContainer {
     // Puts intake arm down at start of climb
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
-        .whenInactive(new InstantCommand(() -> m_intakeArm.setPosition(false), m_intakeArm));
+        .whenInactive(new InstantCommand(() -> m_intakeArm.setArmDown(), m_intakeArm));
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer
     // stopped by hitting high indexer path
@@ -206,7 +206,7 @@ public class RobotContainer {
 
     m_driver
         .upperPOV()
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getArmUpCommand(m_intakeArm));
 
     m_operator
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
@@ -368,7 +368,8 @@ public class RobotContainer {
 
     // When at pre-climb state, pressing proceed will disengage ratchet and raise hooks.
 
-    // m_driver.getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold).whenActive(new InstantCommand(()->m_climbElevator.setPositionMeters(0)));
+    // m_driver.getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold).whenActive(new
+    // InstantCommand(()->m_climbElevator.setPositionMeters(0)));
 
     m_driver
         .rightBumper()
