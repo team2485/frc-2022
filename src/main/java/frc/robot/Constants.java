@@ -338,7 +338,7 @@ public final class Constants {
     public static final double kIntakeStatorCurrentThresholdAmps = 45;
     public static final double kIntakeStatorCurrentThresholdTimeSecs = 0.05;
 
-    public static final double kIntakeGearRatio = 4; // motor turns : output/full hood turns
+    public static final double kIntakeGearRatio = 2; // motor turns : output/full hood turns
 
     public static final double kIntakeFreeSpeedRotationsPerSecond =
         kNeoFreeSpeedRotationsPerSecond / kIntakeGearRatio;
@@ -466,7 +466,7 @@ public final class Constants {
     public static final double kFeederStatorCurrentThresholdAmps = 45;
     public static final double kFeederStatorCurrentThresholdTimeSecs = 0.05;
 
-    public static final double kFeederGearRatio = 4; // motor turns : output/full hood turns
+    public static final double kFeederGearRatio = 1; // motor turns : output/full hood turns
 
     public static final double kFeederFreeSpeedRotationsPerSecond =
         kNeo550FreeSpeedRotationsPerSecond / kFeederGearRatio;
