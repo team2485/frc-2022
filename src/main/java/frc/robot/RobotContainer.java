@@ -175,38 +175,45 @@ public class RobotContainer {
 
   private void configureCargoHandlingCommands() {
     // Puts intake arm down at start of climb
-    m_climbStateMachine
-        .getClimbStateTrigger(ClimbState.kNotClimbing)
-        .whenInactive(new InstantCommand(() -> m_intakeArm.setPosition(false), m_intakeArm));
+   
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer
     // stopped by hitting high indexer path
-    m_driver
-        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getIntakeCommand(
-                m_intake, m_intakeArm, m_indexer, m_feedServo),
-            true)
-        .whenInactive(
-            new InstantCommand(
-                    () ->
-                        m_indexer.setVelocityRotationsPerSecond(
-                            m_indexer.getVelocityRotationsPerSecond()),
-                    m_indexer)
-                .andThen(
-                    new WaitCommand(0.5),
-                    CargoHandlingCommandBuilder.getStopIntakeCommand(
-                            m_intake, m_intakeArm, m_indexer)
-                        .alongWith(
-                            new StartEndCommand(
-                                    () -> m_operator.setRumble(RumbleType.kLeftRumble, 0.5),
-                                    () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
-                                .withTimeout(0.5))));
+
+    // m_driver
+    //     .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    //     .whileActiveContinuous(
+    //         CargoHandlingCommandBuilder.getIntakeCommand(
+    //             m_intake, m_intakeArm, m_indexer, m_feedServo),
+    //         true)
+    //     .whenInactive(
+    //         new InstantCommand(
+    //                 () ->
+    //                     m_indexer.setVelocityRotationsPerSecond(
+    //                         m_indexer.getVelocityRotationsPerSecond()),
+    //                 m_indexer)
+    //             .andThen(
+    //                 new WaitCommand(0.5),
+    //                 CargoHandlingCommandBuilder.getStopIntakeCommand(
+    //                         m_intake, m_intakeArm, m_indexer)
+    //                     .alongWith(
+    //                         new StartEndCommand(
+    //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0.5),
+    //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
+    //                             .withTimeout(0.5))));
+
+    m_driver.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+            // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
+            .whileActiveOnce(
+                CargoHandlingCommandBuilder.toggleArmCommand(m_intakeArm));
+            
+
+           
 
     m_driver
         .upperPOV()
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getIntakeArmUpCommand(m_intakeArm));
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getArmUpCommand(m_intakeArm));
 
     m_operator
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
