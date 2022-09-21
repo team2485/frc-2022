@@ -1,20 +1,22 @@
 package frc.robot.subsystems.cargoHandling;
 
-import static frc.robot.Constants.*;
 import static frc.robot.Constants.FeederConstants.*;
 
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
+
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Feeder extends SubsystemBase implements Loggable {
-  private final WL_SparkMax m_spark = new WL_SparkMax(kFeederSparkPort);
+  private final WPI_TalonFX m_talon = new WPI_TalonFX(kFeederTalonPort);
 
   private final SR_SimpleMotorFeedforward m_feedforward =
       new SR_SimpleMotorFeedforward(
@@ -35,19 +37,32 @@ public class Feeder extends SubsystemBase implements Loggable {
   private double m_lastOutputVoltage = 0;
 
   public Feeder() {
-    m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
-    m_spark.setSmartCurrentLimit(kFeederSmartCurrentLimitAmps);
-    m_spark.setSecondaryCurrentLimit(kFeederImmediateCurrentLimitAmps);
-    m_spark.setIdleMode(IdleMode.kCoast);
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20
+	TalonFXConfiguration talonConfig = new TalonFXConfiguration();
+
+    talonConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    talonConfig.supplyCurrLimit =
+        new SupplyCurrentLimitConfiguration(
+            true,
+            kFeederSupplyCurrentLimitAmps,
+            kFeederSupplyCurrentThresholdAmps,
+            kFeederSupplyCurrentThresholdTimeSecs);
+    talonConfig.statorCurrLimit =
+        new StatorCurrentLimitConfiguration(
+            true,
+            kFeederStatorCurrentLimitAmps,
+            kFeederStatorCurrentThresholdAmps,
+            kFeederStatorCurrentThresholdTimeSecs);
+
+    m_talon.configAllSettings(talonConfig);
+
+    m_talon.enableVoltageCompensation(true);
+    m_talon.setNeutralMode(NeutralMode.Brake);
   }
 
   /** @return the current velocity in rotations per second. */
   @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
-    return m_spark.getEncoder().getVelocity() / (60.0 * kFeederGearRatio);
+    return m_talon.getSelectedSensorVelocity() / (60.0 * kFeederGearRatio);
   }
 
   /**
@@ -94,7 +109,7 @@ public class Feeder extends SubsystemBase implements Loggable {
       m_feedforwardOutput = feedforwardOutput;
     }
     if (outputVoltage != m_lastOutputVoltage) {
-      m_spark.setVoltage(outputVoltage);
+      m_talon.setVoltage(outputVoltage);
     }
 
     m_lastOutputVoltage = outputVoltage;

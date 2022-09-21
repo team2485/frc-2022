@@ -440,10 +440,18 @@ public final class Constants {
   }
 
   public static final class FeederConstants {
-    public static final int kFeederSparkPort = 23;
+	public static final int kFeederTalonPort = 16;
     public static final double kFeederLoopTimeSeconds = 0.02;
     public static final int kFeederSmartCurrentLimitAmps = 15;
     public static final int kFeederImmediateCurrentLimitAmps = 20;
+
+    public static final double kFeederSupplyCurrentLimitAmps = 25;
+    public static final double kFeederSupplyCurrentThresholdAmps = 30;
+    public static final double kFeederSupplyCurrentThresholdTimeSecs = 0.1;
+    public static final double kFeederStatorCurrentLimitAmps = 40;
+    public static final double kFeederStatorCurrentThresholdAmps = 45;
+    public static final double kFeederStatorCurrentThresholdTimeSecs = 0.05;
+
 
     public static final double kFeederGearRatio = 4; // motor turns : output/full hood turns
 
@@ -486,7 +494,7 @@ public final class Constants {
     public static final double kShooterStatorCurrentThresholdAmps = 75;
     public static final double kShooterStatorCurrentThresholdTimeSecs = 0.05;
 
-    public static final double kKickerSupplyCurrentLimitAmps = 40;  
+    public static final double kKickerSupplyCurrentLimitAmps = 40;
     public static final double kKickerSupplyCurrentThresholdAmps = 45;
     public static final double kKickerSupplyCurrentThresholdTimeSecs =
         kShooterSupplyCurrentLimitAmps;
@@ -560,7 +568,7 @@ public final class Constants {
     public static final double kShooterControlVelocityToleranceSensorUnitsPer100Ms =
         kShooterControlVelocityToleranceRotationsPerSecond
             * kSecondsPer100Ms
-            * kFalconSensorUnitsPerRotation;    
+            * kFalconSensorUnitsPerRotation;
 
     public static final double kKickerControlVelocityToleranceRotationsPerSecond =
         kShooterControlVelocityToleranceRotationsPerSecond
@@ -645,7 +653,7 @@ public final class Constants {
             .select(
                 0.18, 0.18); // these are recalc gains -- the ka from sysid was lost in the noise
 
-    public static final double kPElevatorUnloadedVoltsPerMeter = 100                                                                        ;
+    public static final double kPElevatorUnloadedVoltsPerMeter = 100;
     public static final double kDElevatorUnloadedVoltSecondsPerMeter = 0.05;
 
     public static final double kPElevatorLoadedVoltsPerMeter = 280;

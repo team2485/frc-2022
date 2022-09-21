@@ -142,10 +142,10 @@ public class ClimbCommandBuilder {
     return getEngageRatchetCommand(elevator).andThen(new InstantCommand(() -> {}, elevator));
   }
 
-  private static Command  getMoveElevatorCommand(double positionMeters, ClimbElevator elevator) {
+  private static Command getMoveElevatorCommand(double positionMeters, ClimbElevator elevator) {
     return new RunCommand(() -> elevator.setPositionMeters(-positionMeters), elevator)
         .withInterrupt(
-            () -> 
+            () ->
                 atGoal(
                     -positionMeters,
                     kElevatorPositionToleranceMeters,
