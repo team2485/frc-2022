@@ -326,10 +326,17 @@ public final class Constants {
   }
 
   public static final class IntakeConstants {
-    public static final int kIntakeSparkPort = 21;
+    public static final int kIntakeTalonPort = 20;
     public static final double kIntakeLoopTimeSeconds = 0.02;
     public static final int kIntakeSmartCurrentLimitAmps = 20;
     public static final int kIntakeImmediateCurrentLimitAmps = 25;
+
+    public static final double kIntakeSupplyCurrentLimitAmps = 25;
+    public static final double kIntakeSupplyCurrentThresholdAmps = 30;
+    public static final double kIntakeSupplyCurrentThresholdTimeSecs = 0.1;
+    public static final double kIntakeStatorCurrentLimitAmps = 40;
+    public static final double kIntakeStatorCurrentThresholdAmps = 45;
+    public static final double kIntakeStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final double kIntakeGearRatio = 4; // motor turns : output/full hood turns
 
@@ -412,10 +419,17 @@ public final class Constants {
   }
 
   public static final class IndexerConstants {
-    public static final int kIndexerSparkPort = 22;
+    public static final int kIndexerTalonPort = 18;
     public static final double kIndexerLoopTimeSeconds = 0.02;
     public static final int kIndexerSmartCurrentLimitAmps = 25;
     public static final int kIndexerImmediateCurrentLimitAmps = 30;
+
+    public static final double kIndexerSupplyCurrentLimitAmps = 25;
+    public static final double kIndexerSupplyCurrentThresholdAmps = 30;
+    public static final double kIndexerSupplyCurrentThresholdTimeSecs = 0.1;
+    public static final double kIndexerStatorCurrentLimitAmps = 40;
+    public static final double kIndexerStatorCurrentThresholdAmps = 45;
+    public static final double kIndexerStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final double kIndexerGearRatio = 4; // motor turns : output/full hood turns
 

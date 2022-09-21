@@ -2,6 +2,10 @@ package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.IndexerConstants.*;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -10,9 +14,11 @@ import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
 public class Indexer extends SubsystemBase implements Loggable {
-  private WL_SparkMax m_spark = new WL_SparkMax(kIndexerSparkPort);
+  private WPI_TalonFX m_talon = new WPI_TalonFX(kIndexerTalonPort);
 
   private final SR_SimpleMotorFeedforward m_feedforward =
       new SR_SimpleMotorFeedforward(
@@ -35,20 +41,36 @@ public class Indexer extends SubsystemBase implements Loggable {
   private double m_lastOutputVoltage = 0;
 
   public Indexer() {
-    m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
-    m_spark.setSmartCurrentLimit(kIndexerSmartCurrentLimitAmps);
-    m_spark.setSecondaryCurrentLimit(kIndexerImmediateCurrentLimitAmps);
-    m_spark.setIdleMode(IdleMode.kBrake);
-    m_spark.setInverted(true);
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535); // default 10
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535); // default 20
-    m_spark.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65535); // default 20
+
+
+    TalonFXConfiguration indexerTalonConfig = new TalonFXConfiguration();
+    indexerTalonConfig.voltageCompSaturation = Constants.kNominalVoltage;
+    indexerTalonConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
+    indexerTalonConfig.velocityMeasurementWindow = 1;
+
+    indexerTalonConfig.supplyCurrLimit =
+    new SupplyCurrentLimitConfiguration(
+        true,
+        kIndexerSupplyCurrentLimitAmps,
+        kIndexerSupplyCurrentThresholdAmps,
+        kIndexerSupplyCurrentThresholdTimeSecs);
+
+    indexerTalonConfig.statorCurrLimit =
+    new StatorCurrentLimitConfiguration(
+        true,
+        kIndexerStatorCurrentLimitAmps,
+        kIndexerStatorCurrentThresholdAmps,
+        kIndexerStatorCurrentThresholdTimeSecs);
+
+    m_talon.configAllSettings(indexerTalonConfig);
+    m_talon.setNeutralMode(NeutralMode.Brake);
+    m_talon.enableVoltageCompensation(true);
   }
 
   /** @return the current velocity in rotations per second. */
   // @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
-    return m_spark.getEncoder().getVelocity() / (60.0 * kIndexerGearRatio);
+    return m_talon.getSelectedSensorVelocity() / (60.0 * kIndexerGearRatio);
   }
 
   /**
@@ -74,9 +96,9 @@ public class Indexer extends SubsystemBase implements Loggable {
   }
 
   // @Log(name = "Stator current")
-  public double getStatorCurrent() {
-    return m_spark.getOutputCurrent();
-  }
+  // public double getStatorCurrent() {
+  //   return m_talon.getOutputCurrent();
+  // }
 
   // @Log(name = "At setpoint")
   public boolean atSetpoint() {
@@ -102,7 +124,7 @@ public class Indexer extends SubsystemBase implements Loggable {
     }
 
     if (outputVoltage != m_lastOutputVoltage) {
-      m_spark.setVoltage(outputVoltage);
+      m_talon.setVoltage(outputVoltage);
     }
     m_lastOutputVoltage = outputVoltage;
     m_lastVelocity = this.getVelocityRotationsPerSecond();

@@ -12,7 +12,6 @@ import static frc.robot.Constants.ShooterConstants.*;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -22,8 +21,6 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PerpetualCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoCommandBuilder;
@@ -175,7 +172,6 @@ public class RobotContainer {
 
   private void configureCargoHandlingCommands() {
     // Puts intake arm down at start of climb
-   
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer
     // stopped by hitting high indexer path
@@ -203,13 +199,11 @@ public class RobotContainer {
     //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
     //                             .withTimeout(0.5))));
 
-    m_driver.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-            // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-            .whileActiveOnce(
-                CargoHandlingCommandBuilder.toggleArmCommand(m_intakeArm));
-            
-
-           
+    m_driver
+        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+        // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getArmDownCommand(m_intakeArm))
+        .whenInactive(CargoHandlingCommandBuilder.getArmUpCommand(m_intakeArm));
 
     m_driver
         .upperPOV()

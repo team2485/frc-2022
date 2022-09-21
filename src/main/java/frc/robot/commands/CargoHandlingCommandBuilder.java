@@ -150,6 +150,7 @@ public class CargoHandlingCommandBuilder {
   public static Command getArmDownCommand(IntakeArm intakeArm) {
     return new InstantCommand(() -> intakeArm.setArmDown(), intakeArm);
   }
+
   public static Command toggleArmCommand(IntakeArm intakeArm) {
     return new InstantCommand(() -> intakeArm.togglePosition(), intakeArm);
   }
