@@ -3,6 +3,8 @@ package frc.robot.subsystems.cargoHandling;
 import static frc.robot.Constants.IntakeConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
@@ -13,9 +15,6 @@ import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
-import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-
 
 public class Intake extends SubsystemBase implements Loggable {
   private final WPI_TalonFX m_talon = new WL_TalonFX(kIntakeTalonPort);
@@ -41,7 +40,6 @@ public class Intake extends SubsystemBase implements Loggable {
   public Intake() {
     TalonFXConfiguration intakeTalonConfig = new TalonFXConfiguration();
     intakeTalonConfig.voltageCompSaturation = Constants.kNominalVoltage;
-    intakeTalonConfig.peakOutputReverse = 0;
     intakeTalonConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
     intakeTalonConfig.velocityMeasurementWindow = 1;
 

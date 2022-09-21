@@ -3,19 +3,16 @@ package frc.robot.subsystems.cargoHandling;
 import static frc.robot.Constants.IndexerConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import frc.team2485.WarlordsLib.sendableRichness.SR_SimpleMotorFeedforward;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
-import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
 public class Indexer extends SubsystemBase implements Loggable {
   private WPI_TalonFX m_talon = new WPI_TalonFX(kIndexerTalonPort);
@@ -42,25 +39,24 @@ public class Indexer extends SubsystemBase implements Loggable {
 
   public Indexer() {
 
-
     TalonFXConfiguration indexerTalonConfig = new TalonFXConfiguration();
     indexerTalonConfig.voltageCompSaturation = Constants.kNominalVoltage;
     indexerTalonConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
     indexerTalonConfig.velocityMeasurementWindow = 1;
 
     indexerTalonConfig.supplyCurrLimit =
-    new SupplyCurrentLimitConfiguration(
-        true,
-        kIndexerSupplyCurrentLimitAmps,
-        kIndexerSupplyCurrentThresholdAmps,
-        kIndexerSupplyCurrentThresholdTimeSecs);
+        new SupplyCurrentLimitConfiguration(
+            true,
+            kIndexerSupplyCurrentLimitAmps,
+            kIndexerSupplyCurrentThresholdAmps,
+            kIndexerSupplyCurrentThresholdTimeSecs);
 
     indexerTalonConfig.statorCurrLimit =
-    new StatorCurrentLimitConfiguration(
-        true,
-        kIndexerStatorCurrentLimitAmps,
-        kIndexerStatorCurrentThresholdAmps,
-        kIndexerStatorCurrentThresholdTimeSecs);
+        new StatorCurrentLimitConfiguration(
+            true,
+            kIndexerStatorCurrentLimitAmps,
+            kIndexerStatorCurrentThresholdAmps,
+            kIndexerStatorCurrentThresholdTimeSecs);
 
     m_talon.configAllSettings(indexerTalonConfig);
     m_talon.setNeutralMode(NeutralMode.Brake);

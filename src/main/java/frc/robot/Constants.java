@@ -454,10 +454,17 @@ public final class Constants {
   }
 
   public static final class FeederConstants {
-    public static final int kFeederSparkPort = 23;
+    public static final int kFeederTalonPort = 16;
     public static final double kFeederLoopTimeSeconds = 0.02;
     public static final int kFeederSmartCurrentLimitAmps = 15;
     public static final int kFeederImmediateCurrentLimitAmps = 20;
+
+    public static final double kFeederSupplyCurrentLimitAmps = 25;
+    public static final double kFeederSupplyCurrentThresholdAmps = 30;
+    public static final double kFeederSupplyCurrentThresholdTimeSecs = 0.1;
+    public static final double kFeederStatorCurrentLimitAmps = 40;
+    public static final double kFeederStatorCurrentThresholdAmps = 45;
+    public static final double kFeederStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final double kFeederGearRatio = 4; // motor turns : output/full hood turns
 
