@@ -115,8 +115,7 @@ public final class Constants {
     //// Drive mechanism/encoder constants
     public static final double kWheelDiameterMeters = 0.1016;
     public static final double kWheelCircumferenceMeters = 0.1016 * Math.PI;
-    public static final double kDriveGearRatio =
-        IDManager.getInstance().select(6.75, 6.86); // motor turns per wheel turns
+    public static final double kDriveGearRatio = 6.86; // motor turns per wheel turns
     public static final double kDriveDistMetersPerMotorRev =
         kWheelCircumferenceMeters / kDriveGearRatio;
     public static final double kDriveDistMetersPerPulse =
@@ -135,11 +134,11 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
     // practice carpet
-    public static final double ksDriveVolts = IDManager.getInstance().select(0.67757, 0.73658);
+    public static final double ksDriveVolts =  0.73658;
     public static final double kvDriveVoltSecondsPerMeter =
-        IDManager.getInstance().select(2.1986, 2.2729);
+       2.2729;
     public static final double kaDriveVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.30189, 0.37446);
+        0.37446;
 
     public static final double ksDriveVoltsBackLeft = 0.5;
 
@@ -169,14 +168,7 @@ public final class Constants {
         1.5 * kTurningRadiansPerPulse * kFalconOutputUnitsPerVolt / kSecondsPer100Ms;
     public static final double kDTurningOutputUnit100MsSquaredPerSensorUnit =
         0.2 * kTurningRadiansPerPulse * kFalconOutputUnitsPerVolt / kSecondsPer100Ms;
-    public static final double kFTurningOutputUnit100MsPerSensorUnit =
-        IDManager.getInstance()
-            .select(
-                kvTurningVoltSecondsPerRadian
-                    * kTurningRadiansPerPulse
-                    * kFalconOutputUnitsPerVolt
-                    / kSecondsPer100Ms,
-                0.4 * 1023 / 8360);
+    public static final double kFTurningOutputUnit100MsPerSensorUnit = 0.4 * 1023 / 8360;
 
     public static final double kTurningPositionToleranceSensorUnits =
         Units.degreesToRadians(2) * kFalconSensorUnitsPerRotation;
@@ -194,40 +186,29 @@ public final class Constants {
     /** Zeros found with bevel gears facing right. Applied offset is the negative of the zero. */
     public static final int kPigeonPort = 9;
 
-    public static final boolean kDriveInverted = IDManager.getInstance().select(false, true);
+    public static final boolean kDriveInverted = true;
     public static final int kFLDriveTalonPort = 5;
     public static final int kFLTurningTalonPort = 6;
     public static final int kFLCANCoderPort = 12;
-    public static final Rotation2d kFLCANCoderZero =
-        IDManager.getInstance()
-            .select(
-                Rotation2d.fromDegrees(-133.6 + 0.261 + 5.4492 - 78.838),
-                Rotation2d.fromDegrees(56.0 - 1.66));
+    public static final Rotation2d kFLCANCoderZero = 
+                Rotation2d.fromDegrees(56.0 - 1.66);
 
     public static final int kFRDriveTalonPort = 7;
     public static final int kFRTurningTalonPort = 8;
     public static final int kFRCANCoderPort = 13;
     public static final Rotation2d kFRCANCoderZero =
-        IDManager.getInstance()
-            .select(
-                Rotation2d.fromDegrees(-161.4907 - 167.4316 - 85.957),
-                Rotation2d.fromDegrees(139.0 + 0.52));
+                Rotation2d.fromDegrees(139.0 + 0.52);
 
     public static final int kBRDriveTalonPort = 1;
     public static final int kBRTurningTalonPort = 2;
     public static final int kBRCANCoderPort = 10;
     public static final Rotation2d kBRCANCoderZero =
-        IDManager.getInstance()
-            .select(
-                Rotation2d.fromDegrees(162.3504 - 4.92 + 73.649),
-                Rotation2d.fromDegrees(-3.6 - 5.18));
+                Rotation2d.fromDegrees(-3.6 - 5.18);
 
     public static final int kBLDriveTalonPort = 3;
     public static final int kBLTurningTalonPort = 4;
     public static final int kBLCANCoderPort = 11;
-    public static final Rotation2d kBLCANCoderZero =
-        IDManager.getInstance()
-            .select(Rotation2d.fromDegrees(46.79 + 180), Rotation2d.fromDegrees(-167.7 + 4.33));
+    public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33);
 
     // Drivebase dimensions
     public static final double kWheelbaseLengthMeters = 0.635; // meters
