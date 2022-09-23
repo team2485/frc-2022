@@ -24,9 +24,10 @@ import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Shooter extends SubsystemBase implements Loggable {
-  private final WPI_TalonFX m_shooterTalon = new WPI_TalonFX(kShooterTalonPort);
-
-  private final WPI_TalonFX m_kickerTalon = new WPI_TalonFX(kKickerTalonPort);
+  //no invert
+  private final WPI_TalonFX m_shooterTalon = new WPI_TalonFX(kShooterTalonPort1);
+  //invert
+  private final WPI_TalonFX m_shooterTalon2 = new WPI_TalonFX(kShooterTalonPort2);
 
   @Log(name = "Shooter velocity Setpoint")
   private double m_shooterVelocitySetpointRotationsPerSecond = 0;
@@ -51,7 +52,7 @@ public class Shooter extends SubsystemBase implements Loggable {
             kShooterStatorCurrentThresholdAmps,
             kShooterStatorCurrentThresholdTimeSecs);
 
-    shooterTalonConfig.peakOutputReverse = 0;
+    // shooterTalonConfig.peakOutputReverse = 0;
     shooterTalonConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
     shooterTalonConfig.velocityMeasurementWindow = 1;
 
@@ -64,33 +65,34 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_shooterTalon.setNeutralMode(NeutralMode.Coast);
     m_shooterTalon.enableVoltageCompensation(true);
 
-    TalonFXConfiguration kickerTalonConfig = new TalonFXConfiguration();
-    kickerTalonConfig.voltageCompSaturation = Constants.kNominalVoltage;
-    kickerTalonConfig.supplyCurrLimit =
+    TalonFXConfiguration shooterTalon2Config = new TalonFXConfiguration();
+    shooterTalon2Config.voltageCompSaturation = Constants.kNominalVoltage;
+    shooterTalon2Config.supplyCurrLimit =
         new SupplyCurrentLimitConfiguration(
             true,
             kKickerSupplyCurrentLimitAmps,
             kKickerSupplyCurrentThresholdAmps,
             kKickerSupplyCurrentThresholdTimeSecs);
-    kickerTalonConfig.statorCurrLimit =
+    shooterTalon2Config.statorCurrLimit =
         new StatorCurrentLimitConfiguration(
             true,
             kKickerStatorCurrentLimitAmps,
             kKickerStatorCurrentThresholdAmps,
             kKickerStatorCurrentThresholdTimeSecs);
 
-    kickerTalonConfig.peakOutputReverse = 0;
-    kickerTalonConfig.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
-    kickerTalonConfig.velocityMeasurementWindow = 1;
+    // shooterTalon2Config.peakOutputReverse = 0;
+    shooterTalon2Config.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
+    shooterTalon2Config.velocityMeasurementWindow = 1;
 
-    kickerTalonConfig.slot0.kP = kPKickerOutputUnit100MsPerSensorUnit;
-    kickerTalonConfig.slot0.kF = kFKickerOutputUnit100MsPerSensorUnit * kKickerFeedforwardScale;
-    kickerTalonConfig.slot0.allowableClosedloopError =
+    shooterTalon2Config.slot0.kP = kPKickerOutputUnit100MsPerSensorUnit;
+    shooterTalon2Config.slot0.kF = kFKickerOutputUnit100MsPerSensorUnit * kKickerFeedforwardScale;
+    shooterTalon2Config.slot0.allowableClosedloopError =
         kKickerControlVelocityToleranceSensorUnitsPer100Ms;
 
-    m_kickerTalon.configAllSettings(kickerTalonConfig);
-    m_kickerTalon.setNeutralMode(NeutralMode.Coast);
-    m_kickerTalon.enableVoltageCompensation(true);
+    m_shooterTalon2.configAllSettings(shooterTalon2Config);
+    m_shooterTalon2.setNeutralMode(NeutralMode.Coast);
+    m_shooterTalon2.setInverted(true);
+    m_shooterTalon2.enableVoltageCompensation(true);
 
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
@@ -108,21 +110,21 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
     m_shooterTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
-    m_kickerTalon.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_4_AinTempVbat, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_6_Misc, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_7_CommStatus, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_9_MotProfBuffer, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_12_Feedback1, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
+    m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
   }
 
   /** @return the current talon-reported shooter velocity in rotations per second. */
@@ -131,16 +133,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     return m_shooterTalon.getSelectedSensorVelocity()
         / kShooterGearRatio
         / kFalconSensorUnitsPerRotation
-        * 10;
-  }
-
-  /** @return the current talon-reported shooter velocity in rotations per second. */
-  @Log(name = "Current kicker velocity (RPS)")
-  public double getKickerVelocityRotationsPerSecond() {
-    return m_kickerTalon.getSelectedSensorVelocity()
-        / kKickerGearRatio
-        / kFalconSensorUnitsPerRotation
-        * 10;
+        / 10;
   }
 
   /**
@@ -180,7 +173,17 @@ public class Shooter extends SubsystemBase implements Loggable {
     double newVelocitySetpointRotationsPerSecond =
         MathUtil.clamp(velocityRotationsPerSecond, 0, kShooterMaxSpeedRotationsPerSecond);
     m_shooterVelocitySetpointRotationsPerSecond = newVelocitySetpointRotationsPerSecond;
+
     m_shooterTalon.set(
+        ControlMode.Velocity,
+        newVelocitySetpointRotationsPerSecond
+            * kFalconSensorUnitsPerRotation
+            * kShooterGearRatio
+            * 0.1,
+        DemandType.ArbitraryFeedForward,
+        velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+
+    m_shooterTalon2.set(
         ControlMode.Velocity,
         newVelocitySetpointRotationsPerSecond
             * kFalconSensorUnitsPerRotation
@@ -190,27 +193,6 @@ public class Shooter extends SubsystemBase implements Loggable {
         velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }
 
-  /**
-   * Sets the velocity setpoint for the kicker.
-   *
-   * @param rotationsPerSecond velocity setpoint
-   */
-  @Config(name = "Set Kicker Velocity (RPS)")
-  public void setKickerVelocityRotationsPerSecond(double velocityRotationsPerSecond) {
-    double newVelocitySetpointRotationsPerSecond =
-        MathUtil.clamp(velocityRotationsPerSecond, 0, 180);
-    if (newVelocitySetpointRotationsPerSecond != m_kickerVelocitySetpointRotationsPerSecond) {
-      m_kickerVelocitySetpointRotationsPerSecond = newVelocitySetpointRotationsPerSecond;
-      m_kickerTalon.set(
-          ControlMode.Velocity,
-          newVelocitySetpointRotationsPerSecond
-              * kFalconSensorUnitsPerRotation
-              * kKickerGearRatio
-              * 0.1,
-          DemandType.ArbitraryFeedForward,
-          velocityRotationsPerSecond > 0 ? kSKickerVolts / kNominalVoltage : 0);
-    }
-  }
 
   /**
    * Applies the given voltage to the talon.
@@ -220,17 +202,10 @@ public class Shooter extends SubsystemBase implements Loggable {
   @Config(name = "Set shooter voltage")
   public void setShooterVoltage(double voltage) {
     m_shooterTalon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
+    m_shooterTalon2.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
+
   }
 
-  /**
-   * Applies the given voltage to the talon.
-   *
-   * @param voltage what voltage to apply
-   */
-  @Config(name = "Set kicker voltage")
-  public void setKickerVoltage(double voltage) {
-    m_kickerTalon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
-  }
 
   public boolean shooterWithinTolerance(double tolerance) {
     return Math.abs(
@@ -238,14 +213,8 @@ public class Shooter extends SubsystemBase implements Loggable {
         < tolerance;
   }
 
-  public boolean kickerWithinTolerance(double tolerance) {
-    return Math.abs(
-            getKickerVelocityRotationsPerSecond() - m_kickerVelocitySetpointRotationsPerSecond)
-        < tolerance;
-  }
-
   public boolean withinTolerance(double tolerance) {
-    return shooterWithinTolerance(tolerance) && kickerWithinTolerance(tolerance);
+    return shooterWithinTolerance(tolerance);
   }
 
   public double getSetpoint() {

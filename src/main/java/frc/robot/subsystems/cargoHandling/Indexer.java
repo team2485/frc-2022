@@ -1,6 +1,7 @@
 package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.IndexerConstants.*;
+import static frc.robot.Constants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
@@ -34,8 +35,10 @@ public class Indexer extends SubsystemBase implements Loggable {
   private boolean m_voltageOverride = false;
   private double m_voltageSetpoint = 0;
 
-  @Log(name = "output voltage")
   private double m_lastOutputVoltage = 0;
+
+  @Log(name = "output voltage")
+  private double outputVoltage = 0;
 
   public Indexer() {
 
@@ -60,13 +63,16 @@ public class Indexer extends SubsystemBase implements Loggable {
 
     m_talon.configAllSettings(indexerTalonConfig);
     m_talon.setNeutralMode(NeutralMode.Brake);
+    m_talon.setInverted(true);
     m_talon.enableVoltageCompensation(true);
   }
 
   /** @return the current velocity in rotations per second. */
   // @Log(name = "Current velocity (RPS)")
+  @Log(name = "current rotations/sec")
   public double getVelocityRotationsPerSecond() {
-    return m_talon.getSelectedSensorVelocity() / (60.0 * kIndexerGearRatio);
+    return m_talon.getSelectedSensorVelocity() / 
+      (kIndexerGearRatio*kFalconSensorUnitsPerRotation);
   }
 
   /**
@@ -104,7 +110,7 @@ public class Indexer extends SubsystemBase implements Loggable {
 
   public void runControlLoop() {
     // Calculates voltage to apply.
-    double outputVoltage = 0;
+    outputVoltage = 0;
     if (m_voltageOverride) {
       outputVoltage = m_voltageSetpoint;
     } else {

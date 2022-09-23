@@ -19,7 +19,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   DoubleSolenoid m_solenoid;
   DoubleSolenoid m_solenoid2;
-  boolean armUp = false;
+  boolean armUp = true;
 
   PneumaticsControlModule m_PCM = new PneumaticsControlModule();
   Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);

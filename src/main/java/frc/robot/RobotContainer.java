@@ -202,8 +202,19 @@ public class RobotContainer {
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getArmDownCommand(m_intakeArm))
-        .whenInactive(CargoHandlingCommandBuilder.getArmUpCommand(m_intakeArm));
+        .whileActiveContinuous(CargoHandlingCommandBuilder.runTestCommand(m_intake, m_intakeArm, m_indexer))
+        .whenInactive(CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
+
+        m_driver
+        .rightPOV()
+        // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getSetShooterCommand(()->15, m_shooter));
+
+        m_driver
+        .leftBumper()
+        // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder))
+        .whenInactive(CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder));
 
     m_driver
         .upperPOV()
@@ -230,7 +241,6 @@ public class RobotContainer {
                 new InstantCommand(),
                 CargoHandlingCommandBuilder.getSetShooterCommand(
                     () -> m_shooterVelocityLock + m_shooterOffset,
-                    () -> m_shooterTangentialRatioLock + m_kickerRatioOffset,
                     m_shooter),
                 () -> !m_setpointLock));
 

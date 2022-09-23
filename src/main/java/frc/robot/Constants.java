@@ -346,14 +346,11 @@ public final class Constants {
     public static final double kIntakeTopWheelDiameterMeters = 0.1016; // 4 in
     public static final double kIntakeBottomWheelDiameterMeters = 0.1524; // 6 in
     public static final double kIntakeBottomWheelCircumferenceMeters = 0.1524 * Math.PI;
-    public static final double kIntakeDefaultSpeedRotationsPerSecond =
-        kIntakeFreeSpeedRotationsPerSecond * 0.4;
+    public static final double kIntakeDefaultSpeedRotationsPerSecond = 2;
 
-    public static final double kSIntakeVolts = IDManager.getInstance().select(0.15, 0.0);
-    public static final double kVIntakeVoltSecondsPerMeter =
-        IDManager.getInstance().select(0.08, 0.1);
-    public static final double kAIntakeVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.01, 0.01);
+    public static final double kSIntakeVolts = 0.75191;
+    public static final double kVIntakeVoltSecondsPerMeter = 0.45447;
+    public static final double kAIntakeVoltSecondsSquaredPerMeter = 0.026443;
 
     public static final double kIntakeVelocityToleranceRotationsPerSecond = 1;
 
@@ -444,11 +441,9 @@ public final class Constants {
     public static final double kIndexerDefaultSpeedRotationsPerSecond =
         kIndexerFreeSpeedRotationsPerSecond * 0.9;
 
-    public static final double kSIndexerVolts = IDManager.getInstance().select(0.49, 0.1);
-    public static final double kVIndexerVoltSecondsPerMeter =
-        IDManager.getInstance().select(0.1, 0.1);
-    public static final double kAIndexerVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.005, 0.005);
+    public static final double kSIndexerVolts = 0.69534;
+    public static final double kVIndexerVoltSecondsPerMeter = 0.5;
+    public static final double kAIndexerVoltSecondsSquaredPerMeter = 0.0015969;
 
     public static final double kIndexerVelocityToleranceRotationsPerSecond = 1;
   }
@@ -483,11 +478,9 @@ public final class Constants {
         kFeederSurfaceFreeSpeedMetersPerSecond
             / ShooterConstants.kShooterSurfaceFreeSpeedMetersPerSecond;
 
-    public static final double kSFeederVolts = IDManager.getInstance().select(0.52807, 0.65884);
-    public static final double kVFeederVoltSecondsPerMeter =
-        IDManager.getInstance().select(0.24889, 0.11065);
-    public static final double kAFeederVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.033443, 0.023167);
+    public static final double kSFeederVolts = 0.56782;
+    public static final double kVFeederVoltSecondsPerMeter = 0.6591;
+    public static final double kAFeederVoltSecondsSquaredPerMeter = 0.032787;
 
     public static final double kFeederVelocityToleranceRotationsPerSecond = 1;
 
@@ -497,8 +490,8 @@ public final class Constants {
   }
 
   public static final class ShooterConstants {
-    public static final int kShooterTalonPort = 30;
-    public static final int kKickerTalonPort = 31;
+    public static final int kShooterTalonPort1 = 17;
+    public static final int kShooterTalonPort2 = 19;
 
     public static final double kShooterSupplyCurrentLimitAmps = 65;
     public static final double kShooterSupplyCurrentThresholdAmps = 75;
@@ -519,7 +512,7 @@ public final class Constants {
     public static final double kShooterLoopTimeSeconds = 0.001;
     public static final double kKickerLoopTimeSeconds = kShooterLoopTimeSeconds;
 
-    public static final double kShooterGearRatio = 1.5;
+    public static final double kShooterGearRatio = 1;
     public static final double kKickerGearRatio = 0.5;
 
     public static final double kShooterCircumferenceMeters =
@@ -540,12 +533,12 @@ public final class Constants {
         kKickerFreeSpeedRotationsPerSecond * kKickerCircumferenceMeters;
 
     public static final double kSShooterVolts = 0.5;
-    public static final double kVShooterVoltSecondsPerRotation = 0.235;
+    public static final double kVShooterVoltSecondsPerRotation = 0.41254;
     public static final double kAShooterVoltSecondsSquaredPerRotation =
         IDManager.getInstance().select(0.05, 0.005);
 
     public static final double kSKickerVolts = 0.5;
-    public static final double kVKickerVoltSecondsPerRotation = 0.06252;
+    public static final double kVKickerVoltSecondsPerRotation = 0.41254;
     public static final double kAKickerVoltSecondsSquaredPerRotation = 0.0019767;
 
     public static final double kFShooterOutputUnit100MsPerSensorUnit =

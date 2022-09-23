@@ -25,6 +25,25 @@ import java.util.function.DoubleSupplier;
 
 public class CargoHandlingCommandBuilder {
 
+  public static Command  getRunFeederCommand(Feeder feeder){
+    return new RunCommand(()->feeder.setVelocityRotationsPerSecond(4), feeder);
+  }
+  public static Command getStopFeederCommand(Feeder feeder){
+    return new InstantCommand(()->feeder.setVelocityRotationsPerSecond(0), feeder);
+  }
+
+
+  public static Command runTestCommand(Intake intake, IntakeArm intakeArm, Indexer indexer){
+    return getArmDownCommand(intakeArm)
+        .andThen(new RunCommand(()->intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond)))
+        .alongWith(new RunCommand(()->indexer.setVelocityRotationsPerSecond(4)));
+  }
+  public static Command stopTestCommand(Intake intake, IntakeArm intakeArm, Indexer indexer){
+    return new InstantCommand(()->intake.setVelocityRotationsPerSecond(0)) 
+      .andThen(new InstantCommand(()->indexer.setVelocityRotationsPerSecond(0)),
+      getArmUpCommand(intakeArm));
+  }
+
   public static Command getIntakeCommand(
       Intake intake, IntakeArm intakeArm, Indexer indexer, FeedServo servo) {
     return getArmUpCommand(intakeArm)
@@ -121,7 +140,7 @@ public class CargoHandlingCommandBuilder {
   }
 
   public static Command getSetShooterCommand(
-      DoubleSupplier shooterVelocity, DoubleSupplier tangentialVelocityRatio, Shooter shooter) {
+      DoubleSupplier shooterVelocity, Shooter shooter) {
     return new StartEndCommand(
         () -> shooter.setVelocities(shooterVelocity.getAsDouble()),
         () -> shooter.setVelocities(0),

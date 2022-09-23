@@ -1,6 +1,8 @@
 package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.IntakeConstants.*;
+import static frc.robot.Constants.*;
+
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
@@ -59,12 +61,14 @@ public class Intake extends SubsystemBase implements Loggable {
     m_talon.configAllSettings(intakeTalonConfig);
     m_talon.setNeutralMode(NeutralMode.Brake);
     m_talon.enableVoltageCompensation(true);
+    m_talon.setInverted(true);
   }
 
   /** @return the current velocity in rotations per second. */
   @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
-    return m_talon.getSelectedSensorVelocity() / (60.0 * kIntakeGearRatio);
+    return m_talon.getSelectedSensorVelocity() /  
+      (kIntakeGearRatio*kFalconSensorUnitsPerRotation);
   }
 
   /**
