@@ -19,7 +19,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   DoubleSolenoid m_solenoid;
   DoubleSolenoid m_solenoid2;
-  boolean armUp = true;
+  // boolean armUp = true;
 
   PneumaticsControlModule m_PCM = new PneumaticsControlModule();
   Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
@@ -60,19 +60,19 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   }
 
   public void setArmUp() {
-    if (!armUp) {
+    // if (!armUp) {
       m_solenoid.set(Value.kForward);
       m_solenoid2.set(Value.kForward);
-      armUp = true;
-    }
+      // armUp = true;
+    // }
   }
 
   public void setArmDown() {
-    if (armUp) {
+    // if (armUp) {
       m_solenoid.set(Value.kReverse);
       m_solenoid2.set(Value.kReverse);
-      armUp = false;
-    }
+      // armUp = false;
+    // }
   }
 
   @Override

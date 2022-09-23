@@ -84,8 +84,8 @@ public class Shooter extends SubsystemBase implements Loggable {
     shooterTalon2Config.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_1Ms;
     shooterTalon2Config.velocityMeasurementWindow = 1;
 
-    shooterTalon2Config.slot0.kP = kPKickerOutputUnit100MsPerSensorUnit;
-    shooterTalon2Config.slot0.kF = kFKickerOutputUnit100MsPerSensorUnit * kKickerFeedforwardScale;
+    shooterTalon2Config.slot0.kP = kPShooterOutputUnit100MsPerSensorUnit;
+    shooterTalon2Config.slot0.kF = kFShooterOutputUnit100MsPerSensorUnit * kKickerFeedforwardScale;
     shooterTalon2Config.slot0.allowableClosedloopError =
         kKickerControlVelocityToleranceSensorUnitsPer100Ms;
 
@@ -132,8 +132,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   public double getShooterVelocityRotationsPerSecond() {
     return m_shooterTalon.getSelectedSensorVelocity()
         / kShooterGearRatio
-        / kFalconSensorUnitsPerRotation
-        / 10;
+        / kFalconSensorUnitsPerRotation;
   }
 
   /**
@@ -178,8 +177,7 @@ public class Shooter extends SubsystemBase implements Loggable {
         ControlMode.Velocity,
         newVelocitySetpointRotationsPerSecond
             * kFalconSensorUnitsPerRotation
-            * kShooterGearRatio
-            * 0.1,
+            * kShooterGearRatio,
         DemandType.ArbitraryFeedForward,
         velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
 
@@ -187,8 +185,7 @@ public class Shooter extends SubsystemBase implements Loggable {
         ControlMode.Velocity,
         newVelocitySetpointRotationsPerSecond
             * kFalconSensorUnitsPerRotation
-            * kShooterGearRatio
-            * 0.1,
+            * kShooterGearRatio,
         DemandType.ArbitraryFeedForward,
         velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }

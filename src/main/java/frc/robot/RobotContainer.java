@@ -206,15 +206,15 @@ public class RobotContainer {
         .whenInactive(CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
         m_driver
-        .rightPOV()
+        .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getSetShooterCommand(()->15, m_shooter));
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getSetShooterCommand(()->5 , m_shooter));
 
         m_driver
-        .leftBumper()
+        .rightBumper()
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder))
-        .whenInactive(CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder));
+        .whenActive(CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder).alongWith(CargoHandlingCommandBuilder.getRunIndexerCommand(m_indexer)))
+        .whenInactive(CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder).alongWith(CargoHandlingCommandBuilder.getStopIndexerCommand(m_indexer)));
 
     m_driver
         .upperPOV()
@@ -233,26 +233,26 @@ public class RobotContainer {
             new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(0), m_indexer));
 
     // Set shooter on operator left trigger: based on distance to hub
-    m_operator
-        .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whileActiveContinuous(
-            new ConditionalCommand(
-                new InstantCommand(),
-                CargoHandlingCommandBuilder.getSetShooterCommand(
-                    () -> m_shooterVelocityLock + m_shooterOffset,
-                    m_shooter),
-                () -> !m_setpointLock));
+    // m_operator
+    //     .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
+    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    //     .whileActiveContinuous(
+    //         new ConditionalCommand(
+    //             new InstantCommand(),
+    //             CargoHandlingCommandBuilder.getSetShooterCommand(
+    //                 () -> m_shooterVelocityLock + m_shooterOffset,
+    //                 m_shooter),
+    //             () -> !m_setpointLock));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
-    m_operator
-        .rightBumper()
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder, m_feedServo),
-            false)
-        .whenInactive(
-            CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo));
+    // m_operator
+    //     .rightBumper()
+    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    //     .whileActiveContinuous(
+    //         CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder, m_feedServo),
+    //         false)
+    //     .whenInactive(
+    //         CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo));
 
     m_operator
         .upperPOV()

@@ -32,11 +32,20 @@ public class CargoHandlingCommandBuilder {
     return new InstantCommand(()->feeder.setVelocityRotationsPerSecond(0), feeder);
   }
 
+  public static Command  getRunIndexerCommand(Indexer indexer){
+    return new RunCommand(()->indexer.setVelocityRotationsPerSecond(6), indexer)
+                          .withTimeout(0.5)
+                          .andThen(new RunCommand(()->indexer.setVelocityRotationsPerSecond(6)));
+  }
+  public static Command getStopIndexerCommand(Indexer indexer){
+    return new InstantCommand(()->indexer.setVelocityRotationsPerSecond(0), indexer);
+  }
+
 
   public static Command runTestCommand(Intake intake, IntakeArm intakeArm, Indexer indexer){
     return getArmDownCommand(intakeArm)
         .andThen(new RunCommand(()->intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond)))
-        .alongWith(new RunCommand(()->indexer.setVelocityRotationsPerSecond(4)));
+        .alongWith(new RunCommand(()->indexer.setVelocityRotationsPerSecond(6)));
   }
   public static Command stopTestCommand(Intake intake, IntakeArm intakeArm, Indexer indexer){
     return new InstantCommand(()->intake.setVelocityRotationsPerSecond(0)) 
