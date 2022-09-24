@@ -24,9 +24,9 @@ import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class Shooter extends SubsystemBase implements Loggable {
-  //no invert
+  // no invert
   private final WPI_TalonFX m_shooterTalon = new WPI_TalonFX(kShooterTalonPort1);
-  //invert
+  // invert
   private final WPI_TalonFX m_shooterTalon2 = new WPI_TalonFX(kShooterTalonPort2);
 
   @Log(name = "Shooter velocity Setpoint")
@@ -175,21 +175,16 @@ public class Shooter extends SubsystemBase implements Loggable {
 
     m_shooterTalon.set(
         ControlMode.Velocity,
-        newVelocitySetpointRotationsPerSecond
-            * kFalconSensorUnitsPerRotation
-            * kShooterGearRatio,
+        newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio,
         DemandType.ArbitraryFeedForward,
         velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
 
     m_shooterTalon2.set(
         ControlMode.Velocity,
-        newVelocitySetpointRotationsPerSecond
-            * kFalconSensorUnitsPerRotation
-            * kShooterGearRatio,
+        newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio,
         DemandType.ArbitraryFeedForward,
         velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }
-
 
   /**
    * Applies the given voltage to the talon.
@@ -200,9 +195,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   public void setShooterVoltage(double voltage) {
     m_shooterTalon.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
     m_shooterTalon2.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
-
   }
-
 
   public boolean shooterWithinTolerance(double tolerance) {
     return Math.abs(

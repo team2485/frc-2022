@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
@@ -28,7 +27,7 @@ import io.github.oblarg.oblog.Logger;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-WPI_TalonFX m_talon = new WPI_TalonFX(18);
+  WPI_TalonFX m_talon = new WPI_TalonFX(18);
 
   private final RobotContainer m_robotContainer;
 

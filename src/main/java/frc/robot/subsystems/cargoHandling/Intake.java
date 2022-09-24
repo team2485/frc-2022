@@ -1,8 +1,7 @@
 package frc.robot.subsystems.cargoHandling;
 
-import static frc.robot.Constants.IntakeConstants.*;
 import static frc.robot.Constants.*;
-
+import static frc.robot.Constants.IntakeConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
@@ -67,8 +66,7 @@ public class Intake extends SubsystemBase implements Loggable {
   /** @return the current velocity in rotations per second. */
   @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
-    return m_talon.getSelectedSensorVelocity() /  
-      (kIntakeGearRatio*kFalconSensorUnitsPerRotation);
+    return m_talon.getSelectedSensorVelocity() / (kIntakeGearRatio * kFalconSensorUnitsPerRotation);
   }
 
   /**

@@ -134,11 +134,9 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
     // practice carpet
-    public static final double ksDriveVolts =  0.73658;
-    public static final double kvDriveVoltSecondsPerMeter =
-       2.2729;
-    public static final double kaDriveVoltSecondsSquaredPerMeter =
-        0.37446;
+    public static final double ksDriveVolts = 0.73658;
+    public static final double kvDriveVoltSecondsPerMeter = 2.2729;
+    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.37446;
 
     public static final double ksDriveVoltsBackLeft = 0.5;
 
@@ -190,26 +188,22 @@ public final class Constants {
     public static final int kFLDriveTalonPort = 5;
     public static final int kFLTurningTalonPort = 6;
     public static final int kFLCANCoderPort = 12;
-    public static final Rotation2d kFLCANCoderZero = 
-                Rotation2d.fromDegrees(56.0 - 1.66);
+    public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(56.0 - 1.66);
 
     public static final int kFRDriveTalonPort = 7;
     public static final int kFRTurningTalonPort = 8;
     public static final int kFRCANCoderPort = 13;
-    public static final Rotation2d kFRCANCoderZero =
-                Rotation2d.fromDegrees(-85.48-135);
+    public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-85.48 - 135);
 
     public static final int kBRDriveTalonPort = 1;
     public static final int kBRTurningTalonPort = 2;
     public static final int kBRCANCoderPort = 10;
-    public static final Rotation2d kBRCANCoderZero =
-                Rotation2d.fromDegrees(-3.6 - 5.18);
+    public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(-3.6 - 5.18);
 
     public static final int kBLDriveTalonPort = 3;
     public static final int kBLTurningTalonPort = 4;
     public static final int kBLCANCoderPort = 11;
-    public static final Rotation2d kBLCANCoderZero = 
-                Rotation2d.fromDegrees(-167.7 + 4.33 - 3.06);
+    public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33 - 3.06);
 
     // Drivebase dimensions
     public static final double kWheelbaseLengthMeters = 0.635; // meters
@@ -520,7 +514,7 @@ public final class Constants {
         IDManager.getInstance().select(0.05, 0.005);
 
     public static final double kSKickerVolts = 0.5;
-    public static final double kVKickerVoltSecondsPerRotation = 0.3;
+    public static final double kVKickerVoltSecondsPerRotation = 0.1;
     public static final double kAKickerVoltSecondsSquaredPerRotation = 0.0019767;
 
     public static final double kFShooterOutputUnit100MsPerSensorUnit =

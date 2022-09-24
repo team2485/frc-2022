@@ -61,17 +61,17 @@ public class IntakeArm extends SubsystemBase implements Loggable {
 
   public void setArmUp() {
     // if (!armUp) {
-      m_solenoid.set(Value.kForward);
-      m_solenoid2.set(Value.kForward);
-      // armUp = true;
+    m_solenoid.set(Value.kForward);
+    m_solenoid2.set(Value.kForward);
+    // armUp = true;
     // }
   }
 
   public void setArmDown() {
     // if (armUp) {
-      m_solenoid.set(Value.kReverse);
-      m_solenoid2.set(Value.kReverse);
-      // armUp = false;
+    m_solenoid.set(Value.kReverse);
+    m_solenoid2.set(Value.kReverse);
+    // armUp = false;
     // }
   }
 

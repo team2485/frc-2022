@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PerpetualCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -202,19 +201,26 @@ public class RobotContainer {
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(CargoHandlingCommandBuilder.runTestCommand(m_intake, m_intakeArm, m_indexer))
-        .whenInactive(CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
+        .whileActiveContinuous(
+            CargoHandlingCommandBuilder.runTestCommand(m_intake, m_intakeArm, m_indexer))
+        .whenInactive(
+            CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
-        m_driver
+    m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getSetShooterCommand(()->5 , m_shooter));
+        .whileActiveContinuous(
+            CargoHandlingCommandBuilder.getSetShooterCommand(() -> 2, m_shooter));
 
-        m_driver
+    m_operator
         .rightBumper()
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whenActive(CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder).alongWith(CargoHandlingCommandBuilder.getRunIndexerCommand(m_indexer)))
-        .whenInactive(CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder).alongWith(CargoHandlingCommandBuilder.getStopIndexerCommand(m_indexer)));
+        .whenActive(
+            CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder)
+                .alongWith(CargoHandlingCommandBuilder.getRunIndexerCommand(m_indexer)))
+        .whenInactive(
+            CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder)
+                .alongWith(CargoHandlingCommandBuilder.getStopIndexerCommand(m_indexer)));
 
     m_driver
         .upperPOV()
@@ -249,7 +255,8 @@ public class RobotContainer {
     //     .rightBumper()
     //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
     //     .whileActiveContinuous(
-    //         CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder, m_feedServo),
+    //         CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder,
+    // m_feedServo),
     //         false)
     //     .whenInactive(
     //         CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo));

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.cargoHandling;
 
-import static frc.robot.Constants.FeederConstants.*;
 import static frc.robot.Constants.*;
+import static frc.robot.Constants.FeederConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
@@ -63,8 +63,8 @@ public class Feeder extends SubsystemBase implements Loggable {
   /** @return the current velocity in rotations per second. */
   @Log(name = "Current velocity (RPS)")
   public double getVelocityRotationsPerSecond() {
-    return m_talon.getSelectedSensorVelocity() / 
-      (kFeederGearRatio*kFalconSensorUnitsPerRotation*10);
+    return m_talon.getSelectedSensorVelocity()
+        / (kFeederGearRatio * kFalconSensorUnitsPerRotation * 10);
   }
 
   /**

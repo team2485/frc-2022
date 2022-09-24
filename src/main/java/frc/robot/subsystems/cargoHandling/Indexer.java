@@ -1,7 +1,7 @@
 package frc.robot.subsystems.cargoHandling;
 
-import static frc.robot.Constants.IndexerConstants.*;
 import static frc.robot.Constants.*;
+import static frc.robot.Constants.IndexerConstants.*;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
@@ -71,8 +71,8 @@ public class Indexer extends SubsystemBase implements Loggable {
   // @Log(name = "Current velocity (RPS)")
   @Log(name = "current rotations/sec")
   public double getVelocityRotationsPerSecond() {
-    return m_talon.getSelectedSensorVelocity() / 
-      (kIndexerGearRatio*kFalconSensorUnitsPerRotation);
+    return m_talon.getSelectedSensorVelocity()
+        / (kIndexerGearRatio * kFalconSensorUnitsPerRotation);
   }
 
   /**

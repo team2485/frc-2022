@@ -32,7 +32,7 @@ public class AutoCommandBuilder {
 
     return new WaitCommand(0.5)
         .andThen(getIndexToShooterCommand(indexer, feeder, servo), new WaitCommand(0.5))
-        .raceWith(getSetShooterCommand(() -> 27.4,  shooter))
+        .raceWith(getSetShooterCommand(() -> 27.4, shooter))
         .andThen(
             getResetOdometryCommand(drivetrain, intakePathCommand),
             new InstantCommand(
@@ -95,7 +95,7 @@ public class AutoCommandBuilder {
             getStopIntakeCommand(intake, intakeArm, indexer),
             getIndexToShooterCommand(indexer, feeder, servo),
             getIndexToShooterCommand(indexer, feeder, servo))
-        .alongWith(getSetShooterCommand(() -> 27.8,  shooter));
+        .alongWith(getSetShooterCommand(() -> 27.8, shooter));
   }
 
   //   public static Command getSwordfishAuto() {
