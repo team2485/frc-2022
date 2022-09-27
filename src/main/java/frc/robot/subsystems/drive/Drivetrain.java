@@ -97,7 +97,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
             kFRTurningTalonPort,
             kFRCANCoderPort,
             kFRCANCoderZero,
-            kDriveInverted,
+            !kDriveInverted,
             "FR");
 
     m_backLeftModule =
@@ -114,7 +114,7 @@ public class Drivetrain extends SubsystemBase implements Loggable {
             kBRTurningTalonPort,
             kBRCANCoderPort,
             kBRCANCoderZero,
-            kDriveInverted,
+            !kDriveInverted,
             "BR");
 
     m_pigeon = new WPI_Pigeon2(kPigeonPort);

@@ -188,22 +188,26 @@ public final class Constants {
     public static final int kFLDriveTalonPort = 5;
     public static final int kFLTurningTalonPort = 6;
     public static final int kFLCANCoderPort = 12;
-    public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(56.0 - 1.66);
+    // public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(56.0 - 1.66);
+    public static final Rotation2d kFLCANCoderZero = Rotation2d.fromDegrees(47.96);
 
     public static final int kFRDriveTalonPort = 7;
     public static final int kFRTurningTalonPort = 8;
     public static final int kFRCANCoderPort = 13;
-    public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-85.48 - 135);
+    // public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-85.48 - 135);
+    public static final Rotation2d kFRCANCoderZero = Rotation2d.fromDegrees(-43.52);
 
     public static final int kBRDriveTalonPort = 1;
     public static final int kBRTurningTalonPort = 2;
     public static final int kBRCANCoderPort = 10;
-    public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(-3.6 - 5.18);
+    // public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(-3.6 - 5.18);
+    public static final Rotation2d kBRCANCoderZero = Rotation2d.fromDegrees(170.89);
 
     public static final int kBLDriveTalonPort = 3;
     public static final int kBLTurningTalonPort = 4;
     public static final int kBLCANCoderPort = 11;
-    public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33 - 3.06);
+    // public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33 - 3.06);
+    public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-168.98);
 
     // Drivebase dimensions
     public static final double kWheelbaseLengthMeters = 0.635; // meters
