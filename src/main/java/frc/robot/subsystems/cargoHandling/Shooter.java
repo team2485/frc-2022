@@ -130,7 +130,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   /** @return the current talon-reported shooter velocity in rotations per second. */
   @Log(name = "Current shooter velocity (RPS)")
   public double getShooterVelocityRotationsPerSecond() {
-    return m_shooterTalon.getSelectedSensorVelocity()
+    return m_shooterTalon.getSelectedSensorVelocity() * 10
         / kShooterGearRatio
         / kFalconSensorUnitsPerRotation;
   }
@@ -175,13 +175,13 @@ public class Shooter extends SubsystemBase implements Loggable {
 
     m_shooterTalon.set(
         ControlMode.Velocity,
-        newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio,
+        newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
         DemandType.ArbitraryFeedForward,
         velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
 
     m_shooterTalon2.set(
         ControlMode.Velocity,
-        newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio,
+        newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
         DemandType.ArbitraryFeedForward,
         velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }

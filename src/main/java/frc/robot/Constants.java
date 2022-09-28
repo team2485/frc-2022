@@ -473,11 +473,11 @@ public final class Constants {
     public static final int kShooterTalonPort1 = 17;
     public static final int kShooterTalonPort2 = 19;
 
-    public static final double kShooterSupplyCurrentLimitAmps = 65;
-    public static final double kShooterSupplyCurrentThresholdAmps = 75;
+    public static final double kShooterSupplyCurrentLimitAmps = 25;
+    public static final double kShooterSupplyCurrentThresholdAmps = 30;
     public static final double kShooterSupplyCurrentThresholdTimeSecs = 0.1;
-    public static final double kShooterStatorCurrentLimitAmps = 70;
-    public static final double kShooterStatorCurrentThresholdAmps = 75;
+    public static final double kShooterStatorCurrentLimitAmps = 40;
+    public static final double kShooterStatorCurrentThresholdAmps = 45;
     public static final double kShooterStatorCurrentThresholdTimeSecs = 0.05;
 
     public static final double kKickerSupplyCurrentLimitAmps = 40;
@@ -512,8 +512,8 @@ public final class Constants {
     public static final double kKickerSurfaceFreeSpeedMetersPerSecond =
         kKickerFreeSpeedRotationsPerSecond * kKickerCircumferenceMeters;
 
-    public static final double kSShooterVolts = 0.5;
-    public static final double kVShooterVoltSecondsPerRotation = 0.41254;
+    public static final double kSShooterVolts = 0.25;
+    public static final double kVShooterVoltSecondsPerRotation = 0.135;
     public static final double kAShooterVoltSecondsSquaredPerRotation =
         IDManager.getInstance().select(0.05, 0.005);
 
@@ -534,7 +534,7 @@ public final class Constants {
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPShooterVoltSecondsPerRotation = 0.1; // 0.5
+    public static final double kPShooterVoltSecondsPerRotation = 0.05; // 0.5
     public static final double kPShooterOutputUnit100MsPerSensorUnit =
         kPShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt

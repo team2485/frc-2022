@@ -9,6 +9,7 @@ import static frc.robot.Constants.ShooterConstants.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -25,12 +26,13 @@ import java.util.function.DoubleSupplier;
 
 public class CargoHandlingCommandBuilder {
 
-  public static Command getRunFeederCommand(Feeder feeder) {
-    return new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4), feeder);
+  public static Command getRunFeederCommand(Feeder feeder, Indexer indexer) {
+    return new ParallelRaceGroup(new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4), feeder)
+    ,new WaitCommand(2).andThen(new RunCommand(()-> indexer.setVelocityRotationsPerSecond(6)).withTimeout(3)));
   }
 
-  public static Command getStopFeederCommand(Feeder feeder) {
-    return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder);
+  public static Command getStopFeederCommand(Feeder feeder, Indexer indexer) {
+    return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder).alongWith(new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0)));
   }
 
   public static Command getRunIndexerCommand(Indexer indexer) {
