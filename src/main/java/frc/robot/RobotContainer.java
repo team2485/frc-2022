@@ -46,6 +46,8 @@ public class RobotContainer {
 
   public final Drivetrain m_drivetrain = new Drivetrain();
 
+  public final Hood m_hood = new Hood();
+
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
   public final ClimbStateMachine m_climbStateMachine = new ClimbStateMachine();
@@ -198,6 +200,12 @@ public class RobotContainer {
     //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
     //                             .withTimeout(0.5))));
 
+    m_driver.lowerPOV().whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(0.1)));
+    m_driver.rightPOV().whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(0.25)));
+    m_driver.leftPOV().whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(0)));
+
+
+    
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
@@ -206,19 +214,17 @@ public class RobotContainer {
         .whenInactive(
             CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
-    m_operator
+    m_driver
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getSetShooterCommand(() -> 25, m_shooter));
+            CargoHandlingCommandBuilder.getSetShooterCommand(() -> 30, m_shooter));
 
-    m_operator
+    m_driver
         .rightBumper()
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder, m_indexer))
-        .whenInactive(
-            CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder, m_indexer));
+        .whenActive(
+            CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder, m_indexer));
 
     m_driver
         .upperPOV()

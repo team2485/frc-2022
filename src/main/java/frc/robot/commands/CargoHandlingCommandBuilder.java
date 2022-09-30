@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
@@ -27,8 +28,13 @@ import java.util.function.DoubleSupplier;
 public class CargoHandlingCommandBuilder {
 
   public static Command getRunFeederCommand(Feeder feeder, Indexer indexer) {
-    return new ParallelRaceGroup(new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4), feeder)
-    ,new WaitCommand(2).andThen(new RunCommand(()-> indexer.setVelocityRotationsPerSecond(6)).withTimeout(3)));
+    return new SequentialCommandGroup(
+      new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4), feeder).withTimeout(1),
+      new InstantCommand(()->feeder.setVelocityRotationsPerSecond(0)),
+      new RunCommand(()-> indexer.setVelocityRotationsPerSecond(6)).withTimeout(1),
+      new InstantCommand(()->indexer.setVelocityRotationsPerSecond(0)),
+      new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4), feeder).withTimeout(1),
+      new InstantCommand(()->feeder.setVelocityRotationsPerSecond(0)));
   }
 
   public static Command getStopFeederCommand(Feeder feeder, Indexer indexer) {
