@@ -17,6 +17,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import io.github.oblarg.oblog.Loggable;
@@ -28,6 +29,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   private final WPI_TalonFX m_shooterTalon = new WPI_TalonFX(kShooterTalonPort1);
   // invert
   private final WPI_TalonFX m_shooterTalon2 = new WPI_TalonFX(kShooterTalonPort2);
+
 
   @Log(name = "Shooter velocity Setpoint")
   private double m_shooterVelocitySetpointRotationsPerSecond = 0;

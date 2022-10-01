@@ -7,6 +7,7 @@ import static frc.robot.Constants.IntakeArmConstants.*;
 import static frc.robot.Constants.IntakeConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -22,10 +23,26 @@ import frc.robot.subsystems.cargoHandling.Indexer;
 import frc.robot.subsystems.cargoHandling.Intake;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
 import frc.robot.subsystems.cargoHandling.Shooter;
+import frc.robot.subsystems.drive.Drivetrain;
+import io.github.oblarg.oblog.annotations.Log;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class CargoHandlingCommandBuilder {
+
+
+  public static Command allignToHub(Drivetrain drivetrain){
+
+    // double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
+    // double kP = Math.abs(tx) > 1 ? -0.1 : 0;
+   
+    return new InstantCommand(()->drivetrain.drive(0,0,
+                                (Math.abs(NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0)) > 1 ? -0.1 : 0)
+                                *NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0),false));
+
+
+  }
 
   public static Command getRunFeederCommand(Feeder feeder, Indexer indexer) {
     return new SequentialCommandGroup(

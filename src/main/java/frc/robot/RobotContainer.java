@@ -157,6 +157,8 @@ public class RobotContainer {
             },
             m_drivetrain));
 
+    m_driver.y().whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));
+
     m_driver
         .rightStick()
         .whileHeld(

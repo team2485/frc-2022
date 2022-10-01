@@ -9,6 +9,8 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
+
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_TalonFX;
@@ -19,6 +21,9 @@ import io.github.oblarg.oblog.annotations.Log;
 
 public class Intake extends SubsystemBase implements Loggable {
   private final WPI_TalonFX m_talon = new WL_TalonFX(kIntakeTalonPort);
+
+  @Log(name = "tx")
+  private double tx = 0;
 
   private final SR_SimpleMotorFeedforward m_feedforward =
       new SR_SimpleMotorFeedforward(
@@ -119,5 +124,6 @@ public class Intake extends SubsystemBase implements Loggable {
 
   public void periodic() {
     this.runControlLoop();
+    tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
   }
 }
