@@ -117,7 +117,8 @@ public class RobotContainer {
             m_feeder,
             m_feedServo,
             m_shooter,
-            m_autoTimer));
+            m_autoTimer,
+            m_hood));
     m_autoChooser.addOption(
         "Back up",
         // PathCommandBuilder.getResetOdometryCommand(m_drivetrain,

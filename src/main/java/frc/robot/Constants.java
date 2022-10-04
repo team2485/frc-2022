@@ -80,8 +80,8 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kAutoMaxSpeedMetersPerSecond = 2;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2;
+    public static final double kAutoMaxSpeedMetersPerSecond = 1.5;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 1.5;
 
     public static final double kAutoMaxAngularSpeedRadiansPerSecond =
         1.5 / DriveConstants.kTurningRadiusMeters;
@@ -478,8 +478,8 @@ public final class Constants {
     public static final double kHoodBottomPositionRadians = 0; // from horizontal
     public static final double kHoodTopPositionRadians = 0.2872;
 
-    public static final int kHoodSmartCurrentLimitAmps = 8;
-    public static final int kHoodImmediateCurrentLimitAmps = 8;
+    public static final int kHoodSmartCurrentLimitAmps = 6;
+    public static final int kHoodImmediateCurrentLimitAmps = 6;
 
     // Hood characterization constants
     public static final double kSHoodVolts = 0.13428;

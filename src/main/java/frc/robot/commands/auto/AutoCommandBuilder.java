@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.drive.*;
@@ -69,7 +70,8 @@ public class AutoCommandBuilder {
       Feeder feeder,
       FeedServo servo,
       Shooter shooter,
-      Timer timer) {
+      Timer timer,
+      Hood hood) {
 
     WL_SwerveControllerCommand pathCommand = getPathCommand(drivetrain, "2 Ball Left Fender");
 
@@ -80,6 +82,7 @@ public class AutoCommandBuilder {
             })
         .andThen(
             new WaitCommand(0.5),
+            new InstantCommand(()->hood.setAngleRadians(0.1)),
             getResetOdometryCommand(drivetrain, pathCommand),
             new InstantCommand(
                 () ->
@@ -90,12 +93,11 @@ public class AutoCommandBuilder {
                 drivetrain),
             pathCommand
                 .withInterrupt(() -> timer.get() > 8)
-                .andThen(getStopPathCommand(drivetrain), new WaitCommand(0.5))
-                .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
-            getStopIntakeCommand(intake, intakeArm, indexer),
-            getIndexToShooterCommand(indexer, feeder, servo),
-            getIndexToShooterCommand(indexer, feeder, servo))
-        .alongWith(getSetShooterCommand(() -> 27.8, shooter));
+                .andThen(getStopPathCommand(drivetrain), new WaitCommand(2))
+                .raceWith(runTestCommand(intake, intakeArm, indexer)),
+            stopTestCommand(intake, intakeArm, indexer),
+            getRunFeederCommand(feeder, indexer))
+        .alongWith(getSetShooterCommand(() -> 38, shooter));
   }
 
   //   public static Command getSwordfishAuto() {
