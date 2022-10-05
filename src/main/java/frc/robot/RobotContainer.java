@@ -10,8 +10,13 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
+import javax.print.attribute.standard.Compression;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -31,13 +36,11 @@ import frc.robot.subsystems.climb.ClimbStateMachine.ClimbState;
 import frc.robot.subsystems.drive.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import io.github.oblarg.oblog.annotations.*;
+import pabeles.concurrency.ConcurrencyOps.NewInstance;
 
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
-
-  private final PowerDistribution m_pd = new PowerDistribution();
-  private boolean isCompressorOn = false;
 
   //   private final Vision m_vision = new Vision();
 
@@ -56,6 +59,8 @@ public class RobotContainer {
   public final ClimbArm m_climbArm = new ClimbArm();
   public final ClimbStateMachine m_climbStateMachine = new ClimbStateMachine();
   public WPI_TalonFX m_talon = new WPI_TalonFX(40);
+
+  Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
   // SHOOTER SETPOINT FIELDS
   // Distance offset to change distance by for auto-aim -- used to adjust
@@ -121,7 +126,8 @@ public class RobotContainer {
             m_feeder,
             m_feedServo,
             m_shooter,
-            m_autoTimer));
+            m_autoTimer,
+            m_hood));
     m_autoChooser.addOption(
         "Back up",
         // PathCommandBuilder.getResetOdometryCommand(m_drivetrain,
@@ -178,10 +184,11 @@ public class RobotContainer {
   }
 
   private void configureCargoHandlingCommands() {
+
     m_operator.leftBumper().whenPressed(
         new InstantCommand(() -> {
-            isCompressorOn = !isCompressorOn;
-            m_pd.setSwitchableChannel(isCompressorOn);
+            if (m_compressor.enabled()) m_compressor.disable();
+            else m_compressor.enableDigital();
         })
     );
 

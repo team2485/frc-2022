@@ -10,7 +10,9 @@ import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +30,8 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+
+  Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
   public Robot() {
     IDManager.getInstance(Constants.kRobotIdFile);
@@ -110,6 +114,7 @@ public class Robot extends TimedRobot {
     }
     // m_robotContainer.configureDriveCoastMode();
 
+    m_compressor.disable();
   }
 
   /** This function is called periodically during operator control. */
