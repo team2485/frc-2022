@@ -27,13 +27,7 @@ import io.github.oblarg.oblog.Logger;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  WPI_TalonFX m_talon = new WPI_TalonFX(18);
-
   private final RobotContainer m_robotContainer;
-
-  // CommandXboxController m_drive = new CommandXboxController(0);
-
-  // private final AnalogPotentiometer m_potentiometer = new AnalogPotentiometer(0, 5, 0);
 
   public Robot() {
     IDManager.getInstance(Constants.kRobotIdFile);

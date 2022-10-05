@@ -12,6 +12,7 @@ import static frc.robot.Constants.ShooterConstants.*;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -34,6 +35,9 @@ import io.github.oblarg.oblog.annotations.*;
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
   private final CommandXboxController m_operator = new CommandXboxController(kOperatorPort);
+
+  private final PowerDistribution m_pd = new PowerDistribution();
+  private boolean isCompressorOn = false;
 
   //   private final Vision m_vision = new Vision();
 
@@ -174,6 +178,13 @@ public class RobotContainer {
   }
 
   private void configureCargoHandlingCommands() {
+    m_operator.leftBumper().whenPressed(
+        new InstantCommand(() -> {
+            isCompressorOn = !isCompressorOn;
+            m_pd.setSwitchableChannel(isCompressorOn);
+        })
+    );
+
     // Puts intake arm down at start of climb
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer

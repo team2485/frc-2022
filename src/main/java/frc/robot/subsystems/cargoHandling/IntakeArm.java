@@ -50,7 +50,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
     } else if (m_solenoid.get() == Value.kReverse) {
       return 1;
     } else {
-      return 2;
+      return -1;
     }
   }
 
