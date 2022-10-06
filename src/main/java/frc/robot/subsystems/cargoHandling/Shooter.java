@@ -30,6 +30,16 @@ public class Shooter extends SubsystemBase implements Loggable {
   // invert
   private final WPI_TalonFX m_shooterTalon2 = new WPI_TalonFX(kShooterTalonPort2);
 
+  //m = 1, 2, 3, 4, 5, 6
+  private final double[] settingTable = new double[]{30, 34, 38, 44, 48};
+
+  @Log(name = "distance  to hub")
+  private double distanceToHub = 0; 
+
+  @Log(name = "ty")
+  private double ty = 0; 
+
+
 
   @Log(name = "Shooter velocity Setpoint")
   private double m_shooterVelocitySetpointRotationsPerSecond = 0;
@@ -135,6 +145,15 @@ public class Shooter extends SubsystemBase implements Loggable {
     return m_shooterTalon.getSelectedSensorVelocity() * 10
         / kShooterGearRatio
         / kFalconSensorUnitsPerRotation;
+  }
+
+  public void allignToHub(){
+    ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
+    double angleToGoal = (37+ty)*(Math.PI/180.0);
+    //difference between actual goal height and limelight height
+    double goalHeight = 2.64 - 0.96;
+    distanceToHub = goalHeight/Math.tan(angleToGoal);
+
   }
 
   /**

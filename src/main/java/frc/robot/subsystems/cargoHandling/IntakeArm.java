@@ -22,7 +22,7 @@ public class IntakeArm extends SubsystemBase implements Loggable {
   // boolean armUp = true;
 
   PneumaticsControlModule m_PCM = new PneumaticsControlModule();
-  Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
+  // Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
   /** Creates a new intakeArm. */
   public IntakeArm() {

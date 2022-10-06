@@ -132,6 +132,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().enable();
     // m_robotContainer.configureDriveCoastMode();
 
+    m_compressor.enableDigital();
   }
 
   /** This function is called periodically during test mode. */

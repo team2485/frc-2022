@@ -5,6 +5,7 @@ import static frc.robot.Constants.HoodConstants.*;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.SparkMaxLimitSwitch;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -16,6 +17,9 @@ import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.*;
 
 public class Hood extends SubsystemBase implements Loggable {
+
+  //m = 1, 2, 3, 4, 5, 6
+  private final double[] settingTable = new double[]{0.1, 0.15, 0.18, 0.2, 0.28};
 
   private final WL_SparkMax m_spark = new WL_SparkMax(kHoodSparkPort);
   private SparkMaxLimitSwitch m_limitSwitch =
@@ -38,6 +42,14 @@ public class Hood extends SubsystemBase implements Loggable {
 
   private boolean m_isZeroed = false;
 
+  @Log(name = "distance  to hub")
+  private double distanceToHub = 0; 
+
+  @Log(name = "ty")
+  private double ty = 0; 
+
+
+
   public Hood() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
     m_spark.setSmartCurrentLimit(kHoodSmartCurrentLimitAmps);
@@ -54,6 +66,15 @@ public class Hood extends SubsystemBase implements Loggable {
     this.resetAngleRadians(kHoodBottomPositionRadians);
 
     Shuffleboard.getTab("Hood").add("Hood controller", m_controller);
+  }
+
+  public void allignToHub(){
+    ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
+    double angleToGoal = (37+ty)*(Math.PI/180.0);
+    //difference between actual goal height and limelight height
+    double goalHeight = 2.64 - 0.96;
+    distanceToHub = goalHeight/Math.tan(angleToGoal);
+
   }
 
   /** @return current angle from horizontal */
@@ -78,6 +99,8 @@ public class Hood extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
+
+    this.allignToHub();
 
     //setpoint ramp
     if(m_angleSetpointRadiansCurrent<=m_angleSetpointRadiansFinal){

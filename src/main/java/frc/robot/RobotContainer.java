@@ -60,8 +60,6 @@ public class RobotContainer {
   public final ClimbStateMachine m_climbStateMachine = new ClimbStateMachine();
   public WPI_TalonFX m_talon = new WPI_TalonFX(40);
 
-  Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
-
   // SHOOTER SETPOINT FIELDS
   // Distance offset to change distance by for auto-aim -- used to adjust
 
@@ -84,6 +82,9 @@ public class RobotContainer {
 
   @Log(name = "Low fender lock", width = 4, height = 2, rowIndex = 2, columnIndex = 15)
   boolean m_lowFender = false;
+
+  double hoodAngle = 0.1;
+  double flywheelSpeed = 30;
 
   // @Log(name = "Eject lock", width = 3, height = 1, rowIndex = 5, columnIndex = 12)
   // boolean m_eject = false;
@@ -185,13 +186,6 @@ public class RobotContainer {
 
   private void configureCargoHandlingCommands() {
 
-    m_operator.leftBumper().whenPressed(
-        new InstantCommand(() -> {
-            if (m_compressor.enabled()) m_compressor.disable();
-            else m_compressor.enableDigital();
-        })
-    );
-
     // Puts intake arm down at start of climb
 
     // Intake on driver right trigger: put intake arm down, then run intake and low indexer
@@ -220,9 +214,16 @@ public class RobotContainer {
     //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
     //                             .withTimeout(0.5))));
 
-    m_driver.lowerPOV().whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(0.1)));
-    m_driver.rightPOV().whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(0.25)));
-    m_driver.leftPOV().whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(0)));
+
+    m_operator.upperPOV().whileActiveOnce(new InstantCommand(()->hoodAngle+=0.01));
+    m_operator.lowerPOV().whileActiveOnce(new InstantCommand(()->hoodAngle-=0.01));
+
+    m_operator.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(hoodAngle)));
+    m_operator.leftBumper().whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(0)));
+
+    m_operator.leftPOV().whileActiveOnce(new InstantCommand(()->flywheelSpeed--));
+    m_operator.rightPOV().whileActiveOnce(new InstantCommand(()->flywheelSpeed++));
+
 
 
     
@@ -234,33 +235,33 @@ public class RobotContainer {
         .whenInactive(
             CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
-    m_driver
+    m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getSetShooterCommand(() -> 30, m_shooter));
+            CargoHandlingCommandBuilder.getSetShooterCommand(() -> flywheelSpeed, m_shooter));
 
-    m_driver
+    m_operator
         .rightBumper()
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whenActive(
             CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder, m_indexer));
 
-    m_driver
-        .upperPOV()
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getArmUpCommand(m_intakeArm));
+    // m_driver
+    //     .upperPOV()
+    //     .whileActiveContinuous(CargoHandlingCommandBuilder.getArmUpCommand(m_intakeArm));
 
-    m_operator
-        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-        .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-        .whenActive(
-            new InstantCommand(
-                () ->
-                    m_indexer.setVelocityRotationsPerSecond(
-                        Constants.IndexerConstants.kIndexerDefaultSpeedRotationsPerSecond),
-                m_indexer))
-        .whenInactive(
-            new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(0), m_indexer));
+    // m_operator
+    //     .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    //     .whenActive(
+    //         new InstantCommand(
+    //             () ->
+    //                 m_indexer.setVelocityRotationsPerSecond(
+    //                     Constants.IndexerConstants.kIndexerDefaultSpeedRotationsPerSecond),
+    //             m_indexer))
+    //     .whenInactive(
+    //         new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(0), m_indexer));
 
     // Set shooter on operator left trigger: based on distance to hub
     // m_operator

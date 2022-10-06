@@ -17,6 +17,32 @@
     },
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Ungrouped/DigitalInput[0]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[1]": "Digital Input",
+      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[5]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
+      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/Ungrouped/Talon FX [16]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [17]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [18]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [19]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [1]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [20]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [2]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [3]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [40]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [41]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [4]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [5]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [6]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [7]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [8]": "Motor Controller",
       "/Shuffleboard/ClimbElevator/Bottom Slot Sensor": "Digital Input",
       "/Shuffleboard/ClimbElevator/Top Slot Sensor": "Digital Input",
       "/Shuffleboard/Drivetrain/Angle PID (hub tracking)": "PIDController",
@@ -46,7 +72,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "height": -24,
+          "height": 332,
           "series": [
             {
               "color": [
@@ -64,7 +90,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": 1008,
+          "height": -9,
           "series": [
             {
               "color": [

@@ -571,7 +571,7 @@ public final class Constants {
             / kSecondsPer100Ms
             / kFalconSensorUnitsPerRotation;
 
-    public static final double kPShooterVoltSecondsPerRotation = 0.05; // 0.5
+    public static final double kPShooterVoltSecondsPerRotation = 0.01; // 0.5
     public static final double kPShooterOutputUnit100MsPerSensorUnit =
         kPShooterVoltSecondsPerRotation
             * kFalconOutputUnitsPerVolt
