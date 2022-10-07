@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
 import frc.robot.subsystems.cargoHandling.FeedServo;
 import frc.robot.subsystems.cargoHandling.Feeder;
+import frc.robot.subsystems.cargoHandling.Hood;
 import frc.robot.subsystems.cargoHandling.Indexer;
 import frc.robot.subsystems.cargoHandling.Intake;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
@@ -40,8 +41,10 @@ public class CargoHandlingCommandBuilder {
     return new InstantCommand(()->drivetrain.drive(0,0,
                                 (Math.abs(NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0)) > 1 ? -0.1 : 0)
                                 *NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0),false));
+  }
 
-
+  public static Command setShooterForShot(Hood hood, Shooter shooter){
+    return new InstantCommand(()->shooter.allignToHub()).andThen(new InstantCommand(()->hood.allignToHub()));
   }
 
   public static Command getRunFeederCommand(Feeder feeder, Indexer indexer) {
@@ -169,19 +172,19 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getSetShooterOnlyCommand(DoubleSupplier velocity, Shooter shooter) {
     if (velocity.getAsDouble() == 0) {
-      return new InstantCommand(() -> shooter.setShooterVelocityRotationsPerSecond(0), shooter);
+      return new InstantCommand(() -> shooter.zeroShooter(), shooter);
     } else {
       return new StartEndCommand(
-          () -> shooter.setShooterVelocityRotationsPerSecond(velocity.getAsDouble()),
-          () -> shooter.setShooterVelocityRotationsPerSecond(0),
+          () -> shooter.setShooterVelocityRotationsPerSecond(),
+          () -> shooter.zeroShooter(),
           shooter);
     }
   }
 
-  public static Command getSetShooterCommand(DoubleSupplier shooterVelocity, Shooter shooter) {
+  public static Command getSetShooterCommand(Shooter shooter) {
     return new StartEndCommand(
-        () -> shooter.setVelocities(shooterVelocity.getAsDouble()),
-        () -> shooter.setVelocities(0),
+        () -> shooter.setVelocities(),
+        () -> shooter.zeroShooter(),
         shooter);
   }
 

@@ -478,12 +478,12 @@ public final class Constants {
     public static final double kHoodBottomPositionRadians = 0; // from horizontal
     public static final double kHoodTopPositionRadians = 0.2872;
 
-    public static final int kHoodSmartCurrentLimitAmps = 6;
-    public static final int kHoodImmediateCurrentLimitAmps = 6;
+    public static final int kHoodSmartCurrentLimitAmps = 10;
+    public static final int kHoodImmediateCurrentLimitAmps = 10;
 
     // Hood characterization constants
-    public static final double kSHoodVolts = 0.13428;
-    public static final double kGHoodVolts = 0.5;
+    public static final double kSHoodVolts = 0.1;
+    public static final double kGHoodVolts = 0.25;
     public static final double kVHoodVoltSecondsPerRadian = 1;
     public static final double kAHoodVoltSecondsSquaredPerRadian = 0.12369;
 
@@ -501,7 +501,8 @@ public final class Constants {
         new SR_TrapezoidProfile.Constraints(
             kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
     // Hood PID constants
-    public static final double kPHood = 60;
+    public static final double kPHood = 50;
+    public static final double kIHood = 3;
     public static final double kDHood = 0;  
     public static final double kHoodControllerPositionTolerance = 0.005;
   }

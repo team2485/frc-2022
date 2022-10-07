@@ -33,7 +33,7 @@ public class AutoCommandBuilder {
 
     return new WaitCommand(0.5)
         .andThen(getIndexToShooterCommand(indexer, feeder, servo), new WaitCommand(0.5))
-        .raceWith(getSetShooterCommand(() -> 27.4, shooter))
+        .raceWith(getSetShooterCommand(shooter))
         .andThen(
             getResetOdometryCommand(drivetrain, intakePathCommand),
             new InstantCommand(
@@ -59,7 +59,7 @@ public class AutoCommandBuilder {
             new ParallelRaceGroup(
                 getIndexToShooterCommand(indexer, feeder, servo)
                     .andThen(getIndexToShooterCommand(indexer, feeder, servo))
-                    .raceWith(getSetShooterCommand(() -> 27.8, shooter))));
+                    .raceWith(getSetShooterCommand(shooter))));
   }
 
   public static Command get2BallFenderAutoLeft(
@@ -97,7 +97,7 @@ public class AutoCommandBuilder {
                 .raceWith(runTestCommand(intake, intakeArm, indexer)),
             stopTestCommand(intake, intakeArm, indexer),
             getRunFeederCommand(feeder, indexer))
-        .alongWith(getSetShooterCommand(() -> 38, shooter));
+        .alongWith(getSetShooterCommand(shooter));
   }
 
   //   public static Command getSwordfishAuto() {

@@ -31,7 +31,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   private final WPI_TalonFX m_shooterTalon2 = new WPI_TalonFX(kShooterTalonPort2);
 
   //m = 1, 2, 3, 4, 5, 6
-  private final double[] settingTable = new double[]{30, 34, 38, 44, 48};
+  private final double[] settingTable = new double[]{31, 34, 38, 43, 48};
 
   @Log(name = "distance  to hub")
   private double distanceToHub = 0; 
@@ -39,9 +39,10 @@ public class Shooter extends SubsystemBase implements Loggable {
   @Log(name = "ty")
   private double ty = 0; 
 
-
-
   @Log(name = "Shooter velocity Setpoint")
+  double newVelocitySetpointRotationsPerSecond = 30;
+
+
   private double m_shooterVelocitySetpointRotationsPerSecond = 0;
 
   @Log(name = "Kicker velocity Setpoint")
@@ -154,6 +155,17 @@ public class Shooter extends SubsystemBase implements Loggable {
     double goalHeight = 2.64 - 0.96;
     distanceToHub = goalHeight/Math.tan(angleToGoal);
 
+    if(distanceToHub>=1 && distanceToHub<2){
+        newVelocitySetpointRotationsPerSecond = settingTable[0] + ((distanceToHub-1) * (settingTable[1]-settingTable[0]));
+    }else if(distanceToHub>=2 && distanceToHub<3){
+      newVelocitySetpointRotationsPerSecond = settingTable[1] + ((distanceToHub-2) * (settingTable[2]-settingTable[1]));
+    }else if(distanceToHub>=3 && distanceToHub<4){
+      newVelocitySetpointRotationsPerSecond = settingTable[2] + ((distanceToHub-3) * (settingTable[3]-settingTable[2]));
+    }else if(distanceToHub>=4 && distanceToHub<5){
+      newVelocitySetpointRotationsPerSecond = settingTable[3] + ((distanceToHub-4) * (settingTable[4]-settingTable[3]));
+    }
+    MathUtil.clamp(newVelocitySetpointRotationsPerSecond, 0, kShooterMaxSpeedRotationsPerSecond);
+
   }
 
   /**
@@ -165,8 +177,8 @@ public class Shooter extends SubsystemBase implements Loggable {
    *     <1 creates backspin
    */
   @Config(name = "Set Velocities")
-  public void setVelocities(double shooterVelocityRotationsPerSecond) {
-    this.setShooterVelocityRotationsPerSecond(shooterVelocityRotationsPerSecond);
+  public void setVelocities() {
+    this.setShooterVelocityRotationsPerSecond();
     // this.setKickerVelocityRotationsPerSecond(
     //     shooterVelocityRotationsPerSecond
     //         * kShooterCircumferenceMeters // desired shooter tangential velocity m/s
@@ -189,22 +201,25 @@ public class Shooter extends SubsystemBase implements Loggable {
    * @param rotationsPerSecond velocity setpoint
    */
   @Config(name = "Set Shooter Velocity (RPS)")
-  public void setShooterVelocityRotationsPerSecond(double velocityRotationsPerSecond) {
-    double newVelocitySetpointRotationsPerSecond =
-        MathUtil.clamp(velocityRotationsPerSecond, 0, kShooterMaxSpeedRotationsPerSecond);
-    m_shooterVelocitySetpointRotationsPerSecond = newVelocitySetpointRotationsPerSecond;
+  public void setShooterVelocityRotationsPerSecond() {
+  
 
     m_shooterTalon.set(
         ControlMode.Velocity,
         newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
         DemandType.ArbitraryFeedForward,
-        velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+        newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
 
     m_shooterTalon2.set(
         ControlMode.Velocity,
         newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
         DemandType.ArbitraryFeedForward,
-        velocityRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+        newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+  }
+
+  public void zeroShooter(){
+    m_shooterTalon.set(0);
+    m_shooterTalon2.set(0);
   }
 
   /**

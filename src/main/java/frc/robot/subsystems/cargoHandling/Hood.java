@@ -19,14 +19,14 @@ import io.github.oblarg.oblog.annotations.*;
 public class Hood extends SubsystemBase implements Loggable {
 
   //m = 1, 2, 3, 4, 5, 6
-  private final double[] settingTable = new double[]{0.1, 0.15, 0.18, 0.2, 0.28};
+  private final double[] settingTable = new double[]{0.12, 0.15, 0.2, 0.26, 0.28};
 
   private final WL_SparkMax m_spark = new WL_SparkMax(kHoodSparkPort);
   private SparkMaxLimitSwitch m_limitSwitch =
       m_spark.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
 
   private final SR_ProfiledPIDController m_controller =
-      new SR_ProfiledPIDController(kPHood, 0, kDHood, kHoodMotionProfileConstraints);
+      new SR_ProfiledPIDController(kPHood, kIHood, kDHood, kHoodMotionProfileConstraints);
 
   @Log(name = "Hood Feedforward")
   private final SR_ArmFeedforward m_feedforward =
@@ -75,6 +75,15 @@ public class Hood extends SubsystemBase implements Loggable {
     double goalHeight = 2.64 - 0.96;
     distanceToHub = goalHeight/Math.tan(angleToGoal);
 
+    if(distanceToHub>=1 && distanceToHub<2){
+      m_angleSetpointRadiansCurrent = settingTable[0] + ((distanceToHub-1) * (settingTable[1]-settingTable[0]));
+   }else if(distanceToHub>=2 && distanceToHub<3){
+    m_angleSetpointRadiansCurrent = settingTable[1] + ((distanceToHub-2) * (settingTable[2]-settingTable[1]));
+   }else if(distanceToHub>=3 && distanceToHub<4){
+    m_angleSetpointRadiansCurrent = settingTable[2] + ((distanceToHub-3) * (settingTable[3]-settingTable[2]));
+   }else if(distanceToHub>=4 && distanceToHub<5){
+    m_angleSetpointRadiansCurrent = settingTable[3] + ((distanceToHub-4) * (settingTable[4]-settingTable[3]));
+    }
   }
 
   /** @return current angle from horizontal */
@@ -85,7 +94,7 @@ public class Hood extends SubsystemBase implements Loggable {
 
   @Config(name = "Set angle (radians)", defaultValueNumeric = kHoodBottomPositionRadians)
   public void setAngleRadians(double angle) {
-    m_angleSetpointRadiansFinal =
+    m_angleSetpointRadiansCurrent =
         MathUtil.clamp(angle, kHoodBottomPositionRadians, kHoodTopPositionRadians);
   }
 
@@ -100,15 +109,14 @@ public class Hood extends SubsystemBase implements Loggable {
   @Override
   public void periodic() {
 
-    this.allignToHub();
 
     //setpoint ramp
-    if(m_angleSetpointRadiansCurrent<=m_angleSetpointRadiansFinal){
-      m_angleSetpointRadiansCurrent+=0.005;
-    }
-    if(m_angleSetpointRadiansCurrent>=m_angleSetpointRadiansFinal){
-      m_angleSetpointRadiansCurrent-=0.005;
-    }
+    // if(m_angleSetpointRadiansCurrent<m_angleSetpointRadiansFinal){
+    //   m_angleSetpointRadiansCurrent+=0.005;
+    // }
+    // if(m_angleSetpointRadiansCurrent>m_angleSetpointRadiansFinal){
+    //   m_angleSetpointRadiansCurrent-=0.005;  
+    // }
 
     double controllerVoltage =
         m_controller.calculate(this.getAngleRadians(), m_angleSetpointRadiansCurrent);
