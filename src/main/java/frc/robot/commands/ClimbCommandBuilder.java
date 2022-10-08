@@ -70,7 +70,7 @@ public class ClimbCommandBuilder {
   public static Command getArmOnNextBarCommand(ClimbElevator elevator, ClimbArm arm) {
     return new InstantCommand(arm::restartTimer)
         .andThen(
-            new RunCommand(() -> arm.setVoltage(-7.2 * arm.getTimerTime())).withTimeout(1.2),
+            new RunCommand(() -> arm.setVoltage(-7.2 * arm.getTimerTime())).withTimeout(1.21),
             new InstantCommand(() -> arm.setVoltage(0)),
             new WaitCommand(0.5),
             getMoveElevatorCommand(Units.inchesToMeters(5), elevator));
