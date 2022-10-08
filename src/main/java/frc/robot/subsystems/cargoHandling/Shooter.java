@@ -137,6 +137,8 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_14_Turn_PIDF1, 255);
     m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
     m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
+
+    this.zeroShooter();
   }
 
   /** @return the current talon-reported shooter velocity in rotations per second. */
@@ -226,8 +228,23 @@ public class Shooter extends SubsystemBase implements Loggable {
   }
 
   public void zeroShooter() {
-    m_shooterTalon.set(0);
-    m_shooterTalon2.set(0);
+    m_shooterTalon.set(
+      ControlMode.Velocity,
+      0
+          * kFalconSensorUnitsPerRotation
+          * kShooterGearRatio
+          * 0.1,
+      DemandType.ArbitraryFeedForward,
+      newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+
+  m_shooterTalon2.set(
+      ControlMode.Velocity,
+      0
+          * kFalconSensorUnitsPerRotation
+          * kShooterGearRatio
+          * 0.1,
+      DemandType.ArbitraryFeedForward,
+      newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }
 
   /**
@@ -241,15 +258,13 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_shooterTalon2.set(ControlMode.PercentOutput, voltage / kNominalVoltage);
   }
 
-  public boolean shooterWithinTolerance(double tolerance) {
+  @Log(name = "Shoot When Green")
+  public boolean shooterWithinTolerance() {
     return Math.abs(
-            getShooterVelocityRotationsPerSecond() - m_shooterVelocitySetpointRotationsPerSecond)
-        < tolerance;
+            getShooterVelocityRotationsPerSecond() - newVelocitySetpointRotationsPerSecond)
+        < 1;
   }
 
-  public boolean withinTolerance(double tolerance) {
-    return shooterWithinTolerance(tolerance);
-  }
 
   public double getSetpoint() {
     return m_shooterVelocitySetpointRotationsPerSecond;

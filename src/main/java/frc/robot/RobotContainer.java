@@ -218,7 +218,7 @@ public class RobotContainer {
 
     m_operator.y().whenActive(CargoHandlingCommandBuilder.setShooterForShot(m_hood, m_shooter));
 
-    m_operator.x().whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));
+    m_operator.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));
 
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
@@ -227,6 +227,14 @@ public class RobotContainer {
             CargoHandlingCommandBuilder.runTestCommand(m_intake, m_intakeArm, m_indexer))
         .whenInactive(
             CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
+
+    m_driver
+    .b()
+    // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
+    .whileActiveContinuous(
+        CargoHandlingCommandBuilder.outtakeCommand(m_intake, m_intakeArm))
+    .whenInactive(
+        CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
     m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)

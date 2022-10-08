@@ -61,7 +61,7 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getRunFeederCommand(Feeder feeder, Indexer indexer) {
     return new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4))
-        .alongWith(new RunCommand(() -> indexer.setVelocityRotationsPerSecond(4)));
+        .alongWith(new RunCommand(() -> indexer.setVelocityRotationsPerSecond(6)));
   }
 
   public static Command getStopFeederCommand(Feeder feeder, Indexer indexer) {
@@ -85,6 +85,13 @@ public class CargoHandlingCommandBuilder {
             new RunCommand(
                 () -> intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond)))
         .alongWith(new RunCommand(() -> indexer.setVelocityRotationsPerSecond(6)));
+  }
+
+  public static Command outtakeCommand(Intake intake, IntakeArm intakeArm) {
+    return getArmDownCommand(intakeArm)
+        .andThen(
+            new RunCommand(
+                () -> intake.setVelocityRotationsPerSecond(-6)));
   }
 
   public static Command stopTestCommand(Intake intake, IntakeArm intakeArm, Indexer indexer) {
@@ -162,7 +169,7 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getOuttakeCommand(Indexer indexer) {
     return new StartEndCommand(
-        () -> indexer.setVelocityRotationsPerSecond(-6),
+        () -> indexer.setVelocityRotationsPerSecond(-3),
         () -> indexer.setVelocityRotationsPerSecond(0),
         indexer);
   }
