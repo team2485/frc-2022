@@ -10,10 +10,8 @@ import static frc.robot.Constants.ShooterConstants.*;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.interpolation.InterpolatingTable;
@@ -25,40 +23,50 @@ import frc.robot.subsystems.cargoHandling.Intake;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
 import frc.robot.subsystems.cargoHandling.Shooter;
 import frc.robot.subsystems.drive.Drivetrain;
-import io.github.oblarg.oblog.annotations.Log;
-
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class CargoHandlingCommandBuilder {
 
+  public static Command allignToHub(Drivetrain drivetrain) {
 
-  public static Command allignToHub(Drivetrain drivetrain){
-
-    // double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
+    // double tx =
+    // NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
     // double kP = Math.abs(tx) > 1 ? -0.1 : 0;
-   
-    return new InstantCommand(()->drivetrain.drive(0,0,
-                                (Math.abs(NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0)) > 1 ? -0.1 : 0)
-                                *NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0),false));
+
+    return new InstantCommand(
+        () ->
+            drivetrain.drive(
+                0,
+                0,
+                (Math.abs(
+                                NetworkTableInstance.getDefault()
+                                    .getTable("limelight")
+                                    .getEntry("tx")
+                                    .getDouble(0))
+                            > 1
+                        ? -0.1
+                        : 0)
+                    * NetworkTableInstance.getDefault()
+                        .getTable("limelight")
+                        .getEntry("tx")
+                        .getDouble(0),
+                false));
   }
 
-  public static Command setShooterForShot(Hood hood, Shooter shooter){
-    return new InstantCommand(()->shooter.allignToHub()).andThen(new InstantCommand(()->hood.allignToHub()));
+  public static Command setShooterForShot(Hood hood, Shooter shooter) {
+    return new InstantCommand(() -> shooter.allignToHub())
+        .andThen(new InstantCommand(() -> hood.allignToHub()));
   }
 
   public static Command getRunFeederCommand(Feeder feeder, Indexer indexer) {
-    return new SequentialCommandGroup(
-      new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4), feeder).withTimeout(1),
-      new InstantCommand(()->feeder.setVelocityRotationsPerSecond(0)),
-      new RunCommand(()-> indexer.setVelocityRotationsPerSecond(6)).withTimeout(1),
-      new InstantCommand(()->indexer.setVelocityRotationsPerSecond(0)),
-      new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4), feeder).withTimeout(1),
-      new InstantCommand(()->feeder.setVelocityRotationsPerSecond(0)));
+    return new RunCommand(() -> feeder.setVelocityRotationsPerSecond(4))
+        .alongWith(new RunCommand(() -> indexer.setVelocityRotationsPerSecond(4)));
   }
 
   public static Command getStopFeederCommand(Feeder feeder, Indexer indexer) {
-    return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder).alongWith(new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0)));
+    return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0), feeder)
+        .alongWith(new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0)));
   }
 
   public static Command getRunIndexerCommand(Indexer indexer) {
@@ -154,7 +162,7 @@ public class CargoHandlingCommandBuilder {
 
   public static Command getOuttakeCommand(Indexer indexer) {
     return new StartEndCommand(
-        () -> indexer.setVelocityRotationsPerSecond(-3),
+        () -> indexer.setVelocityRotationsPerSecond(-6),
         () -> indexer.setVelocityRotationsPerSecond(0),
         indexer);
   }
@@ -182,10 +190,7 @@ public class CargoHandlingCommandBuilder {
   }
 
   public static Command getSetShooterCommand(Shooter shooter) {
-    return new StartEndCommand(
-        () -> shooter.setVelocities(),
-        () -> shooter.zeroShooter(),
-        shooter);
+    return new StartEndCommand(() -> shooter.setVelocities(), () -> shooter.zeroShooter(), shooter);
   }
 
   public static Command getSetIntakeCommand(DoubleSupplier velocity, Intake intake) {

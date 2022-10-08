@@ -8,7 +8,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.team2485.WarlordsLib.motorcontrol.WL_SparkMax;
 import frc.team2485.WarlordsLib.sendableRichness.SR_ArmFeedforward;
@@ -18,8 +17,8 @@ import io.github.oblarg.oblog.annotations.*;
 
 public class Hood extends SubsystemBase implements Loggable {
 
-  //m = 1, 2, 3, 4, 5, 6
-  private final double[] settingTable = new double[]{0.12, 0.15, 0.2, 0.26, 0.28};
+  // m = 1, 2, 3, 4, 5, 6
+  private final double[] settingTable = new double[] {0.12, 0.16, 0.21, 0.26, 0.28};
 
   private final WL_SparkMax m_spark = new WL_SparkMax(kHoodSparkPort);
   private SparkMaxLimitSwitch m_limitSwitch =
@@ -43,12 +42,10 @@ public class Hood extends SubsystemBase implements Loggable {
   private boolean m_isZeroed = false;
 
   @Log(name = "distance  to hub")
-  private double distanceToHub = 0; 
+  private double distanceToHub = 0;
 
   @Log(name = "ty")
-  private double ty = 0; 
-
-
+  private double ty = 0;
 
   public Hood() {
     m_spark.enableVoltageCompensation(Constants.kNominalVoltage);
@@ -68,21 +65,25 @@ public class Hood extends SubsystemBase implements Loggable {
     Shuffleboard.getTab("Hood").add("Hood controller", m_controller);
   }
 
-  public void allignToHub(){
+  public void allignToHub() {
     ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
-    double angleToGoal = (37+ty)*(Math.PI/180.0);
-    //difference between actual goal height and limelight height
+    double angleToGoal = (37 + ty) * (Math.PI / 180.0);
+    // difference between actual goal height and limelight height
     double goalHeight = 2.64 - 0.96;
-    distanceToHub = goalHeight/Math.tan(angleToGoal);
+    distanceToHub = goalHeight / Math.tan(angleToGoal);
 
-    if(distanceToHub>=1 && distanceToHub<2){
-      m_angleSetpointRadiansCurrent = settingTable[0] + ((distanceToHub-1) * (settingTable[1]-settingTable[0]));
-   }else if(distanceToHub>=2 && distanceToHub<3){
-    m_angleSetpointRadiansCurrent = settingTable[1] + ((distanceToHub-2) * (settingTable[2]-settingTable[1]));
-   }else if(distanceToHub>=3 && distanceToHub<4){
-    m_angleSetpointRadiansCurrent = settingTable[2] + ((distanceToHub-3) * (settingTable[3]-settingTable[2]));
-   }else if(distanceToHub>=4 && distanceToHub<5){
-    m_angleSetpointRadiansCurrent = settingTable[3] + ((distanceToHub-4) * (settingTable[4]-settingTable[3]));
+    if (distanceToHub >= 1 && distanceToHub < 2) {
+      m_angleSetpointRadiansCurrent =
+          settingTable[0] + ((distanceToHub - 1) * (settingTable[1] - settingTable[0]));
+    } else if (distanceToHub >= 2 && distanceToHub < 3) {
+      m_angleSetpointRadiansCurrent =
+          settingTable[1] + ((distanceToHub - 2) * (settingTable[2] - settingTable[1]));
+    } else if (distanceToHub >= 3 && distanceToHub < 4) {
+      m_angleSetpointRadiansCurrent =
+          settingTable[2] + ((distanceToHub - 3) * (settingTable[3] - settingTable[2]));
+    } else if (distanceToHub >= 4 && distanceToHub < 5) {
+      m_angleSetpointRadiansCurrent =
+          settingTable[3] + ((distanceToHub - 4) * (settingTable[4] - settingTable[3]));
     }
   }
 
@@ -109,13 +110,12 @@ public class Hood extends SubsystemBase implements Loggable {
   @Override
   public void periodic() {
 
-
-    //setpoint ramp
+    // setpoint ramp
     // if(m_angleSetpointRadiansCurrent<m_angleSetpointRadiansFinal){
     //   m_angleSetpointRadiansCurrent+=0.005;
     // }
     // if(m_angleSetpointRadiansCurrent>m_angleSetpointRadiansFinal){
-    //   m_angleSetpointRadiansCurrent-=0.005;  
+    //   m_angleSetpointRadiansCurrent-=0.005;
     // }
 
     double controllerVoltage =

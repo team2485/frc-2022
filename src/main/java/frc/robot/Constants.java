@@ -207,7 +207,8 @@ public final class Constants {
     public static final int kBLDriveTalonPort = 3;
     public static final int kBLTurningTalonPort = 4;
     public static final int kBLCANCoderPort = 11;
-    // public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33 - 3.06);
+    // public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-167.7 + 4.33 -
+    // 3.06);
     public static final Rotation2d kBLCANCoderZero = Rotation2d.fromDegrees(-168.98);
 
     // Drivebase dimensions
@@ -503,7 +504,7 @@ public final class Constants {
     // Hood PID constants
     public static final double kPHood = 50;
     public static final double kIHood = 3;
-    public static final double kDHood = 0;  
+    public static final double kDHood = 0;
     public static final double kHoodControllerPositionTolerance = 0.005;
   }
 
@@ -551,7 +552,7 @@ public final class Constants {
         kKickerFreeSpeedRotationsPerSecond * kKickerCircumferenceMeters;
 
     public static final double kSShooterVolts = 0.25;
-    public static final double kVShooterVoltSecondsPerRotation = 0.135;
+    public static final double kVShooterVoltSecondsPerRotation = 0.133;
     public static final double kAShooterVoltSecondsSquaredPerRotation =
         IDManager.getInstance().select(0.05, 0.005);
 

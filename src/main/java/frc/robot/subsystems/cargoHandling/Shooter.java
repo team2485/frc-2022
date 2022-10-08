@@ -30,18 +30,17 @@ public class Shooter extends SubsystemBase implements Loggable {
   // invert
   private final WPI_TalonFX m_shooterTalon2 = new WPI_TalonFX(kShooterTalonPort2);
 
-  //m = 1, 2, 3, 4, 5, 6
-  private final double[] settingTable = new double[]{31, 34, 38, 43, 48};
+  // m = 1, 2, 3, 4, 5, 6
+  private final double[] settingTable = new double[] {31, 34, 38, 43, 48};
 
   @Log(name = "distance  to hub")
-  private double distanceToHub = 0; 
+  private double distanceToHub = 0;
 
   @Log(name = "ty")
-  private double ty = 0; 
+  private double ty = 0;
 
   @Log(name = "Shooter velocity Setpoint")
   double newVelocitySetpointRotationsPerSecond = 30;
-
 
   private double m_shooterVelocitySetpointRotationsPerSecond = 0;
 
@@ -143,29 +142,33 @@ public class Shooter extends SubsystemBase implements Loggable {
   /** @return the current talon-reported shooter velocity in rotations per second. */
   @Log(name = "Current shooter velocity (RPS)")
   public double getShooterVelocityRotationsPerSecond() {
-    return m_shooterTalon.getSelectedSensorVelocity() * 10
+    return m_shooterTalon.getSelectedSensorVelocity()
+        * 10
         / kShooterGearRatio
         / kFalconSensorUnitsPerRotation;
   }
 
-  public void allignToHub(){
+  public void allignToHub() {
     ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
-    double angleToGoal = (37+ty)*(Math.PI/180.0);
-    //difference between actual goal height and limelight height
+    double angleToGoal = (37 + ty) * (Math.PI / 180.0);
+    // difference between actual goal height and limelight height
     double goalHeight = 2.64 - 0.96;
-    distanceToHub = goalHeight/Math.tan(angleToGoal);
+    distanceToHub = goalHeight / Math.tan(angleToGoal);
 
-    if(distanceToHub>=1 && distanceToHub<2){
-        newVelocitySetpointRotationsPerSecond = settingTable[0] + ((distanceToHub-1) * (settingTable[1]-settingTable[0]));
-    }else if(distanceToHub>=2 && distanceToHub<3){
-      newVelocitySetpointRotationsPerSecond = settingTable[1] + ((distanceToHub-2) * (settingTable[2]-settingTable[1]));
-    }else if(distanceToHub>=3 && distanceToHub<4){
-      newVelocitySetpointRotationsPerSecond = settingTable[2] + ((distanceToHub-3) * (settingTable[3]-settingTable[2]));
-    }else if(distanceToHub>=4 && distanceToHub<5){
-      newVelocitySetpointRotationsPerSecond = settingTable[3] + ((distanceToHub-4) * (settingTable[4]-settingTable[3]));
+    if (distanceToHub >= 1 && distanceToHub < 2) {
+      newVelocitySetpointRotationsPerSecond =
+          settingTable[0] + ((distanceToHub - 1) * (settingTable[1] - settingTable[0]));
+    } else if (distanceToHub >= 2 && distanceToHub < 3) {
+      newVelocitySetpointRotationsPerSecond =
+          settingTable[1] + ((distanceToHub - 2) * (settingTable[2] - settingTable[1]));
+    } else if (distanceToHub >= 3 && distanceToHub < 4) {
+      newVelocitySetpointRotationsPerSecond =
+          settingTable[2] + ((distanceToHub - 3) * (settingTable[3] - settingTable[2]));
+    } else if (distanceToHub >= 4 && distanceToHub < 5) {
+      newVelocitySetpointRotationsPerSecond =
+          settingTable[3] + ((distanceToHub - 4) * (settingTable[4] - settingTable[3]));
     }
     MathUtil.clamp(newVelocitySetpointRotationsPerSecond, 0, kShooterMaxSpeedRotationsPerSecond);
-
   }
 
   /**
@@ -202,22 +205,27 @@ public class Shooter extends SubsystemBase implements Loggable {
    */
   @Config(name = "Set Shooter Velocity (RPS)")
   public void setShooterVelocityRotationsPerSecond() {
-  
 
     m_shooterTalon.set(
         ControlMode.Velocity,
-        newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
+        newVelocitySetpointRotationsPerSecond
+            * kFalconSensorUnitsPerRotation
+            * kShooterGearRatio
+            * 0.1,
         DemandType.ArbitraryFeedForward,
         newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
 
     m_shooterTalon2.set(
         ControlMode.Velocity,
-        newVelocitySetpointRotationsPerSecond * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
+        newVelocitySetpointRotationsPerSecond
+            * kFalconSensorUnitsPerRotation
+            * kShooterGearRatio
+            * 0.1,
         DemandType.ArbitraryFeedForward,
         newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }
 
-  public void zeroShooter(){
+  public void zeroShooter() {
     m_shooterTalon.set(0);
     m_shooterTalon2.set(0);
   }

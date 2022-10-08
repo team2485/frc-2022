@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.drive.*;
@@ -82,7 +81,7 @@ public class AutoCommandBuilder {
             })
         .andThen(
             new WaitCommand(0.5),
-            new InstantCommand(()->hood.setAngleRadians(0.1)),
+            new InstantCommand(() -> hood.setAngleRadians(0.1)),
             getResetOdometryCommand(drivetrain, pathCommand),
             new InstantCommand(
                 () ->

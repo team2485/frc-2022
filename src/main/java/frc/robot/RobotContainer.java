@@ -10,14 +10,8 @@ import static frc.robot.Constants.DriveConstants.*;
 import static frc.robot.Constants.OIConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
-import javax.print.attribute.standard.Compression;
-
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Axis;
@@ -36,7 +30,6 @@ import frc.robot.subsystems.climb.ClimbStateMachine.ClimbState;
 import frc.robot.subsystems.drive.*;
 import frc.team2485.WarlordsLib.oi.CommandXboxController;
 import io.github.oblarg.oblog.annotations.*;
-import pabeles.concurrency.ConcurrencyOps.NewInstance;
 
 public class RobotContainer {
   private final CommandXboxController m_driver = new CommandXboxController(kDriverPort);
@@ -168,7 +161,6 @@ public class RobotContainer {
             },
             m_drivetrain));
 
-
     m_driver
         .rightStick()
         .whileHeld(
@@ -213,21 +205,21 @@ public class RobotContainer {
     //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
     //                             .withTimeout(0.5))));
 
+    m_operator.upperPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle += 0.01));
+    m_operator.lowerPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle -= 0.01));
 
-    m_operator.upperPOV().whileActiveOnce(new InstantCommand(()->hoodAngle+=0.01));
-    m_operator.lowerPOV().whileActiveOnce(new InstantCommand(()->hoodAngle-=0.01));
+    m_operator
+        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+        .whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(hoodAngle)));
+    m_operator.leftBumper().whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(0)));
 
-    m_operator.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(hoodAngle)));
-    m_operator.leftBumper().whileActiveOnce(new InstantCommand(()->m_hood.setAngleRadians(0)));
+    m_operator.leftPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed--));
+    m_operator.rightPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed++));
 
-    m_operator.leftPOV().whileActiveOnce(new InstantCommand(()->flywheelSpeed--));
-    m_operator.rightPOV().whileActiveOnce(new InstantCommand(()->flywheelSpeed++));
+    m_operator.y().whenActive(CargoHandlingCommandBuilder.setShooterForShot(m_hood, m_shooter));
 
+    m_operator.x().whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));
 
-    m_operator.y().whileActiveContinuous(CargoHandlingCommandBuilder.setShooterForShot(m_hood, m_shooter).andThen(
-                                         CargoHandlingCommandBuilder.allignToHub(m_drivetrain)));
-
-    
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
@@ -239,14 +231,15 @@ public class RobotContainer {
     m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(
-            CargoHandlingCommandBuilder.getSetShooterCommand(m_shooter));
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getSetShooterCommand(m_shooter));
 
     m_operator
         .rightBumper()
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whenActive(
-            CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder, m_indexer));
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder, m_indexer))
+        .whenInactive(CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder, m_indexer));
+
+ 
 
     // m_driver
     //     .upperPOV()

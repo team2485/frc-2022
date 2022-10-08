@@ -6,7 +6,6 @@ package frc.robot.subsystems.cargoHandling;
 
 import static frc.robot.Constants.IntakeArmConstants.*;
 
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsControlModule;
