@@ -368,7 +368,8 @@ public class RobotContainer {
 
     // When at pre-climb state, pressing proceed will disengage ratchet and raise hooks.
 
-    // m_driver.getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold).whenActive(new InstantCommand(()->m_climbElevator.setPositionMeters(0)));
+    // m_driver.getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold).whenActive(new
+    // InstantCommand(()->m_climbElevator.setPositionMeters(0)));
 
     m_driver
         .rightBumper()
