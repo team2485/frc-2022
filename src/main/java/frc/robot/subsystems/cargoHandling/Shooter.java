@@ -229,22 +229,16 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   public void zeroShooter() {
     m_shooterTalon.set(
-      ControlMode.Velocity,
-      0
-          * kFalconSensorUnitsPerRotation
-          * kShooterGearRatio
-          * 0.1,
-      DemandType.ArbitraryFeedForward,
-      newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+        ControlMode.Velocity,
+        0 * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
+        DemandType.ArbitraryFeedForward,
+        newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
 
-  m_shooterTalon2.set(
-      ControlMode.Velocity,
-      0
-          * kFalconSensorUnitsPerRotation
-          * kShooterGearRatio
-          * 0.1,
-      DemandType.ArbitraryFeedForward,
-      newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+    m_shooterTalon2.set(
+        ControlMode.Velocity,
+        0 * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
+        DemandType.ArbitraryFeedForward,
+        newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }
 
   /**
@@ -260,11 +254,9 @@ public class Shooter extends SubsystemBase implements Loggable {
 
   @Log(name = "Shoot When Green")
   public boolean shooterWithinTolerance() {
-    return Math.abs(
-            getShooterVelocityRotationsPerSecond() - newVelocitySetpointRotationsPerSecond)
+    return Math.abs(getShooterVelocityRotationsPerSecond() - newVelocitySetpointRotationsPerSecond)
         < 1;
   }
-
 
   public double getSetpoint() {
     return m_shooterVelocitySetpointRotationsPerSecond;

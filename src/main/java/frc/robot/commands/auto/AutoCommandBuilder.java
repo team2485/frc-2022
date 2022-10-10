@@ -9,7 +9,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.commands.CargoHandlingCommandBuilder;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.drive.*;
 
@@ -74,14 +76,8 @@ public class AutoCommandBuilder {
 
     WL_SwerveControllerCommand pathCommand = getPathCommand(drivetrain, "2 Ball Left Fender");
 
-    return new InstantCommand(
-            () -> {
-              timer.reset();
-              timer.start();
-            })
+    return new WaitCommand(0.5)
         .andThen(
-            new WaitCommand(0.5),
-            new InstantCommand(() -> hood.setAngleRadians(0.1)),
             getResetOdometryCommand(drivetrain, pathCommand),
             new InstantCommand(
                 () ->
@@ -91,12 +87,17 @@ public class AutoCommandBuilder {
                         .setTrajectory(pathCommand.m_trajectory),
                 drivetrain),
             pathCommand
-                .withInterrupt(() -> timer.get() > 8)
-                .andThen(getStopPathCommand(drivetrain), new WaitCommand(2))
+                .withTimeout(5)
+                .andThen(getStopPathCommand(drivetrain))
                 .raceWith(runTestCommand(intake, intakeArm, indexer)),
             stopTestCommand(intake, intakeArm, indexer),
-            getRunFeederCommand(feeder, indexer))
-        .alongWith(getSetShooterCommand(shooter));
+            new RunCommand(() -> CargoHandlingCommandBuilder.allignToHub(drivetrain))
+                .raceWith(
+                    CargoHandlingCommandBuilder.setShooterForShot(hood, shooter)
+                        .andThen(new WaitCommand(1))),
+            getSetShooterCommand(shooter)
+                .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
+                ,new WaitCommand(3),getStopFeederCommand(feeder, indexer),new InstantCommand(() -> shooter.zeroShooter()));
   }
 
   //   public static Command getSwordfishAuto() {

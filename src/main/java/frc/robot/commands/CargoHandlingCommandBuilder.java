@@ -89,9 +89,7 @@ public class CargoHandlingCommandBuilder {
 
   public static Command outtakeCommand(Intake intake, IntakeArm intakeArm) {
     return getArmDownCommand(intakeArm)
-        .andThen(
-            new RunCommand(
-                () -> intake.setVelocityRotationsPerSecond(-6)));
+        .andThen(new RunCommand(() -> intake.setVelocityRotationsPerSecond(-6)));
   }
 
   public static Command stopTestCommand(Intake intake, IntakeArm intakeArm, Indexer indexer) {
@@ -199,6 +197,8 @@ public class CargoHandlingCommandBuilder {
   public static Command getSetShooterCommand(Shooter shooter) {
     return new StartEndCommand(() -> shooter.setVelocities(), () -> shooter.zeroShooter(), shooter);
   }
+
+
 
   public static Command getSetIntakeCommand(DoubleSupplier velocity, Intake intake) {
     if (velocity.getAsDouble() == 0) {

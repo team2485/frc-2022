@@ -205,20 +205,22 @@ public class RobotContainer {
     //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
     //                             .withTimeout(0.5))));
 
-    m_operator.upperPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle += 0.01));
-    m_operator.lowerPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle -= 0.01));
+    // m_operator.upperPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle += 0.01));
+    // m_operator.lowerPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle -= 0.01));
 
-    m_operator
-        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-        .whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(hoodAngle)));
+    // m_operator
+    //     .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+    //     .whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(hoodAngle)));
     m_operator.leftBumper().whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(0)));
 
-    m_operator.leftPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed--));
-    m_operator.rightPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed++));
+    // m_operator.leftPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed--));
+    // m_operator.rightPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed++));
 
     m_operator.y().whenActive(CargoHandlingCommandBuilder.setShooterForShot(m_hood, m_shooter));
 
-    m_operator.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold).whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));
+    m_operator
+        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+        .whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));
 
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
@@ -229,12 +231,11 @@ public class RobotContainer {
             CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
     m_driver
-    .b()
-    // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-    .whileActiveContinuous(
-        CargoHandlingCommandBuilder.outtakeCommand(m_intake, m_intakeArm))
-    .whenInactive(
-        CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
+        .b()
+        // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
+        .whileActiveContinuous(CargoHandlingCommandBuilder.outtakeCommand(m_intake, m_intakeArm))
+        .whenInactive(
+            CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
     m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
@@ -246,8 +247,6 @@ public class RobotContainer {
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whileActiveContinuous(CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder, m_indexer))
         .whenInactive(CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder, m_indexer));
-
- 
 
     // m_driver
     //     .upperPOV()
