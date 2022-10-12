@@ -109,7 +109,14 @@ public class RobotContainer {
     m_autoChooser.setDefaultOption(
         "3 Ball Right Side",
         AutoCommandBuilder.get3BallFenderAutoRight(
-            m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter));
+            m_drivetrain,
+            m_intake,
+            m_intakeArm,
+            m_indexer,
+            m_feeder,
+            m_feedServo,
+            m_shooter,
+            m_hood));
     m_autoChooser.addOption(
         "2 Ball Left Side",
         AutoCommandBuilder.get2BallFenderAutoLeft(

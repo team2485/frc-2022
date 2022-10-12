@@ -30,10 +30,7 @@ public class CargoHandlingCommandBuilder {
 
   public static Command allignToHub(Drivetrain drivetrain) {
 
-    // double tx =
-    // NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
-    // double kP = Math.abs(tx) > 1 ? -0.1 : 0;
-
+    // kP * tx
     return new InstantCommand(
         () ->
             drivetrain.drive(
@@ -86,6 +83,19 @@ public class CargoHandlingCommandBuilder {
                 () -> intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond)))
         .alongWith(new RunCommand(() -> indexer.setVelocityRotationsPerSecond(6)));
   }
+
+  //no intake arm
+  public static Command intakeForAutoCommand(Intake intake, Indexer indexer) {
+    return new RunCommand(
+                () -> intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond))
+        .alongWith(new RunCommand(() -> indexer.setVelocityRotationsPerSecond(6)));
+  }
+  public static Command stopIntakeForAutoCommand(Intake intake, Indexer indexer) {
+    return new InstantCommand(
+                () -> intake.setVelocityRotationsPerSecond(0))
+        .alongWith(new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0)));
+  }
+
 
   public static Command outtakeCommand(Intake intake, IntakeArm intakeArm) {
     return getArmDownCommand(intakeArm)
@@ -197,8 +207,6 @@ public class CargoHandlingCommandBuilder {
   public static Command getSetShooterCommand(Shooter shooter) {
     return new StartEndCommand(() -> shooter.setVelocities(), () -> shooter.zeroShooter(), shooter);
   }
-
-
 
   public static Command getSetIntakeCommand(DoubleSupplier velocity, Intake intake) {
     if (velocity.getAsDouble() == 0) {

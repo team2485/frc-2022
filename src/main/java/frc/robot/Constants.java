@@ -81,7 +81,7 @@ public final class Constants {
 
   public static final class AutoConstants {
     public static final double kAutoMaxSpeedMetersPerSecond = 1.5;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 1.5;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 1;
 
     public static final double kAutoMaxAngularSpeedRadiansPerSecond =
         1.5 / DriveConstants.kTurningRadiusMeters;
@@ -135,9 +135,9 @@ public final class Constants {
     // public static final double kaDriveVoltSecondsSquaredPerMeter = 0.23776;
 
     // practice carpet
-    public static final double ksDriveVolts = 0.73658;
-    public static final double kvDriveVoltSecondsPerMeter = 2.2729;
-    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.37446;
+    public static final double ksDriveVolts = 0.51019;
+    public static final double kvDriveVoltSecondsPerMeter = 2.2644;
+    public static final double kaDriveVoltSecondsSquaredPerMeter = 0.1;
 
     public static final double ksDriveVoltsBackLeft = 0.5;
 

@@ -7,8 +7,6 @@ import static frc.robot.commands.auto.PathCommandBuilder.*;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.CargoHandlingCommandBuilder;
@@ -24,7 +22,8 @@ public class AutoCommandBuilder {
       Indexer indexer,
       Feeder feeder,
       FeedServo servo,
-      Shooter shooter) {
+      Shooter shooter,
+      Hood hood) {
 
     WL_SwerveControllerCommand intakePathCommand =
         getPathCommand(drivetrain, "3 Ball Right Fender");
@@ -32,10 +31,9 @@ public class AutoCommandBuilder {
     WL_SwerveControllerCommand scorePathCommand =
         getPathCommand(drivetrain, "3 Score Right Fender");
 
-    return new WaitCommand(0.5)
-        .andThen(getIndexToShooterCommand(indexer, feeder, servo), new WaitCommand(0.5))
-        .raceWith(getSetShooterCommand(shooter))
+    return new InstantCommand(() -> intakeArm.setArmDown(), intakeArm)
         .andThen(
+            new WaitCommand(1),
             getResetOdometryCommand(drivetrain, intakePathCommand),
             new InstantCommand(
                 () ->
@@ -45,22 +43,46 @@ public class AutoCommandBuilder {
                         .setTrajectory(intakePathCommand.m_trajectory),
                 drivetrain),
             intakePathCommand
-                .andThen(getStopPathCommand(drivetrain), new WaitCommand(1.5))
-                .raceWith(getIntakeCommand(intake, intakeArm, indexer, servo)),
-            new ParallelDeadlineGroup(
-                new InstantCommand(
+                .alongWith(
+                    intakeForAutoCommand(intake, indexer)
+                        .withTimeout(2.5)
+                        .andThen(stopIntakeForAutoCommand(intake, indexer)))
+                .withTimeout(4)
+                .andThen(
+                    getStopPathCommand(drivetrain),
+                    CargoHandlingCommandBuilder.setShooterForShot(hood, shooter),
+                    new WaitCommand(1),
+                    getSetShooterCommand(shooter)
+                        .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
+                        .withTimeout(3),
+                    getStopFeederCommand(feeder, indexer),
+                    new InstantCommand(() -> shooter.zeroShooter()),
+                    new InstantCommand(
                         () ->
                             drivetrain
                                 .getField2d()
                                 .getObject("traj")
                                 .setTrajectory(scorePathCommand.m_trajectory),
-                        drivetrain)
-                    .andThen(scorePathCommand, getStopPathCommand(drivetrain)),
-                getStopIntakeCommand(intake, intakeArm, indexer)),
-            new ParallelRaceGroup(
-                getIndexToShooterCommand(indexer, feeder, servo)
-                    .andThen(getIndexToShooterCommand(indexer, feeder, servo))
-                    .raceWith(getSetShooterCommand(shooter))));
+                        drivetrain),
+                    scorePathCommand
+                        .alongWith(
+                            intakeForAutoCommand(intake, indexer)
+                                .withTimeout(4)
+                                .andThen(
+                                    stopIntakeForAutoCommand(intake, indexer)))
+                        .withTimeout(7)
+                        .andThen(
+                            getStopPathCommand(drivetrain),
+                            CargoHandlingCommandBuilder.setShooterForShot(hood, shooter),
+                            new WaitCommand(1),
+                            getSetShooterCommand(shooter)
+                                .alongWith(
+                                    new WaitCommand(1)
+                                        .andThen(getRunFeederCommand(feeder, indexer)))
+                                .withTimeout(3),
+                            getStopFeederCommand(feeder, indexer),
+                            new InstantCommand(() -> shooter.zeroShooter()),
+                            new InstantCommand(() -> intakeArm.setArmUp()))));
   }
 
   public static Command get2BallFenderAutoLeft(
@@ -76,8 +98,9 @@ public class AutoCommandBuilder {
 
     WL_SwerveControllerCommand pathCommand = getPathCommand(drivetrain, "2 Ball Left Fender");
 
-    return new WaitCommand(0.5)
+    return new InstantCommand(() -> intakeArm.setArmDown(), intakeArm)
         .andThen(
+            new WaitCommand(0.5),
             getResetOdometryCommand(drivetrain, pathCommand),
             new InstantCommand(
                 () ->
@@ -87,200 +110,19 @@ public class AutoCommandBuilder {
                         .setTrajectory(pathCommand.m_trajectory),
                 drivetrain),
             pathCommand
-                .withTimeout(5)
-                .andThen(getStopPathCommand(drivetrain))
-                .raceWith(runTestCommand(intake, intakeArm, indexer)),
-            stopTestCommand(intake, intakeArm, indexer),
-            new RunCommand(() -> CargoHandlingCommandBuilder.allignToHub(drivetrain))
-                .raceWith(
-                    CargoHandlingCommandBuilder.setShooterForShot(hood, shooter)
-                        .andThen(new WaitCommand(1))),
+                .alongWith(
+                    intakeForAutoCommand(intake, indexer)
+                        .withTimeout(2)
+                        .andThen(stopIntakeForAutoCommand(intake, indexer)))
+                .withTimeout(4.75)
+                .andThen(getStopPathCommand(drivetrain)),
+            CargoHandlingCommandBuilder.setShooterForShot(hood, shooter),
+            new WaitCommand(1),
             getSetShooterCommand(shooter)
                 .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
-                ,new WaitCommand(3),getStopFeederCommand(feeder, indexer),new InstantCommand(() -> shooter.zeroShooter()));
+                .withTimeout(3),
+            getStopFeederCommand(feeder, indexer),
+            new InstantCommand(() -> shooter.zeroShooter()),
+            new InstantCommand(() -> intakeArm.setArmUp()));
   }
-
-  //   public static Command getSwordfishAuto() {
-  //     return new RunCommand(()-> m_intak.)
-  //   }
-
-  //     Command scoochOverPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Right
-  // Finish");
-  //     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
-  //     Command stopIntake =
-  //         CargoHandlingCommandBuilder.getStopIntakeCommand(intake, intakeArm, indexer);
-  //     Command setShooter = CargoHandlingCommandBuilder.getShooterSetCommand(shooter, () -> 123);
-
-  //     Command feedToShooterOnce =
-  //         CargoHandlingCommandBuilder.getSetHoodCommand(() -> 0.475, hood)
-  //             .withTimeout(0.5)
-  //             .andThen(
-  //                 CargoHandlingCommandBuilder.getIndexToShooterCommand(
-  //                     indexer, feeder, servo, shooter));
-
-  //     Command feedToShooterOnce2 =
-  //         CargoHandlingCommandBuilder.getIndexToShooterCommand(indexer, feeder, servo, shooter);
-
-  //     return new ParallelRaceGroup(
-  //             new WaitCommand(0.5).andThen(backUpPath, new WaitCommand(2)),
-  //             intakeBalls.alongWith(setShooter))
-  //         .andThen(stopIntake)
-  //         .andThen(feedToShooterOnce, feedToShooterOnce2)
-  //         .andThen(scoochOverPath);
-  //   }
-
-  //   public static Command get2BallAutoLeft(
-  //       Drivetrain drivetrain,
-  //       Intake intake,
-  //       IntakeArm intakeArm,
-  //       Indexer indexer,
-  //       Feeder feeder,
-  //       FeedServo servo,
-  //       Shooter shooter,
-  //       Hood hood) {
-
-  //     Command backUpPath = PathCommandBuilder.getPathCommand(drivetrain, "2 Ball Left");
-
-  //     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
-  //     Command stopIntake =
-  //         CargoHandlingCommandBuilder.getStopIntakeCommand(intake, intakeArm, indexer);
-  //     Command setShooter = CargoHandlingCommandBuilder.getSetShooterCommand(() -> 123, shooter);
-
-  //     Command feedToShooterOnce =
-  //         CargoHandlingCommandBuilder.getSetHoodCommand(() -> 0.475, hood)
-  //             .withTimeout(0.9)
-  //             .andThen(
-  //                 CargoHandlingCommandBuilder.getIndexToShooterCommand(
-  //                     indexer, feeder, servo, shooter));
-
-  //     Command feedToShooterOnce2 =
-  //         CargoHandlingCommandBuilder.getIndexToShooterCommand(indexer, feeder, servo, shooter);
-
-  //     return new ParallelRaceGroup(
-  //             new WaitCommand(0.5).andThen(backUpPath, new WaitCommand(3)),
-  //             intakeBalls.alongWith(setShooter))
-  //         .andThen(stopIntake)
-  //         .andThen(feedToShooterOnce, feedToShooterOnce2);
-  //   }
-
-  //   public static Command get3BallAuto(
-  //       Drivetrain drivetrain,
-  //       Intake intake,
-  //       IntakeArm intakeArm,
-  //       Indexer indexer,
-  //       Feeder feeder,
-  //       FeedServo servo,
-  //       Shooter shooter,
-  //       Hood hood) {
-
-  //     Command thirdBallPath = PathCommandBuilder.getPathCommand(drivetrain, "2 to 3 ball right");
-
-  //     Command intakeBalls =
-  //         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, indexer, servo);
-  //     Command setShooter =
-  //         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-  //             shooter,
-  //             drivetrain::getHubToTurretCenterDistanceMeters,
-  //             () -> {
-  //               return 0;
-  //             });
-  //     Command feedToShooterOnce =
-  //         CargoHandlingCommandBuilder.getIndexToShooterCommand(indexer, feeder, servo, shooter);
-
-  //     return get2BallAutoRight(drivetrain, intake, intakeArm, indexer, feeder, servo, shooter,
-  // hood)
-  //         .andThen(thirdBallPath.alongWith(intakeBalls, setShooter), feedToShooterOnce);
-  //   }
-
-  //   public static Command get4BallAuto(
-  //       Drivetrain drivetrain,
-  //       Intake intake,
-  //       IntakeArm intakeArm,
-  //       Indexer indexer,
-  //       Feeder feeder,
-  //       FeedServo servo,
-  //       Shooter shooter,
-  //       Hood hood) {
-
-  //     Command thirdAndFourthBallPath =
-  //         PathCommandBuilder.getPathCommand(drivetrain, "2 to 4 ball right");
-
-  //     Command scoreBallPath = PathCommandBuilder.getPathCommand(drivetrain, "4 or 5 to score
-  // right");
-
-  //     Command intakeBalls = getIntakeBallsCommand(intake, intakeArm, indexer, servo);
-
-  //     Command setShooter = getSetShooterCommand(shooter, drivetrain);
-
-  //     Command feedToShooterOnce =
-  //         getFeedToShooterCommand(hood, drivetrain, indexer, feeder, servo, shooter);
-
-  //     Command feedToShooterOnce2 =
-  //         getFeedToShooterCommand(hood, drivetrain, indexer, feeder, servo, shooter);
-
-  //     return get2BallAutoRight(drivetrain, intake, intakeArm, indexer, feeder, servo, shooter,
-  // hood)
-  //         .andThen(
-  //             new ParallelRaceGroup(
-  //                 new WaitCommand(0.2).andThen(thirdAndFourthBallPath, new WaitCommand(2)),
-  //                 intakeBalls,
-  //                 new WaitCommand(0.5),
-  //                 new ParallelRaceGroup(scoreBallPath.andThen(new WaitCommand(0.2)), setShooter),
-  //                 feedToShooterOnce,
-  //                 feedToShooterOnce2));
-  //   }
-
-  //   public static Command getEpicMemerAuto(
-  //       Drivetrain drivetrain,
-  //       Intake intake,
-  //       IntakeArm intakeArm,
-  //       Indexer indexer,
-  //       Feeder feeder,
-  //       FeedServo servo,
-  //       Shooter shooter,
-  //       Hood hood) {
-  //     Command epicMemerPath = PathCommandBuilder.getPathCommand(drivetrain, "Epic Memer");
-  //     Command intakeArmUp = CargoHandlingCommandBuilder.getIntakeArmUpCommand(intakeArm);
-  //     Command outtakeBall =
-  //         new RunCommand(() -> indexer.setVelocityRotationsPerSecond(-20), indexer)
-  //             .withTimeout(2)
-  //             .andThen(new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0)));
-  //     return epicMemerPath.andThen(intakeArmUp, outtakeBall);
-  //   }
-
-  //   public static Command get5BallAuto(
-  //       Drivetrain drivetrain,
-  //       Vision vision,
-  //       Intake intake,
-  //       IntakeArm intakeArm,
-  //       Indexer indexer,
-  //       Feeder feeder,
-  //       FeedServo servo,
-  //       Shooter shooter) {
-
-  //     Command fourthAndFifthBallPath =
-  //         PathCommandBuilder.getPathCommand(drivetrain, "3 to 5 ball right");
-
-  //     Command scoreBallPath = PathCommandBuilder.getPathCommand(drivetrain, "4/5 to score
-  // right");
-
-  //     Command intakeBalls =
-  //         CargoHandlingCommandBuilder.getIntakeCommand(intake, intakeArm, indexer, servo);
-  //     Command setShooter =
-  //         CargoHandlingCommandBuilder.getShooterAutoSetCommand(
-  //             shooter, drivetrain::getHubToTurretCenterDistanceMeters, () -> 0);
-  //     Command feedToShooterOnce =
-  //         CargoHandlingCommandBuilder.getIndexToShooterOnceCommand(indexer, feeder, servo,
-  // shooter);
-
-  //     return get3BallAuto(drivetrain, vision, intake, intakeArm, indexer, feeder, servo,
-  // shooter)
-  //         .andThen(
-  //             fourthAndFifthBallPath.alongWith(intakeBalls, setShooter),
-  //             new WaitCommand(3),
-  //             scoreBallPath.alongWith(setShooter),
-  //             feedToShooterOnce,
-  //             feedToShooterOnce);
-  //   }
-
 }
