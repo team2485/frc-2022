@@ -152,8 +152,7 @@ public class Shooter extends SubsystemBase implements Loggable {
    *     <1 creates backspin
    */
   @Config(name = "Set Velocities")
-  public void setVelocities(
-      double shooterVelocityRotationsPerSecond) {
+  public void setVelocities(double shooterVelocityRotationsPerSecond) {
     this.setShooterVelocityRotationsPerSecond(shooterVelocityRotationsPerSecond);
     // this.setKickerVelocityRotationsPerSecond(
     //     shooterVelocityRotationsPerSecond

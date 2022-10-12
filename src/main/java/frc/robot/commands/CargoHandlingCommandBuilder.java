@@ -123,9 +123,7 @@ public class CargoHandlingCommandBuilder {
   public static Command getSetShooterCommand(
       DoubleSupplier shooterVelocity, DoubleSupplier tangentialVelocityRatio, Shooter shooter) {
     return new StartEndCommand(
-        () ->
-            shooter.setVelocities(
-                shooterVelocity.getAsDouble()),
+        () -> shooter.setVelocities(shooterVelocity.getAsDouble()),
         () -> shooter.setVelocities(0),
         shooter);
   }

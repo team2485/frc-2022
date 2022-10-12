@@ -70,10 +70,10 @@ public class ClimbCommandBuilder {
   public static Command getArmOnNextBarCommand(ClimbElevator elevator, ClimbArm arm) {
     return new InstantCommand(arm::restartTimer)
         .andThen(
-            new RunCommand(() -> arm.setVoltage(-7.2 * arm.getTimerTime())).withTimeout(1.2),
+            new RunCommand(() -> arm.setVoltage(-7.2 * arm.getTimerTime())).withTimeout(1.21),
             new InstantCommand(() -> arm.setVoltage(0)),
             new WaitCommand(0.5),
-            getMoveElevatorCommand(Units.inchesToMeters(3.5), elevator));
+            getMoveElevatorCommand(Units.inchesToMeters(5), elevator));
   }
 
   // Reset arm rotation. Pull arm back to settle on bar, unload hook, roll up rack partway, lower
@@ -96,7 +96,7 @@ public class ClimbCommandBuilder {
                                 kElevatorSlotSensorBottomPosition, elevator))), // lower hook
             getMoveElevatorCommand(Units.inchesToMeters(5.5), elevator), // raise hook
             getTranslateArmCommand(0.605, arm), // roll back
-            getMoveElevatorCommand(Units.inchesToMeters(4), elevator)); // lower hook onto bar
+            getMoveElevatorCommand(Units.inchesToMeters(5), elevator)); // lower hook onto bar
   }
 
   public static Command getResetClimberCommand(ClimbElevator elevator, ClimbArm arm) {
@@ -123,7 +123,7 @@ public class ClimbCommandBuilder {
   public static Command getPushArmForwardAtEndCommand(
       ClimbArm arm, ClimbElevator elevator, IntakeArm intakeArm) {
     return getMoveElevatorCommand(
-            Units.inchesToMeters(3.5), elevator) // climb up to remove arm contact
+            Units.inchesToMeters(5), elevator) // climb up to remove arm contact
         .andThen(
             new RunCommand(() -> arm.setVoltage(-10))
                 .until(() -> arm.getTranslationMeters() < 0.22),
@@ -142,10 +142,10 @@ public class ClimbCommandBuilder {
     return getEngageRatchetCommand(elevator).andThen(new InstantCommand(() -> {}, elevator));
   }
 
-  private static Command  getMoveElevatorCommand(double positionMeters, ClimbElevator elevator) {
+  private static Command getMoveElevatorCommand(double positionMeters, ClimbElevator elevator) {
     return new RunCommand(() -> elevator.setPositionMeters(-positionMeters), elevator)
         .withInterrupt(
-            () -> 
+            () ->
                 atGoal(
                     -positionMeters,
                     kElevatorPositionToleranceMeters,
