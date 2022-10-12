@@ -1,6 +1,21 @@
 {
   "NetworkTables": {
     "Shuffleboard": {
+      "Drivetrain": {
+        "BL": {
+          "open": true
+        },
+        "BR": {
+          "open": true
+        },
+        "FL": {
+          "open": true
+        },
+        "FR": {
+          "open": true
+        },
+        "open": true
+      },
       "RobotContainer": {
         "open": true
       },
@@ -43,7 +58,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "height": 332,
+          "height": -24,
           "series": [
             {
               "color": [
