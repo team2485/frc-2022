@@ -14,9 +14,11 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PerpetualCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -247,7 +249,10 @@ public class RobotContainer {
     m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getSetShooterCommand(m_shooter));
+        .whileActiveContinuous(CargoHandlingCommandBuilder.getSetShooterCommand(m_shooter)
+        .alongWith(new ConditionalCommand(new InstantCommand(()->m_operator.setRumble(RumbleType.kLeftRumble, 0.5)), 
+                                          new InstantCommand(),
+                                          ()->m_shooter.shooterWithinTolerance())));
 
     m_operator
         .rightBumper()
