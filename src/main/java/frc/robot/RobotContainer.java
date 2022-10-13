@@ -12,9 +12,9 @@ import static frc.robot.Constants.ShooterConstants.*;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -131,6 +131,19 @@ public class RobotContainer {
             m_shooter,
             m_autoTimer,
             m_hood));
+
+    m_autoChooser.addOption(
+        "5 Ball (flex)",
+        AutoCommandBuilder.get5BallAuto(
+            m_drivetrain,
+            m_intake,
+            m_intakeArm,
+            m_indexer,
+            m_feeder,
+            m_feedServo,
+            m_shooter,
+            m_hood));
+            
     m_autoChooser.addOption(
         "Back up",
         // PathCommandBuilder.getResetOdometryCommand(m_drivetrain,
@@ -249,10 +262,13 @@ public class RobotContainer {
     m_operator
         .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .whileActiveContinuous(CargoHandlingCommandBuilder.getSetShooterCommand(m_shooter)
-        .alongWith(new ConditionalCommand(new InstantCommand(()->m_operator.setRumble(RumbleType.kLeftRumble, 0.5)), 
-                                          new InstantCommand(),
-                                          ()->m_shooter.shooterWithinTolerance())));
+        .whileActiveContinuous(
+            CargoHandlingCommandBuilder.getSetShooterCommand(m_shooter)
+                .alongWith(
+                    new ConditionalCommand(
+                        new InstantCommand(() -> m_operator.setRumble(RumbleType.kLeftRumble, 0.5)),
+                        new InstantCommand(),
+                        () -> m_shooter.shooterWithinTolerance())));
 
     m_operator
         .rightBumper()

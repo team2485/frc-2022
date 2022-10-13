@@ -80,8 +80,8 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kAutoMaxSpeedMetersPerSecond = 1.5;
-    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 1;
+    public static final double kAutoMaxSpeedMetersPerSecond = 2;
+    public static final double kAutoMaxAccelerationMetersPerSecondSquared = 2.5;
 
     public static final double kAutoMaxAngularSpeedRadiansPerSecond =
         1.5 / DriveConstants.kTurningRadiusMeters;
@@ -95,7 +95,7 @@ public final class Constants {
     public static final double kDAutoYController = 0.2;
 
     public static final double kAutoXYIntegratorMaxMetersPerSecond = 0.5;
-    public static final double kPAutoThetaController = 10;
+    public static final double kPAutoThetaController = 8;
     public static final double kIAutoThetaController = 0.1;
     public static final double kAutoThetaIntegratorMaxRadiansPerSecond = 0.2;
     public static final double kDAutoThetaController = 0.1;

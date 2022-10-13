@@ -84,18 +84,17 @@ public class CargoHandlingCommandBuilder {
         .alongWith(new RunCommand(() -> indexer.setVelocityRotationsPerSecond(6)));
   }
 
-  //no intake arm
+  // no intake arm
   public static Command intakeForAutoCommand(Intake intake, Indexer indexer) {
     return new RunCommand(
-                () -> intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond))
+            () -> intake.setVelocityRotationsPerSecond(kIntakeDefaultSpeedRotationsPerSecond))
         .alongWith(new RunCommand(() -> indexer.setVelocityRotationsPerSecond(6)));
   }
+
   public static Command stopIntakeForAutoCommand(Intake intake, Indexer indexer) {
-    return new InstantCommand(
-                () -> intake.setVelocityRotationsPerSecond(0))
+    return new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0))
         .alongWith(new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0)));
   }
-
 
   public static Command outtakeCommand(Intake intake, IntakeArm intakeArm) {
     return getArmDownCommand(intakeArm)

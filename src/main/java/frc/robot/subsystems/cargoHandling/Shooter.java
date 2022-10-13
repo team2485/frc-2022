@@ -150,6 +150,7 @@ public class Shooter extends SubsystemBase implements Loggable {
         / kFalconSensorUnitsPerRotation;
   }
 
+
   public void allignToHub() {
     ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
     double angleToGoal = (37 + ty) * (Math.PI / 180.0);
@@ -237,6 +238,20 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_shooterTalon2.set(
         ControlMode.Velocity,
         0 * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
+        DemandType.ArbitraryFeedForward,
+        newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+  }
+
+  public void setShooter(double velocity) {
+    m_shooterTalon.set(
+        ControlMode.Velocity,
+        velocity * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
+        DemandType.ArbitraryFeedForward,
+        newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
+
+    m_shooterTalon2.set(
+        ControlMode.Velocity,
+        velocity * kFalconSensorUnitsPerRotation * kShooterGearRatio * 0.1,
         DemandType.ArbitraryFeedForward,
         newVelocitySetpointRotationsPerSecond > 0 ? kSShooterVolts / kNominalVoltage : 0);
   }
