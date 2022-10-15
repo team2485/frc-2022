@@ -142,8 +142,7 @@ public class RobotContainer {
             m_feedServo,
             m_shooter,
             m_hood));
-            
-    
+
     m_autoChooser.addOption(
         "Back up",
         // PathCommandBuilder.getResetOdometryCommand(m_drivetrain,
@@ -242,7 +241,6 @@ public class RobotContainer {
 
     //  m_operator.y().whenActive(new InstantCommand(()->m_hood.setAngleRadians(0.16)));
 
-
     m_operator
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         .whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));
@@ -252,7 +250,8 @@ public class RobotContainer {
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whileActiveContinuous(
             CargoHandlingCommandBuilder.runTestCommand(m_intake, m_intakeArm, m_indexer))
-        .whenInactive(
+        .whenInactive(+
+        
             CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
     m_driver
@@ -270,7 +269,7 @@ public class RobotContainer {
                 .alongWith(
                     new ConditionalCommand(
                         new InstantCommand(() -> m_operator.setRumble(RumbleType.kLeftRumble, 0.5)),
-                        new InstantCommand(),
+                        new InstantCommand(()->m_operator.setRumble(RumbleType.kLeftRumble, 0)) ,
                         () -> m_shooter.shooterWithinTolerance())));
 
     m_operator

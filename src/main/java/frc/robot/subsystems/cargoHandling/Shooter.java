@@ -150,7 +150,6 @@ public class Shooter extends SubsystemBase implements Loggable {
         / kFalconSensorUnitsPerRotation;
   }
 
-
   public void allignToHub() {
     ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
     double angleToGoal = (37 + ty) * (Math.PI / 180.0);
