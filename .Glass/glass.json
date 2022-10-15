@@ -1,8 +1,17 @@
 {
   "NetworkTables": {
+    "CameraPublisher": {
+      "USB Camera 0": {
+        "open": true
+      },
+      "open": true
+    },
     "Shuffleboard": {
       "Drivetrain": {
         "BL": {
+          "open": true
+        },
+        "BR": {
           "open": true
         },
         "open": true
@@ -27,6 +36,7 @@
       "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
+      "/LiveWindow/Ungrouped/Pigeon 2 [9]": "Gyro",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
       "/LiveWindow/Ungrouped/Talon FX [16]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [17]": "Motor Controller",
@@ -66,7 +76,7 @@
   },
   "NetworkTables Settings": {
     "mode": "Client",
-    "serverTeam": "2485"
+    "serverTeam": "9485"
   },
   "Plots": {
     "Plot <0>": {

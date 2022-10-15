@@ -240,6 +240,9 @@ public class RobotContainer {
 
     m_operator.y().whenActive(CargoHandlingCommandBuilder.setShooterForShot(m_hood, m_shooter));
 
+    //  m_operator.y().whenActive(new InstantCommand(()->m_hood.setAngleRadians(0.16)));
+
+
     m_operator
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         .whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));

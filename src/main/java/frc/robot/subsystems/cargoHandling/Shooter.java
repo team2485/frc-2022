@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase implements Loggable {
   private double ty = 0;
 
   @Log(name = "Shooter velocity Setpoint")
-  double newVelocitySetpointRotationsPerSecond = 30;
+  double newVelocitySetpointRotationsPerSecond = 34;
 
   private double m_shooterVelocitySetpointRotationsPerSecond = 0;
 
@@ -138,7 +138,7 @@ public class Shooter extends SubsystemBase implements Loggable {
     m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_15_FirmwareApiStatus, 255);
     m_shooterTalon2.setStatusFramePeriod(StatusFrameEnhanced.Status_Brushless_Current, 255);
 
-    this.zeroShooter();
+    // this.zeroShooter();
   }
 
   /** @return the current talon-reported shooter velocity in rotations per second. */
