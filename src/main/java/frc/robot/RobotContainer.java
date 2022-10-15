@@ -109,8 +109,8 @@ public class RobotContainer {
     m_climbElevator.setPositionMeters(0);
 
     m_autoChooser.setDefaultOption(
-        "3 Ball Right Side",
-        AutoCommandBuilder.get3BallFenderAutoRight(
+        "4 Ball Right Side",
+        AutoCommandBuilder.get4BallAuto(
             m_drivetrain,
             m_intake,
             m_intakeArm,
@@ -120,8 +120,8 @@ public class RobotContainer {
             m_shooter,
             m_hood));
     m_autoChooser.addOption(
-        "2 Ball Left Side",
-        AutoCommandBuilder.get2BallFenderAutoLeft(
+        "3 Ball Left Side",
+        AutoCommandBuilder.get3BallAutoLeft(
             m_drivetrain,
             m_intake,
             m_intakeArm,
@@ -129,7 +129,6 @@ public class RobotContainer {
             m_feeder,
             m_feedServo,
             m_shooter,
-            m_autoTimer,
             m_hood));
 
     m_autoChooser.addOption(
@@ -144,6 +143,7 @@ public class RobotContainer {
             m_shooter,
             m_hood));
             
+    
     m_autoChooser.addOption(
         "Back up",
         // PathCommandBuilder.getResetOdometryCommand(m_drivetrain,

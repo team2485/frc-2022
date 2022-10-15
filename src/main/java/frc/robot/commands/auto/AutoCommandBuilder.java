@@ -17,6 +17,9 @@ import frc.robot.subsystems.drive.*;
 
 public class AutoCommandBuilder {
 
+
+
+
   public static Command get5BallAuto(
         Drivetrain drivetrain,
         Intake intake,
@@ -55,9 +58,9 @@ public class AutoCommandBuilder {
                 part1
                     .alongWith(
                          intakeForAutoCommand(intake, indexer)
-                            .withTimeout(4)
+                            .withTimeout(5.5)
                             .andThen(stopIntakeForAutoCommand(intake, indexer)))
-                    .withTimeout(4),
+                    .withTimeout(5.5),
                     getStopPathCommand(drivetrain),
                     setShooterForShot(hood, shooter),
                     getSetShooterCommand(shooter)
@@ -89,16 +92,108 @@ public class AutoCommandBuilder {
                                     .setTrajectory(part3.m_trajectory),
                             drivetrain),
                         part3
-                            .withTimeout(2),
+                            .withTimeout(4),
                             getStopPathCommand(drivetrain),
                             setShooterForShot(hood, shooter),
                             getSetShooterCommand(shooter).alongWith(new WaitCommand(1).andThen(
-                            getRunFeederCommand(feeder, indexer))).withTimeout(2),
+                            getRunFeederCommand(feeder, indexer))).withTimeout(4),
                             getStopFeederCommand(feeder, indexer),
                             new InstantCommand(() -> shooter.zeroShooter())
                 );
 
         }
+
+        public static Command get4BallAuto(
+            Drivetrain drivetrain,
+            Intake intake,
+            IntakeArm intakeArm,
+            Indexer indexer,
+            Feeder feeder,
+            FeedServo servo,
+            Shooter shooter,
+            Hood hood){
+    
+            WL_SwerveControllerCommand part1 =
+                getPathCommand(drivetrain, "5 Ball Pt. 1");
+    
+                
+                return new InstantCommand(() -> intakeArm.setArmDown(), intakeArm).
+                    andThen(
+                        setShooterForShot(hood, shooter),
+                    getSetShooterCommand(shooter)
+                        .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
+                        .withTimeout(2),
+                    getStopFeederCommand(feeder, indexer),
+                    new InstantCommand(() -> shooter.zeroShooter()),
+                    getResetOdometryCommand(drivetrain, part1),
+                    new InstantCommand(
+                        () ->
+                            drivetrain
+                                .getField2d()
+                                .getObject("traj")
+                                .setTrajectory(part1.m_trajectory),
+                        drivetrain),
+                    part1
+                        .alongWith(
+                             intakeForAutoCommand(intake, indexer)
+                                .withTimeout(5.5)
+                                .andThen(stopIntakeForAutoCommand(intake, indexer)))
+                        .withTimeout(5.5),
+                        getStopPathCommand(drivetrain),
+                        setShooterForShot(hood, shooter),
+                        getSetShooterCommand(shooter)
+                        .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
+                        .withTimeout(2),
+                    getStopFeederCommand(feeder, indexer),
+                    new InstantCommand(() -> shooter.zeroShooter()));
+                   
+            }
+
+            public static Command get3BallAutoLeft(
+                Drivetrain drivetrain,
+                Intake intake,
+                IntakeArm intakeArm,
+                Indexer indexer,
+                Feeder feeder,
+                FeedServo servo,
+                Shooter shooter,
+                Hood hood){
+        
+                WL_SwerveControllerCommand part1 =
+                    getPathCommand(drivetrain, "2 Ball Left Fender");
+        
+                    
+                    return new InstantCommand(() -> intakeArm.setArmDown(), intakeArm).
+                        andThen(
+                            setShooterForShot(hood, shooter),
+                        getSetShooterCommand(shooter)
+                            .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
+                            .withTimeout(2),
+                        getStopFeederCommand(feeder, indexer),
+                        new InstantCommand(() -> shooter.zeroShooter()),
+                        getResetOdometryCommand(drivetrain, part1),
+                        new InstantCommand(
+                            () ->
+                                drivetrain
+                                    .getField2d()
+                                    .getObject("traj")
+                                    .setTrajectory(part1.m_trajectory),
+                            drivetrain),
+                        part1
+                            .alongWith(
+                                 intakeForAutoCommand(intake, indexer)
+                                    .withTimeout(3)
+                                    .andThen(stopIntakeForAutoCommand(intake, indexer)))
+                            .withTimeout(5),
+                            getStopPathCommand(drivetrain),
+                            setShooterForShot(hood, shooter),
+                            getSetShooterCommand(shooter)
+                            .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
+                            .withTimeout(2),
+                        getStopFeederCommand(feeder, indexer),
+                        new InstantCommand(() -> shooter.zeroShooter()));
+                       
+                }
 
   public static Command get3BallFenderAutoRight(
       Drivetrain drivetrain,
@@ -130,7 +225,7 @@ public class AutoCommandBuilder {
             intakePathCommand
                 .alongWith(
                     intakeForAutoCommand(intake, indexer)
-                        .withTimeout(2.5)
+                        .withTimeout(2)
                         .andThen(stopIntakeForAutoCommand(intake, indexer)))
                 .withTimeout(3)
                 .andThen(
