@@ -98,7 +98,7 @@ public class AutoCommandBuilder {
             setShooterForShot(hood, shooter),
             getSetShooterCommand(shooter)
                 .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
-                .withTimeout(2),
+                .withTimeout(3),
             getStopFeederCommand(feeder, indexer),
             new InstantCommand(() -> shooter.zeroShooter()),
             getResetOdometryCommand(drivetrain, part1),
@@ -137,7 +137,7 @@ public class AutoCommandBuilder {
             setShooterForShot(hood, shooter),
             getSetShooterCommand(shooter)
                 .alongWith(new WaitCommand(1).andThen(getRunFeederCommand(feeder, indexer)))
-                .withTimeout(2),
+                .withTimeout(3),
             getStopFeederCommand(feeder, indexer),
             new InstantCommand(() -> shooter.zeroShooter()),
             getResetOdometryCommand(drivetrain, part1),

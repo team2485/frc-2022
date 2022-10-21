@@ -250,9 +250,7 @@ public class RobotContainer {
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whileActiveContinuous(
             CargoHandlingCommandBuilder.runTestCommand(m_intake, m_intakeArm, m_indexer))
-        .whenInactive(+
-        
-            CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
+        .whenInactive(CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
     m_driver
         .b()
@@ -269,7 +267,7 @@ public class RobotContainer {
                 .alongWith(
                     new ConditionalCommand(
                         new InstantCommand(() -> m_operator.setRumble(RumbleType.kLeftRumble, 0.5)),
-                        new InstantCommand(()->m_operator.setRumble(RumbleType.kLeftRumble, 0)) ,
+                        new InstantCommand(()->m_operator.setRumble(RumbleType.kLeftRumble, 0)),
                         () -> m_shooter.shooterWithinTolerance())));
 
     m_operator
