@@ -159,17 +159,6 @@ public class AutoCommandBuilder {
             new InstantCommand(() -> shooter.zeroShooter()));
   }
 
-
-
-
-
-
-
-
-
-
-
-  
   public static Command get3BallFenderAutoRight(
       Drivetrain drivetrain,
       Intake intake,
@@ -277,4 +266,37 @@ public class AutoCommandBuilder {
             new InstantCommand(() -> shooter.zeroShooter()),
             new InstantCommand(() -> intakeArm.setArmUp()));
   }
+
+
+
+public static Command coolTestDriveyThing(
+    Drivetrain drivetrain,
+    Intake intake,
+    IntakeArm intakeArm,
+    Indexer indexer,
+    Feeder feeder,
+    Shooter shooter,
+    Hood hood) {
+        return new InstantCommand(() -> intakeArm.setArmDown(), intakeArm)
+        .andThen(new WaitCommand(0.5))
+        .alongWith( 
+                 new InstantCommand(() -> intake.setVelocityRotationsPerSecond(3)),
+                 new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(3)))
+        .andThen(new WaitCommand(4), new ParallelCommandGroup(
+                 new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0)),
+                 new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0)),
+                 new InstantCommand(() -> intakeArm.setArmUp()),
+                 new InstantCommand(() -> hood.setAngleRadians(0.18))),
+                 new WaitCommand(2),
+                 new InstantCommand(() -> shooter.setShooter(31)),
+                 new WaitCommand(2),
+                 new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(3)),
+                 new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(3)),
+                 new WaitCommand(3),
+                 new InstantCommand(() -> hood.setAngleRadians(0)),
+                 new InstantCommand(() -> shooter.setShooter(0)),
+                 new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0)),
+                 new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0)));
+         
+    }
 }

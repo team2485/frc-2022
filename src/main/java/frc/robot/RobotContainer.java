@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PerpetualCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoCommandBuilder;
@@ -157,6 +158,8 @@ public class RobotContainer {
         //                 new WaitCommand(1)))
         //     .andThen(
         new RunCommand(() -> m_drivetrain.drive(-1, 0, 0, false)).withTimeout(2.5));
+
+    m_autoChooser.addOption("Test Drive Thing", AutoCommandBuilder.coolTestDriveyThing(m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_shooter, m_hood));
   }
 
   /**
@@ -234,6 +237,25 @@ public class RobotContainer {
     //     .whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(hoodAngle)));
     m_operator.leftBumper().whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(0)));
 
+    m_operator.getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+        .whileActiveContinuous(new InstantCommand(() -> m_intakeArm.setArmDown())
+        .alongWith(new InstantCommand(() -> m_intake.setVelocityRotationsPerSecond(5)))
+        .alongWith(new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(5))))
+        .whenInactive(new InstantCommand(() -> m_intakeArm.setArmUp())
+        .alongWith(new InstantCommand(() -> m_intake.setVelocityRotationsPerSecond(0)))
+        .alongWith(new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(0))));
+        
+
+
+    m_operator.rightPOV().whileActiveContinuous(new InstantCommand(() -> m_shooter.setShooter(30))
+        .andThen(new WaitCommand(2), new InstantCommand(() -> m_feeder.setVelocityRotationsPerSecond(5))))
+        .whenInactive(new InstantCommand(() -> m_shooter.setShooter(0))
+        .alongWith(new InstantCommand(() -> m_feeder.setVelocityRotationsPerSecond(0))));
+            
+
+    m_operator.upperPOV().whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(0.14)));
+    m_operator.lowerPOV().whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(0)));
+    
     // m_operator.leftPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed--));
     // m_operator.rightPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed++));
 
@@ -250,8 +272,7 @@ public class RobotContainer {
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whileActiveContinuous(
             CargoHandlingCommandBuilder.runTestCommand(m_intake, m_intakeArm, m_indexer))
-        .whenInactive(+
-        
+        .whenInactive(
             CargoHandlingCommandBuilder.stopTestCommand(m_intake, m_intakeArm, m_indexer));
 
     m_driver
@@ -269,7 +290,7 @@ public class RobotContainer {
                 .alongWith(
                     new ConditionalCommand(
                         new InstantCommand(() -> m_operator.setRumble(RumbleType.kLeftRumble, 0.5)),
-                        new InstantCommand(()->m_operator.setRumble(RumbleType.kLeftRumble, 0)) ,
+                        new InstantCommand(() -> m_operator.setRumble(RumbleType.kLeftRumble, 0)),
                         () -> m_shooter.shooterWithinTolerance())));
 
     m_operator
@@ -317,7 +338,7 @@ public class RobotContainer {
     //     .whenInactive(
     //         CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo));
 
-    m_operator
+    /*m_operator
         .upperPOV()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whenActive(
@@ -325,10 +346,10 @@ public class RobotContainer {
                 () -> {
                   m_shooterOffset += 0.3;
                   m_kickerRatioOffset += 0.1;
-                }));
+                })); */
 
     // Make robot think it's further when aiming
-    m_operator
+    /* m_operator
         .lowerPOV()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
         .whenActive(
@@ -336,7 +357,7 @@ public class RobotContainer {
                 () -> {
                   m_shooterOffset -= 0.3;
                   m_kickerRatioOffset -= 0.1;
-                }));
+                })); */
 
     m_operator
         .a()
