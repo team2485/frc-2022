@@ -28,28 +28,6 @@ import java.util.function.DoubleSupplier;
 
 public class CargoHandlingCommandBuilder {
 
-  public static Command allignToHub(Drivetrain drivetrain) {
-
-    // kP * tx
-    return new InstantCommand(
-        () ->
-            drivetrain.drive(
-                0,
-                0,
-                (Math.abs(
-                                NetworkTableInstance.getDefault()
-                                    .getTable("limelight")
-                                    .getEntry("tx")
-                                    .getDouble(0))
-                            > 1
-                        ? -0.1
-                        : 0)
-                    * NetworkTableInstance.getDefault()
-                        .getTable("limelight")
-                        .getEntry("tx")
-                        .getDouble(0),
-                false));
-  }
 
   public static Command setShooterForShot(Hood hood, Shooter shooter) {
     return new InstantCommand(() -> shooter.allignToHub())

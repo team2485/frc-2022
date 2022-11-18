@@ -263,10 +263,6 @@ public class RobotContainer {
 
     //  m_operator.y().whenActive(new InstantCommand(()->m_hood.setAngleRadians(0.16)));
 
-    m_operator
-        .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-        .whileActiveContinuous(CargoHandlingCommandBuilder.allignToHub(m_drivetrain));
-
     m_driver
         .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
