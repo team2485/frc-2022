@@ -233,4 +233,21 @@ public class CargoHandlingCommandBuilder {
   public static Command toggleArmCommand(IntakeArm intakeArm) {
     return new InstantCommand(() -> intakeArm.togglePosition(), intakeArm);
   }
-}
+
+  public static Command runEverythingAllAtOnce43ger87fsdyuvbuiweyfsbdvu(Indexer indexer, Intake intake, IntakeArm intakeArm, Feeder feeder) {
+    return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0.4), feeder)
+      .alongWith(new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0.4), indexer),
+        (new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0.4), intake)),
+          (new InstantCommand(() -> intakeArm.setArmUp(), intakeArm)));
+  }
+  
+  public static Command runEverythingAllAtOnceEndedsvejrkvnskjdhvnaoiwbvoksubersolvbqlwuabs(Shooter shooter, Indexer indexer, Intake intake, IntakeArm intakeArm, Feeder feeder) {
+    return new InstantCommand(() -> feeder.setVelocityRotationsPerSecond(0.0), feeder)
+      .alongWith(new InstantCommand(() -> indexer.setVelocityRotationsPerSecond(0.0), indexer),
+        (new InstantCommand(() -> intake.setVelocityRotationsPerSecond(0.0), intake)),
+          (new InstantCommand(() -> intakeArm.setArmUp(), intakeArm)))
+            .withTimeout(4)
+              .andThen(new RunCommand(() -> shooter.setShooterVelocityRotationsPerSecond(), shooter));
+  }
+ }
+ 

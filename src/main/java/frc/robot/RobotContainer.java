@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PerpetualCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoCommandBuilder;
@@ -275,6 +276,13 @@ public class RobotContainer {
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whileActiveContinuous(CargoHandlingCommandBuilder.getRunFeederCommand(m_feeder, m_indexer))
         .whenInactive(CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder, m_indexer));
+
+    m_driver
+        .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
+            .whileActiveContinuous(
+                CargoHandlingCommandBuilder.runEverythingAllAtOnce43ger87fsdyuvbuiweyfsbdvu(m_indexer, m_intake, m_intakeArm, m_feeder))
+            .whenInactive(
+                CargoHandlingCommandBuilder.runEverythingAllAtOnceEndedsvejrkvnskjdhvnaoiwbvoksubersolvbqlwuabs(m_shooter, m_indexer, m_intake, m_intakeArm, m_feeder));
 
     // m_driver
     //     .upperPOV()
