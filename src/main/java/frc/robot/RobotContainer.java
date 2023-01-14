@@ -48,6 +48,7 @@ public class RobotContainer {
 
   public final Hood m_hood = new Hood();
 
+
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
   public final ClimbStateMachine m_climbStateMachine = new ClimbStateMachine();
@@ -57,6 +58,8 @@ public class RobotContainer {
   // Distance offset to change distance by for auto-aim -- used to adjust
 
   // OPERATOR ADJUSTMENTS
+
+
   @Log(name = "Distance offset", width = 4, height = 1, rowIndex = 4, columnIndex = 16)
   double m_shooterOffset = 0;
 
@@ -177,8 +180,9 @@ public class RobotContainer {
             m_driver::getLeftX,
             m_driver::getRightX,
             () -> {
-              return !m_driver.rightBumper().getAsBoolean();
+              return m_driver.rightBumper().getAsBoolean();
             }));
+
 
     // m_driver
     //     .rightStick()

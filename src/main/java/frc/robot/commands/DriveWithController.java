@@ -2,6 +2,8 @@ package frc.robot.commands;
 
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drivetrain;
+import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -17,6 +19,8 @@ public class DriveWithController extends CommandBase {
     private DoubleSupplier strafeSup;
     private DoubleSupplier rotationSup;
     private BooleanSupplier robotCentricSup;
+
+    
 
     public DriveWithController(Drivetrain s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup) {
         this.s_Swerve = s_Swerve;

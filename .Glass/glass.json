@@ -1,0 +1,22 @@
+{
+  "NetworkTables": {
+    "transitory": {
+      "Shuffleboard": {
+        "open": true
+      },
+      "SmartDashboard": {
+        "open": true
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/ClimbElevator/Bottom Slot Sensor": "Digital Input",
+      "/Shuffleboard/ClimbElevator/Top Slot Sensor": "Digital Input",
+      "/Shuffleboard/RobotContainer/Auto Chooser": "String Chooser"
+    }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT3)",
+    "serverTeam": "9485"
+  }
+}

@@ -36,8 +36,8 @@ public class Robot extends TimedRobot {
   Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
   public Robot() {
+    ctreConfigs = new CTREConfigs();
     IDManager.getInstance(Constants.kRobotIdFile);
-
     m_robotContainer = new RobotContainer();
     addPeriodic(
         () -> m_robotContainer.m_climbElevator.runControlLoop(),
@@ -60,7 +60,6 @@ public class Robot extends TimedRobot {
     video.setVideoMode(new VideoMode(PixelFormat.kMJPEG, 320, 240, 120));
     video.setFPS(5);
 
-    ctreConfigs = new CTREConfigs();
     // Make the robot container the root project for Oblog
     Logger.configureLoggingAndConfig(m_robotContainer, false);
   }
