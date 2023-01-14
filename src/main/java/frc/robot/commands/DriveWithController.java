@@ -46,17 +46,20 @@ public class DriveWithController extends CommandBase {
     SmartDashboard.putNumber("xbox left x", m_ySpeedSupplier.getAsDouble());
     SmartDashboard.putNumber("xbox left y", m_rotSpeedSupplier.getAsDouble());
 
+    final int xSign = (int)(Math.abs(m_xSpeedSupplier.getAsDouble())/m_xSpeedSupplier.getAsDouble());
     final double xSpeed =
-        -Deadband.cubicScaledDeadband(m_xSpeedSupplier.getAsDouble(), kDriverLeftYDeadband)
-            * kTeleopMaxSpeedMetersPerSecond;
+        map(-Deadband.cubicScaledDeadband(Math.abs(m_xSpeedSupplier.getAsDouble()), kDriverLeftYDeadband)
+            * kTeleopMaxSpeedMetersPerSecond, kDriverLeftYDeadband, 1, 0, 1) * xSign;
 
+    final int ySign = (int)(Math.abs(m_ySpeedSupplier.getAsDouble())/m_ySpeedSupplier.getAsDouble());
     final double ySpeed =
-        -Deadband.cubicScaledDeadband(m_ySpeedSupplier.getAsDouble(), kDriverLeftXDeadband)
-            * kTeleopMaxSpeedMetersPerSecond;
+        map(-Deadband.cubicScaledDeadband(Math.abs(m_ySpeedSupplier.getAsDouble()), kDriverLeftXDeadband)
+          * kTeleopMaxSpeedMetersPerSecond, kDriverLeftXDeadband, 1, 0, 1) * ySign;
 
+    final int rotSign = (int)(Math.abs(m_rotSpeedSupplier.getAsDouble())/m_rotSpeedSupplier.getAsDouble());
     final double rot =
-        -Deadband.cubicScaledDeadband(m_rotSpeedSupplier.getAsDouble(), kDriverRightXDeadband)
-            * kTeleopMaxAngularSpeedRadiansPerSecond;
+        map(-Deadband.cubicScaledDeadband(m_rotSpeedSupplier.getAsDouble(), kDriverRightXDeadband)
+            * kTeleopMaxAngularSpeedRadiansPerSecond, kDriverRightXDeadband, 1, 0, 1) * rotSign;
 
     final boolean fieldRelative = m_fieldRelative.getAsBoolean();
     m_drivetrain.drive(xSpeed, ySpeed, rot, fieldRelative);
