@@ -73,8 +73,8 @@ public final class Constants {
     public static final int kOperatorPort = 1;
 
     public static final double kDriverRightXDeadband = 0.1;
-    public static final double kDriverLeftXDeadband = 0.1;
-    public static final double kDriverLeftYDeadband = 0.1;
+    public static final double kDriverLeftXDeadband = 0.15;
+    public static final double kDriverLeftYDeadband = 0.15;
 
     public static final double kTriggerThreshold = 0.1;
   }
