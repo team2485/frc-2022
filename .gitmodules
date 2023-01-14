@@ -1,0 +1,3 @@
+[submodule "WarlordsLib"]
+	path = WarlordsLib
+	url = https://github.com/team2485/WarlordsLib
