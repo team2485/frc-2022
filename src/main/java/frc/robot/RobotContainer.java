@@ -248,7 +248,7 @@ public class RobotContainer {
         .whileTrue(new RepeatCommand(CargoHandlingCommandBuilder.allignToHub(m_drivetrain)));
 
     m_driver
-        .rightTrigger(kKickerStatorCurrentThresholdAmps)
+        .rightTrigger()
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
         .whileTrue(
             CargoHandlingCommandBuilder.runTestCommand(m_intake, m_intakeArm, m_indexer))

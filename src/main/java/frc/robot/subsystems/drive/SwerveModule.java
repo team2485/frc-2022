@@ -44,7 +44,7 @@ public class SwerveModule {
 
         /* Drive Motor Config */
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID);
-        configDriveMotor();
+        configDriveMotor(moduleConstants.isInverted);
 
         lastAngle = getState().angle;
     }
@@ -58,7 +58,7 @@ public class SwerveModule {
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
         if(isOpenLoop){
-            double percentOutput = desiredState.speedMetersPerSecond / maxSpeed;
+            double percentOutput = (desiredState.speedMetersPerSecond / maxSpeed)*.75;
             mDriveMotor.set(ControlMode.PercentOutput, percentOutput);
         }
         else {
@@ -100,10 +100,10 @@ public class SwerveModule {
         resetToAbsolute();
     }
 
-    private void configDriveMotor(){        
+    private void configDriveMotor(boolean isInverted){        
         mDriveMotor.configFactoryDefault();
         mDriveMotor.configAllSettings(Robot.ctreConfigs.swerveDriveFXConfig);
-        mDriveMotor.setInverted(driveMotorInvert);
+        mDriveMotor.setInverted(isInverted);
         mDriveMotor.setNeutralMode(driveNeutralMode);
         mDriveMotor.setSelectedSensorPosition(0);
     }
