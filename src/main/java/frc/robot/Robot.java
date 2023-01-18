@@ -4,19 +4,31 @@
 
 package frc.robot;
 
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonPipelineResult;
+
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.DriveWithController;
 import frc.robot.subsystems.drive.CTREConfigs;
+import frc.robot.subsystems.drive.Drivetrain;
 import frc.WarlordsLib.IDManager;
 import io.github.oblarg.oblog.Logger;
 
@@ -34,6 +46,14 @@ public class Robot extends TimedRobot {
   public static CTREConfigs ctreConfigs;
 
   Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
+
+  PhotonCamera camera = new PhotonCamera(VisionConstants.kCameraName);
+  PIDController linearVisionController = new PIDController(VisionConstants.kVisionLinearP, 0, VisionConstants.kVisionLinearD);
+  PIDController rotationVisionController = new PIDController(VisionConstants.kVisionAngularP, 0, VisionConstants.kVisionAngularD);
+
+  XboxController xboxController = new XboxController(0);
+
+  Drivetrain drive = new Drivetrain();
 
   public Robot() {
     ctreConfigs = new CTREConfigs();
@@ -123,8 +143,44 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    // m_robotContainer.teleopPeriodic();
-    // m_talon.set(0.3);
+    double xSpeed;
+    double ySpeed;
+    double rotationSpeed;
+
+    if (xboxController.getAButton()) {
+      // vision-alignment mode
+
+      PhotonPipelineResult result = camera.getLatestResult();
+
+      if (result.hasTargets()) {
+        double range = PhotonUtils.calculateDistanceToTargetMeters(VisionConstants.kLensHeightMeters, VisionConstants.kTargetHeightMeters, VisionConstants.kLensPitchRadians, Units.degreesToRadians(result.getBestTarget().getPitch()));
+        // double offset = PhotonUtils.
+        xSpeed = 0;
+        ySpeed = -linearVisionController.calculate(range, VisionConstants.kGoalRangeMeters);
+        rotationSpeed = -rotationVisionController.calculate(result.getBestTarget().getYaw(), 0);
+      } else {
+        xSpeed = 0;
+        ySpeed = 0;
+        rotationSpeed = 0;
+      }
+    } else {
+      xSpeed = -xboxController.getLeftX();
+      ySpeed = -xboxController.getLeftY();
+      rotationSpeed = -xboxController.getRightX();
+    }
+
+    /* Get Values, Deadband*/
+    double translationVal = MathUtil.applyDeadband(ySpeed, Constants.stickDeadband);
+    double strafeVal = MathUtil.applyDeadband(xSpeed, Constants.stickDeadband);
+    double rotationVal = MathUtil.applyDeadband(rotationSpeed, Constants.stickDeadband);
+
+    /* Drive */
+    drive.drive(
+        new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed), 
+        rotationVal * Constants.Swerve.maxAngularVelocity, 
+        xboxController.getRightBumper(), 
+        true
+    );
   }
 
   @Override
