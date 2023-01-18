@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.DriveWithController;
 import frc.robot.subsystems.drive.CTREConfigs;
 import frc.robot.subsystems.drive.Drivetrain;
 import frc.WarlordsLib.IDManager;
@@ -46,14 +45,6 @@ public class Robot extends TimedRobot {
   public static CTREConfigs ctreConfigs;
 
   Compressor m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
-
-  PhotonCamera camera = new PhotonCamera(VisionConstants.kCameraName);
-  PIDController linearVisionController = new PIDController(VisionConstants.kVisionLinearP, 0, VisionConstants.kVisionLinearD);
-  PIDController rotationVisionController = new PIDController(VisionConstants.kVisionAngularP, 0, VisionConstants.kVisionAngularD);
-
-  XboxController xboxController = new XboxController(0);
-
-  Drivetrain drive = new Drivetrain();
 
   public Robot() {
     ctreConfigs = new CTREConfigs();
@@ -143,44 +134,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    double xSpeed;
-    double ySpeed;
-    double rotationSpeed;
-
-    if (xboxController.getAButton()) {
-      // vision-alignment mode
-
-      PhotonPipelineResult result = camera.getLatestResult();
-
-      if (result.hasTargets()) {
-        double range = PhotonUtils.calculateDistanceToTargetMeters(VisionConstants.kLensHeightMeters, VisionConstants.kTargetHeightMeters, VisionConstants.kLensPitchRadians, Units.degreesToRadians(result.getBestTarget().getPitch()));
-        // double offset = PhotonUtils.
-        xSpeed = 0;
-        ySpeed = -linearVisionController.calculate(range, VisionConstants.kGoalRangeMeters);
-        rotationSpeed = -rotationVisionController.calculate(result.getBestTarget().getYaw(), 0);
-      } else {
-        xSpeed = 0;
-        ySpeed = 0;
-        rotationSpeed = 0;
-      }
-    } else {
-      xSpeed = -xboxController.getLeftX();
-      ySpeed = -xboxController.getLeftY();
-      rotationSpeed = -xboxController.getRightX();
-    }
-
-    /* Get Values, Deadband*/
-    double translationVal = MathUtil.applyDeadband(ySpeed, Constants.stickDeadband);
-    double strafeVal = MathUtil.applyDeadband(xSpeed, Constants.stickDeadband);
-    double rotationVal = MathUtil.applyDeadband(rotationSpeed, Constants.stickDeadband);
-
-    /* Drive */
-    drive.drive(
-        new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed), 
-        rotationVal * Constants.Swerve.maxAngularVelocity, 
-        xboxController.getRightBumper(), 
-        true
-    );
   }
 
   @Override

@@ -6,19 +6,20 @@ package frc.robot;
 
 import static frc.robot.Constants.*;
 import static frc.robot.Constants.OIConstants.*;
-import static frc.robot.Constants.ShooterConstants.*;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import frc.WarlordsLib.WL_CommandXboxController;
 
+import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonPipelineResult;
+
+import frc.WarlordsLib.WL_CommandXboxController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -48,6 +49,7 @@ public class RobotContainer {
 
   public final Hood m_hood = new Hood();
 
+  PhotonCamera m_camera = new PhotonCamera(VisionConstants.kCameraName);
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
@@ -196,6 +198,11 @@ public class RobotContainer {
     //             m_drivetrain));
 
     m_driver.x().onTrue(new InstantCommand(m_drivetrain::zeroGyro));
+
+	m_driver.a().onTrue(new RunCommand(
+				() ->
+					CargoHandlingCommandBuilder.followTag(m_drivetrain, m_camera)
+				));
   }
 
   private void configureCargoHandlingCommands() {

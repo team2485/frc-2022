@@ -7,6 +7,7 @@ import static frc.robot.Constants.IntakeArmConstants.*;
 import static frc.robot.Constants.IntakeConstants.*;
 import static frc.robot.Constants.ShooterConstants.*;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.interpolation.InterpolatingTable;
 import frc.robot.subsystems.cargoHandling.FeedServo;
 import frc.robot.subsystems.cargoHandling.Feeder;
@@ -24,10 +26,37 @@ import frc.robot.subsystems.cargoHandling.Intake;
 import frc.robot.subsystems.cargoHandling.IntakeArm;
 import frc.robot.subsystems.cargoHandling.Shooter;
 import frc.robot.subsystems.drive.Drivetrain;
+import edu.wpi.first.math.util.Units;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonPipelineResult;
+
 public class CargoHandlingCommandBuilder {
+
+	public static Command followTag(Drivetrain drivetrain, PhotonCamera camera) {
+		PhotonPipelineResult result = camera.getLatestResult();
+
+		if (result.hasTargets()) {
+			PIDController linearVisionController = new PIDController(VisionConstants.kVisionLinearP, 0, VisionConstants.kVisionLinearD);
+			PIDController rotationVisionController = new PIDController(VisionConstants.kVisionAngularP, 0, VisionConstants.kVisionAngularD);
+			double range = PhotonUtils.calculateDistanceToTargetMeters(VisionConstants.kLensHeightMeters, VisionConstants.kTargetHeightMeters, VisionConstants.kLensPitchRadians, Units.degreesToRadians(result.getBestTarget().getPitch()));
+
+			return new InstantCommand(
+					() ->
+					drivetrain.drive(new Translation2d(-linearVisionController.calculate(range, VisionConstants.kGoalRangeMeters), 0), -rotationVisionController.calculate(result.getBestTarget().getYaw(), 0), false, true)
+					);
+					
+		}
+
+		return new InstantCommand(
+			() ->
+				drivetrain.drive(new Translation2d(0, 0), 0, false, false)
+				);
+	}
 
   public static Command allignToHub(Drivetrain drivetrain) {
 

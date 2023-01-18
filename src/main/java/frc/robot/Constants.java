@@ -247,19 +247,28 @@ public final class Constants {
   }
 
   public static final class VisionConstants {
-    public static final String kCameraName = "gloworm";
+    public static final String kCameraName = "photonvision";
 
     public static final double kVisionNominalFramerate = 45;
 
-    public static final double kLensHeightMeters = 0.56896;
+	public static final double kTargetHeightMeters = 1.5;
+	public static final double kGoalRangeMeters = 3;
+
+    public static final double kLensHeightMeters = 0.97;
     public static final double kLensPitchRadians = Units.degreesToRadians(30);
     public static final Rotation2d kCameraPitch = new Rotation2d(kLensPitchRadians);
 
+    public static final double kVisionLinearP = 0.1;
+    public static final double kVisionLinearD = 0.0;
+
+    public static final double kVisionAngularP = 0.1;
+    public static final double kVisionAngularD = 0.0;
+
     // width of camera FOV (angle)
-    public static final Rotation2d kCameraFOVW = Rotation2d.fromDegrees(59.6);
+    public static final Rotation2d kCameraFOVW = Rotation2d.fromDegrees(62.78);
 
     // height of camera FOV (angle)
-    public static final Rotation2d kCameraFOVH = Rotation2d.fromDegrees(49.7);
+    public static final Rotation2d kCameraFOVH = Rotation2d.fromDegrees(48.98);
 
     // How much do the height and width of the camera vieport change for every meter out from the
     // camera?
