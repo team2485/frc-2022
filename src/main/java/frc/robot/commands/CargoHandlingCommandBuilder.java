@@ -37,25 +37,25 @@ import org.photonvision.targeting.PhotonPipelineResult;
 
 public class CargoHandlingCommandBuilder {
 
-	public static Command followTag(Drivetrain drivetrain, PhotonCamera camera) {
-		PhotonPipelineResult result = camera.getLatestResult();
+// 	public static Command followTag(Drivetrain drivetrain, PhotonCamera camera) {
+// 		PhotonPipelineResult result = camera.getLatestResult();
 
-		if (result.hasTargets()) {
-			PIDController linearVisionController = new PIDController(VisionConstants.kVisionLinearP, 0, VisionConstants.kVisionLinearD);
-			PIDController rotationVisionController = new PIDController(VisionConstants.kVisionAngularP, 0, VisionConstants.kVisionAngularD);
-			double range = PhotonUtils.calculateDistanceToTargetMeters(VisionConstants.kLensHeightMeters, VisionConstants.kTargetHeightMeters, VisionConstants.kLensPitchRadians, Units.degreesToRadians(result.getBestTarget().getPitch()));
+// 		if (result.hasTargets()) {
+// 			PIDController linearVisionController = new PIDController(VisionConstants.kVisionLinearP, 0, VisionConstants.kVisionLinearD);
+// 			PIDController rotationVisionController = new PIDController(VisionConstants.kVisionAngularP, 0, VisionConstants.kVisionAngularD);
+// 			double range = PhotonUtils.calculateDistanceToTargetMeters(VisionConstants.kLensHeightMeters, VisionConstants.kTargetHeightMeters, VisionConstants.kLensPitchRadians, Units.degreesToRadians(result.getBestTarget().getPitch()));
 
-			return new InstantCommand(
-					() ->
-					drivetrain.drive(new Translation2d(-linearVisionController.calculate(range, VisionConstants.kGoalRangeMeters), 0), -rotationVisionController.calculate(result.getBestTarget().getYaw(), 0), false, true)
-					);
-		}
+// 			return new InstantCommand(
+// 					() ->
+// 					drivetrain.drive(new Translation2d(-linearVisionController.calculate(range, VisionConstants.kGoalRangeMeters), 0), -rotationVisionController.calculate(result.getBestTarget().getYaw(), 0), false, true)
+// 					);
+// 		}
 
-    return new InstantCommand(
-      () ->
-        drivetrain.drive(new Translation2d(0, 0), 0, false, false)
-        );
-    }
+//     return new InstantCommand(
+//       () ->
+//         drivetrain.drive(new Translation2d(0, 0), 0, false, false)
+//         );
+//     }
 
     // return new InstantCommand(
     //   () ->
