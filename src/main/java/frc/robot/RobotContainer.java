@@ -199,10 +199,7 @@ public class RobotContainer {
 
     m_driver.x().onTrue(new InstantCommand(m_drivetrain::zeroGyro));
 
-	m_driver.a().onTrue(new RunCommand(
-				() ->
-					CargoHandlingCommandBuilder.followTag(m_drivetrain, m_camera)
-				));
+	m_driver.a().toggleOnTrue(new RepeatCommand(CargoHandlingCommandBuilder.followTag(m_drivetrain, m_camera)));
   }
 
   private void configureCargoHandlingCommands() {

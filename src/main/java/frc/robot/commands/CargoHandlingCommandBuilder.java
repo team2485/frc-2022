@@ -49,14 +49,18 @@ public class CargoHandlingCommandBuilder {
 					() ->
 					drivetrain.drive(new Translation2d(-linearVisionController.calculate(range, VisionConstants.kGoalRangeMeters), 0), -rotationVisionController.calculate(result.getBestTarget().getYaw(), 0), false, true)
 					);
-					
 		}
 
-		return new InstantCommand(
-			() ->
-				drivetrain.drive(new Translation2d(0, 0), 0, false, false)
-				);
-	}
+    return new InstantCommand(
+      () ->
+        drivetrain.drive(new Translation2d(0, 0), 0, false, false)
+        );
+    }
+
+    // return new InstantCommand(
+    //   () ->
+    //   drivetrain.drive(new Translation2d(0, 1), 0, false, false)
+    // );
 
   public static Command allignToHub(Drivetrain drivetrain) {
 

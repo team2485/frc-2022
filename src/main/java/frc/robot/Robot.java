@@ -88,7 +88,6 @@ public class Robot extends TimedRobot {
     Logger.updateEntries();
     NetworkTableInstance.getDefault().flush();
     // System.out.println("Potentiometer reading: " + m_potentiometer.get());
-
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
