@@ -17,7 +17,7 @@ public class TargetVision extends SubsystemBase {
 
     public TargetVision() {
         this.m_camera = new PhotonCamera(VisionConstants.kCameraName);
-        this.m_camera.setPipelineIndex(0); // TODO
+        this.m_camera.setPipelineIndex(0);
     }
 
     @Override
@@ -41,10 +41,10 @@ public class TargetVision extends SubsystemBase {
 
         if (LED_Enable) {
             cameraLEDOn();
-            m_camera.setDriverMode(false);
+            m_camera.setDriverMode(true);
         } else {
             cameraLEDOff();
-            m_camera.setDriverMode(true);
+            m_camera.setDriverMode(false);
         }
     }
 

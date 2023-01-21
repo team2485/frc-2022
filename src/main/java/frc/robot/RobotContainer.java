@@ -30,6 +30,7 @@ import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.climb.*;
 import frc.robot.subsystems.climb.ClimbStateMachine.ClimbState;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.vision.TargetVision;
 import io.github.oblarg.oblog.annotations.*;
 
 public class RobotContainer {
@@ -49,7 +50,7 @@ public class RobotContainer {
 
   public final Hood m_hood = new Hood();
 
-  PhotonCamera m_camera = new PhotonCamera(VisionConstants.kCameraName);
+  TargetVision m_camera = new TargetVision();
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
@@ -198,8 +199,7 @@ public class RobotContainer {
     //             m_drivetrain));
 
     m_driver.x().onTrue(new InstantCommand(m_drivetrain::zeroGyro));
-
-	m_driver.a().toggleOnTrue(new RepeatCommand(CargoHandlingCommandBuilder.followTag(m_drivetrain, m_camera)));
+    m_driver.a().toggleOnTrue(new FollowTag(m_camera, m_drivetrain, m_driver));
   }
 
   private void configureCargoHandlingCommands() {
