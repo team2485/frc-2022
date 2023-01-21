@@ -41,8 +41,8 @@ public class DrivetrainPoseEstimator {
   public void update(SwerveModulePosition[] modulePositions) {
     m_poseEstimator.update(gyro.getRotation2d(), modulePositions);
 
-    // var result = camera.getLatestResult();
     // if (result.hasTargets()) {
+    // var result = camera.getLatestResult();
     // var imageCaptureTime = result.getTimestamp();
     // var camToTargetTrans = result.getBestTarget().getCameraToTarget();
     // var camPose =
