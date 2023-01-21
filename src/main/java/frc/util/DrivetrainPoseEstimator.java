@@ -8,6 +8,8 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -39,9 +41,14 @@ public class DrivetrainPoseEstimator {
   public void update(SwerveModulePosition[] modulePositions) {
     m_poseEstimator.update(gyro.getRotation2d(), modulePositions);
 
-    var result = camera.getLatestResult();
-    if (result.hasTargets()) {
-      var camToTargetTrans = result.getBestTarget().getCameraToTarget();
-    }
+    // var result = camera.getLatestResult();
+    // if (result.hasTargets()) {
+    // var imageCaptureTime = result.getTimestamp();
+    // var camToTargetTrans = result.getBestTarget().getCameraToTarget();
+    // var camPose =
+    // VisionConstants.kBlueMiddleTagAbsolutePos.transformBy(camToTargetTrans.inverse());
+    // m_poseEstimator.addVisionMeasurement(camPose.transformBy(VisionConstants.kCameraToRobot).toPose2d(),
+    // imageCaptureTime);
+    // }
   }
 }
