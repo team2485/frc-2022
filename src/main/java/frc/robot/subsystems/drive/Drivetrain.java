@@ -73,6 +73,10 @@ public class Drivetrain extends SubsystemBase {
     swerveOdometry.resetPosition(getYaw(), getModulePositions(), pose);
   }
 
+  public void resetOdometry(Pose2d pose, Rotation2d rotation) {
+    swerveOdometry.resetPosition(rotation, getModulePositions(), pose);
+  }
+
   public SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     for (SwerveModule mod : mSwerveMods) {
