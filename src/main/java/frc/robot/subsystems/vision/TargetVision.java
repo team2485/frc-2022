@@ -4,6 +4,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 import org.photonvision.common.hardware.VisionLEDMode;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,7 +17,14 @@ public class TargetVision extends SubsystemBase {
   private boolean hasTarget = false;
   private boolean LED_Enable = false;
 
+  private AprilTagFieldLayout aprilTagFieldLayout;
+
   public TargetVision() {
+    try {
+      aprilTagFieldLayout = new AprilTagFieldLayout("./src/main/java/frc/util/fieldmap.json");
+    } catch (Exception e) {
+    }
+
     this.m_camera = new PhotonCamera(VisionConstants.kCameraName);
     this.m_camera.setPipelineIndex(0);
   }
@@ -38,14 +46,14 @@ public class TargetVision extends SubsystemBase {
       SmartDashboard.putBoolean("LED On/Off", hasTarget);
     } else {
       this.hasTarget = false;
-    }
 
-    if (LED_Enable) {
-      cameraLEDOn();
-      m_camera.setDriverMode(true);
-    } else {
-      cameraLEDOff();
-      m_camera.setDriverMode(false);
+      if (LED_Enable) {
+        cameraLEDOn();
+        m_camera.setDriverMode(true);
+      } else {
+        cameraLEDOff();
+        m_camera.setDriverMode(false);
+      }
     }
   }
 
