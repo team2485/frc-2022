@@ -6,6 +6,10 @@ package frc.robot;
 
 import static java.util.Map.entry;
 
+import java.io.IOException;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -333,7 +337,7 @@ public final class Constants {
     public static final Pose3d kBlueLeftTagAbolutePos = new Pose3d(kBlueSideAbsoluteXPos, kBlueLeftAbsoluteYPos, kBlueSideAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180)));
     public static final Pose3d kBlueMiddleTagAbolutePos = new Pose3d(kBlueSideAbsoluteXPos, kBlueMiddleAbsoluteYPos, kBlueSideAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180)));
     public static final Pose3d kBlueRightTagAbolutePos = new Pose3d(kBlueSideAbsoluteXPos, kBlueRightAbsoluteYPos, kBlueSideAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180)));
-    public static final Pose3d kBlueDriverTagAbolutePos = new Pose3d(kBlueDriverAbsoluteXPos, kBlueDriverAbsoluteYPos, kBlueDriverAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180)));
+    public static final Pose3d kBlueDriverTagAbolutePos = new Pose3d(kBlueDriverAbsoluteXPos, kBlueDriverAbsoluteYPos, kBlueDriverAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180))); 
   }
 
   public static final class IntakeConstants {
