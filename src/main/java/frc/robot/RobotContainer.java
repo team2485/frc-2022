@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoCommandBuilder;
+import frc.robot.commands.vision.FollowTag;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.climb.*;
 import frc.robot.subsystems.climb.ClimbStateMachine.ClimbState;
@@ -37,7 +38,7 @@ public class RobotContainer {
   private final WL_CommandXboxController m_driver = new WL_CommandXboxController(kDriverPort);
   private final WL_CommandXboxController m_operator = new WL_CommandXboxController(kOperatorPort);
 
-  //   private final Vision m_vision = new Vision();
+  // private final Vision m_vision = new Vision();
 
   private final IntakeArm m_intakeArm = new IntakeArm();
   private final Intake m_intake = new Intake();
@@ -62,14 +63,14 @@ public class RobotContainer {
 
   // OPERATOR ADJUSTMENTS
 
-
   @Log(name = "Distance offset", width = 4, height = 1, rowIndex = 4, columnIndex = 16)
   double m_shooterOffset = 0;
 
   @Log(name = "Kicker ratio offset", width = 4, height = 1, rowIndex = 5, columnIndex = 16)
   double m_kickerRatioOffset = 0;
 
-  // @Log(name = "Angle shift", width = 2, height = 1, rowIndex = 3, columnIndex = 17)
+  // @Log(name = "Angle shift", width = 2, height = 1, rowIndex = 3, columnIndex =
+  // 17)
   double m_angleShift = 0;
 
   // OPERATOR LOCKS
@@ -85,19 +86,21 @@ public class RobotContainer {
   double hoodAngle = 0.1;
   double flywheelSpeed = 30;
 
-  // @Log(name = "Eject lock", width = 3, height = 1, rowIndex = 5, columnIndex = 12)
+  // @Log(name = "Eject lock", width = 3, height = 1, rowIndex = 5, columnIndex =
+  // 12)
   // boolean m_eject = false;
 
-  //   @Log(name = "Shooter velocity lock value", width = 4, height = 1, rowIndex = 0, columnIndex =
+  // @Log(name = "Shooter velocity lock value", width = 4, height = 1, rowIndex =
+  // 0, columnIndex =
   // 15)
   double m_shooterVelocityLock = 0;
 
-  //   @Log(
-  //       name = "Shooter tangential ratio lock",
-  //       width = 4,
-  //       height = 1,
-  //       rowIndex = 0,
-  //       columnIndex = 15)
+  // @Log(
+  // name = "Shooter tangential ratio lock",
+  // width = 4,
+  // height = 1,
+  // rowIndex = 0,
+  // columnIndex = 15)
   double m_shooterTangentialRatioLock = 1;
 
   @Log(name = "Bar to climb to", width = 2, height = 2, rowIndex = 2, columnIndex = 0)
@@ -107,7 +110,10 @@ public class RobotContainer {
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
 
   Timer m_autoTimer = new Timer();
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     configureButtonBindings();
     m_climbElevator.setPositionMeters(0);
@@ -152,20 +158,22 @@ public class RobotContainer {
         // PathCommandBuilder.getResetOdometryCommand(m_drivetrain,
         // PathCommandBuilder.getPathCommand(m_drivetrain, "2 Ball Left Side")).andThen(
         // CargoHandlingCommandBuilder.getSetShooterCommand(
-        //         () -> 35, () -> 0.8, m_shooter) // full send
-        //     .raceWith(
-        //         new WaitCommand(3)
-        //             .andThen(
-        //                 CargoHandlingCommandBuilder.getIndexToShooterCommand(
-        //                     m_indexer, m_feeder, m_feedServo),
-        //                 new WaitCommand(1)))
-        //     .andThen(
+        // () -> 35, () -> 0.8, m_shooter) // full send
+        // .raceWith(
+        // new WaitCommand(3)
+        // .andThen(
+        // CargoHandlingCommandBuilder.getIndexToShooterCommand(
+        // m_indexer, m_feeder, m_feedServo),
+        // new WaitCommand(1)))
+        // .andThen(
         new RunCommand(() -> m_drivetrain.drive(new Translation2d(-1, 0), 0, false, false)).withTimeout(2.5));
   }
 
   /**
-   * Use this method to define your utton->command mappings. Buttons can be created by instantiating
-   * a {@link GenericHID} or one of its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or {@link
+   * Use this method to define your utton->command mappings. Buttons can be
+   * created by instantiating
+   * a {@link GenericHID} or one of its subclasses
+   * ({@link edu.wpi.first.wpilibj.Joystick} or {@link
    * XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
@@ -186,17 +194,16 @@ public class RobotContainer {
               return m_driver.rightBumper().getAsBoolean();
             }));
 
-
     // m_driver
-    //     .rightStick()
-    //     .whileTrue(
-    //         new DriveFacingHub(
-    //             m_driver::getLeftY,
-    //             m_driver::getLeftX,
-    //             () -> {
-    //               return !m_driver.rightBumper().getAsBoolean();
-    //             },
-    //             m_drivetrain));
+    // .rightStick()
+    // .whileTrue(
+    // new DriveFacingHub(
+    // m_driver::getLeftY,
+    // m_driver::getLeftX,
+    // () -> {
+    // return !m_driver.rightBumper().getAsBoolean();
+    // },
+    // m_drivetrain));
 
     m_driver.x().onTrue(new InstantCommand(m_drivetrain::zeroGyro));
     m_driver.a().toggleOnTrue(new FollowTag(m_camera, m_drivetrain, m_driver));
@@ -206,46 +213,53 @@ public class RobotContainer {
 
     // Puts intake arm down at start of climb
 
-    // Intake on driver right trigger: put intake arm down, then run intake and low indexer
+    // Intake on driver right trigger: put intake arm down, then run intake and low
+    // indexer
     // stopped by hitting high indexer path
 
     // m_driver
-    //     .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-    //     .whileActiveContinuous(
-    //         CargoHandlingCommandBuilder.getIntakeCommand(
-    //             m_intake, m_intakeArm, m_indexer, m_feedServo),
-    //         true)
-    //     .whenInactive(
-    //         new InstantCommand(
-    //                 () ->
-    //                     m_indexer.setVelocityRotationsPerSecond(
-    //                         m_indexer.getVelocityRotationsPerSecond()),
-    //                 m_indexer)
-    //             .andThen(
-    //                 new WaitCommand(0.5),
-    //                 CargoHandlingCommandBuilder.getStopIntakeCommand(
-    //                         m_intake, m_intakeArm, m_indexer)
-    //                     .alongWith(
-    //                         new StartEndCommand(
-    //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0.5),
-    //                                 () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
-    //                             .withTimeout(0.5))));
+    // .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+    // .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    // .whileActiveContinuous(
+    // CargoHandlingCommandBuilder.getIntakeCommand(
+    // m_intake, m_intakeArm, m_indexer, m_feedServo),
+    // true)
+    // .whenInactive(
+    // new InstantCommand(
+    // () ->
+    // m_indexer.setVelocityRotationsPerSecond(
+    // m_indexer.getVelocityRotationsPerSecond()),
+    // m_indexer)
+    // .andThen(
+    // new WaitCommand(0.5),
+    // CargoHandlingCommandBuilder.getStopIntakeCommand(
+    // m_intake, m_intakeArm, m_indexer)
+    // .alongWith(
+    // new StartEndCommand(
+    // () -> m_operator.setRumble(RumbleType.kLeftRumble, 0.5),
+    // () -> m_operator.setRumble(RumbleType.kLeftRumble, 0))
+    // .withTimeout(0.5))));
 
-    // m_operator.upperPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle += 0.01));
-    // m_operator.lowerPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle -= 0.01));
+    // m_operator.upperPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle +=
+    // 0.01));
+    // m_operator.lowerPOV().whileActiveOnce(new InstantCommand(() -> hoodAngle -=
+    // 0.01));
 
     // m_operator
-    //     .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-    //     .whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(hoodAngle)));
+    // .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+    // .whileActiveOnce(new InstantCommand(() ->
+    // m_hood.setAngleRadians(hoodAngle)));
     m_operator.leftBumper().onTrue(new InstantCommand(() -> m_hood.setAngleRadians(0)));
 
-    // m_operator.leftPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed--));
-    // m_operator.rightPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed++));
+    // m_operator.leftPOV().whileActiveOnce(new InstantCommand(() ->
+    // flywheelSpeed--));
+    // m_operator.rightPOV().whileActiveOnce(new InstantCommand(() ->
+    // flywheelSpeed++));
 
     m_operator.y().onTrue(CargoHandlingCommandBuilder.setShooterForShot(m_hood, m_shooter));
 
-    //  m_operator.y().whenActive(new InstantCommand(()->m_hood.setAngleRadians(0.16)));
+    // m_operator.y().whenActive(new
+    // InstantCommand(()->m_hood.setAngleRadians(0.16)));
 
     m_operator
         .rightTrigger()
@@ -278,43 +292,45 @@ public class RobotContainer {
         .onFalse(CargoHandlingCommandBuilder.getStopFeederCommand(m_feeder, m_indexer));
 
     // m_driver
-    //     .upperPOV()
-    //     .whileActiveContinuous(CargoHandlingCommandBuilder.getArmUpCommand(m_intakeArm));
+    // .upperPOV()
+    // .whileActiveContinuous(CargoHandlingCommandBuilder.getArmUpCommand(m_intakeArm));
 
     // m_operator
-    //     .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
-    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-    //     .whenActive(
-    //         new InstantCommand(
-    //             () ->
-    //                 m_indexer.setVelocityRotationsPerSecond(
-    //                     Constants.IndexerConstants.kIndexerDefaultSpeedRotationsPerSecond),
-    //             m_indexer))
-    //     .whenInactive(
-    //         new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(0), m_indexer));
+    // .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
+    // .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    // .whenActive(
+    // new InstantCommand(
+    // () ->
+    // m_indexer.setVelocityRotationsPerSecond(
+    // Constants.IndexerConstants.kIndexerDefaultSpeedRotationsPerSecond),
+    // m_indexer))
+    // .whenInactive(
+    // new InstantCommand(() -> m_indexer.setVelocityRotationsPerSecond(0),
+    // m_indexer));
 
     // Set shooter on operator left trigger: based on distance to hub
     // m_operator
-    //     .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
-    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-    //     .whileActiveContinuous(
-    //         new ConditionalCommand(
-    //             new InstantCommand(),
-    //             CargoHandlingCommandBuilder.getSetShooterCommand(
-    //                 () -> m_shooterVelocityLock + m_shooterOffset,
-    //                 m_shooter),
-    //             () -> !m_setpointLock));
+    // .getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold)
+    // .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    // .whileActiveContinuous(
+    // new ConditionalCommand(
+    // new InstantCommand(),
+    // CargoHandlingCommandBuilder.getSetShooterCommand(
+    // () -> m_shooterVelocityLock + m_shooterOffset,
+    // m_shooter),
+    // () -> !m_setpointLock));
 
     // Feed to shooter on operator right bumper: waits until shooter at setpoint
     // m_operator
-    //     .rightBumper()
-    //     .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
-    //     .whileActiveContinuous(
-    //         CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder,
+    // .rightBumper()
+    // .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kNotClimbing))
+    // .whileActiveContinuous(
+    // CargoHandlingCommandBuilder.getIndexToShooterCommand(m_indexer, m_feeder,
     // m_feedServo),
-    //         false)
-    //     .whenInactive(
-    //         CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder, m_feedServo));
+    // false)
+    // .whenInactive(
+    // CargoHandlingCommandBuilder.getStopFeedCommand(m_indexer, m_feeder,
+    // m_feedServo));
 
     m_operator
         .upperPOV()
@@ -386,14 +402,16 @@ public class RobotContainer {
   }
 
   private void configureClimbCommands() {
-    // Climb commands will only be triggered when in climb mode (see ClimbStateMachine)
+    // Climb commands will only be triggered when in climb mode (see
+    // ClimbStateMachine)
     // Climb mode on: start and back buttons
     // Climb mode off: left pov and back buttons
     // All climb commands within climb mode use the same control layout:
     // A button: proceed
     // B button: repeat/go back
     // Y button: finish
-    // However, not all checkpoints have either repeat or finish options, and none have both.
+    // However, not all checkpoints have either repeat or finish options, and none
+    // have both.
 
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kNotClimbing)
@@ -418,30 +436,32 @@ public class RobotContainer {
 
     // // turn off climb mode
     // m_driver
-    //     .leftPOV()
-    //     .and(m_driver.back())
-    //     .whenActive(
-    //         new PerpetualCommand(
-    //             new RunCommand(m_climbStateMachine::disableClimb)
-    //                 .alongWith(
-    //                     new RunCommand(
-    //                         () -> {
-    //                           m_climbElevator.enable(false);
-    //                         },
-    //                         m_climbElevator),
-    //                     new RunCommand(
-    //                         () -> {
-    //                           m_climbArm.enable(false);
-    //                         },
-    //                         m_climbArm))),
-    //         false);
+    // .leftPOV()
+    // .and(m_driver.back())
+    // .whenActive(
+    // new PerpetualCommand(
+    // new RunCommand(m_climbStateMachine::disableClimb)
+    // .alongWith(
+    // new RunCommand(
+    // () -> {
+    // m_climbElevator.enable(false);
+    // },
+    // m_climbElevator),
+    // new RunCommand(
+    // () -> {
+    // m_climbArm.enable(false);
+    // },
+    // m_climbArm))),
+    // false);
 
     // disengage ratchet
     //
 
-    // When at pre-climb state, pressing proceed will disengage ratchet and raise hooks.
+    // When at pre-climb state, pressing proceed will disengage ratchet and raise
+    // hooks.
 
-    // m_driver.getJoystickAxisButton(Axis.kLeftTrigger, kTriggerThreshold).whenActive(new
+    // m_driver.getJoystickAxisButton(Axis.kLeftTrigger,
+    // kTriggerThreshold).whenActive(new
     // InstantCommand(()->m_climbElevator.setPositionMeters(0)));
 
     m_driver
@@ -455,7 +475,8 @@ public class RobotContainer {
                     ClimbCommandBuilder.getRaiseHookCommand(m_climbElevator),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointAlignedToMidBar)));
 
-    // When at aligned to mid bar checkpoint, pressing proceed will lower hooks onto mid bar.
+    // When at aligned to mid bar checkpoint, pressing proceed will lower hooks onto
+    // mid bar.
     m_driver
         .rightBumper()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointAlignedToMidBar))
@@ -466,7 +487,8 @@ public class RobotContainer {
                     ClimbCommandBuilder.getHookOnMidBarCommand(m_climbElevator),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointHookedOnMidBar)));
 
-    // When at hooked on mid bar checkpoint, pressing proceed will climb on the mid bar.
+    // When at hooked on mid bar checkpoint, pressing proceed will climb on the mid
+    // bar.
     m_driver
         .a()
         .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnMidBar))
@@ -516,13 +538,14 @@ public class RobotContainer {
     // .or(m_driver.y())
     // .and(m_climbStateMachine.getClimbStateTrigger(ClimbState.kCheckpointHookedOnMidBar))
     // .whenActive(
-    //     m_climbStateMachine
-    //         .getSetStateCommand(ClimbState.kClimbingOnMidBar)
-    //         .andThen(
-    //             ClimbCommandBuilder.getLiftOnMidBarCommand(m_climbElevator),
-    //             m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar)));
+    // m_climbStateMachine
+    // .getSetStateCommand(ClimbState.kClimbingOnMidBar)
+    // .andThen(
+    // ClimbCommandBuilder.getLiftOnMidBarCommand(m_climbElevator),
+    // m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointLiftedOnMidBar)));
 
-    // When at hooked on mid bar checkpoint, pressing repeat will move back to pre-climb state
+    // When at hooked on mid bar checkpoint, pressing repeat will move back to
+    // pre-climb state
 
     // driver can try hooking onto mid bar again).
     m_driver
@@ -535,7 +558,8 @@ public class RobotContainer {
                     ClimbCommandBuilder.getRaiseHookCommand(m_climbElevator),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointAlignedToMidBar)));
 
-    // when at climbed on mid bar checkpoint, pressing proceed will move arms to high bar
+    // when at climbed on mid bar checkpoint, pressing proceed will move arms to
+    // high bar
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar)
         .and(new Trigger(() -> m_barToClimbTo == 2 || m_barToClimbTo == 3))
@@ -546,7 +570,8 @@ public class RobotContainer {
                     ClimbCommandBuilder.getArmOnNextBarCommand(m_climbElevator, m_climbArm),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointArmsOnHighBar)));
 
-    // When at climbed on mid bar checkpoint, pressing finish will complete climb on mid bar
+    // When at climbed on mid bar checkpoint, pressing finish will complete climb on
+    // mid bar
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kCheckpointLiftedOnMidBar)
         .and(new Trigger(() -> m_barToClimbTo == 1))
@@ -557,7 +582,8 @@ public class RobotContainer {
                     ClimbCommandBuilder.getEngageRatchetAndLowerCommand(m_climbElevator),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kClimbedOnMidBar)));
 
-    // When at arms on high bar checkpoint, pressing proceed will pull back arms and translate
+    // When at arms on high bar checkpoint, pressing proceed will pull back arms and
+    // translate
     // the bar, then hook on the high bar
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kCheckpointArmsOnHighBar)
@@ -569,7 +595,8 @@ public class RobotContainer {
                         m_climbElevator, m_climbArm),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kCheckpointHookedOnHighBar)));
 
-    // When at hooked on high bar checkpoint, pressing proceed will reset climber for climb on
+    // When at hooked on high bar checkpoint, pressing proceed will reset climber
+    // for climb on
     // traverse bar and move arms there
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kCheckpointHookedOnHighBar)
@@ -583,7 +610,8 @@ public class RobotContainer {
                     m_climbStateMachine.getSetStateCommand(
                         ClimbState.kCheckpointArmsOnTraverseBar)));
 
-    // When at hooked on high bar checkpoint, pressing finish will complete climb on high bar
+    // When at hooked on high bar checkpoint, pressing finish will complete climb on
+    // high bar
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kCheckpointHookedOnHighBar)
         .and(new Trigger(() -> m_barToClimbTo == 2))
@@ -595,7 +623,8 @@ public class RobotContainer {
                         m_climbArm, m_climbElevator, m_intakeArm),
                     m_climbStateMachine.getSetStateCommand(ClimbState.kClimbedOnHighBar)));
 
-    // When at arms on traverse bar checkpoint, pressing proceed will pull back arms and up
+    // When at arms on traverse bar checkpoint, pressing proceed will pull back arms
+    // and up
     // the bar, then hook on traverse bar
     m_climbStateMachine
         .getClimbStateTrigger(ClimbState.kCheckpointArmsOnTraverseBar)
@@ -620,9 +649,9 @@ public class RobotContainer {
                     m_climbStateMachine.getSetStateCommand(ClimbState.kClimbedOnTraverseBar)));
 
     // m_climbStateMachine.getClimbStateTrigger(ClimbState.kClimbedOnHighBar).or(
-    //     m_climbStateMachine.getClimbStateTrigger(ClimbState.kClimbedOnTraverseBar).whenActive(
+    // m_climbStateMachine.getClimbStateTrigger(ClimbState.kClimbedOnTraverseBar).whenActive(
 
-    //     )
+    // )
     // )
   }
 
@@ -633,24 +662,25 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // Command auto =
-    //     AutoCommandBuilder.get2BallAutoLeft(
-    //             m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter)
-    //         .andThen(
-    //             AutoCommandBuilder.getFinishAutoCommand(
-    //                 m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
+    // AutoCommandBuilder.get2BallAutoLeft(
+    // m_drivetrain, m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo,
+    // m_shooter)
+    // .andThen(
+    // AutoCommandBuilder.getFinishAutoCommand(
+    // m_intake, m_intakeArm, m_indexer, m_feeder, m_feedServo, m_shooter, m_hood));
 
     return m_autoChooser.getSelected();
 
     // WL_SwerveControllerCommand path =
-    //     PathCommandBuilder.getPathCommand(m_drivetrain, "3 Score Right Fender");
+    // PathCommandBuilder.getPathCommand(m_drivetrain, "3 Score Right Fender");
 
     // return PathCommandBuilder.getResetOdometryCommand(m_drivetrain, path)
-    //     .andThen(
-    //         new InstantCommand(
-    //             () ->
+    // .andThen(
+    // new InstantCommand(
+    // () ->
     // m_drivetrain.getField2d().getObject("traj").setTrajectory(path.m_trajectory),
-    //             m_drivetrain),
-    //         path);
+    // m_drivetrain),
+    // path);
   }
 
   // whenever the robot is disabled, drive should be turned off

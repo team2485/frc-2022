@@ -21,20 +21,25 @@ import frc.WarlordsLib.sendableRichness.SR_TrapezoidProfile;
 import java.util.Map;
 import java.util.TreeMap;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import frc.util.COTSFalconSwerveConstants;
 import frc.util.SwerveModuleConstants;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  *
- * <p>Include units in Constant names whenever possible/convenient. If not, include a comment
+ * <p>
+ * Include units in Constant names whenever possible/convenient. If not, include
+ * a comment
  * designating units.
  */
 public final class Constants {
@@ -61,12 +66,11 @@ public final class Constants {
   public static final double k775FreeSpeedRotationsPerSecond = 18730.0 / 60.0;
 
   // meters and shot parameters (radians and rps)
-  public static final TreeMap<Double, ShotParameter> kShootingMap =
-      new TreeMap<>(
-          Map.ofEntries(
-              entry(2.76, new ShotParameter(105, 0, 0)),
-              entry(3.2, new ShotParameter(120, 0.455, 0)),
-              entry(3.6, new ShotParameter(123, 0.475, 0))));
+  public static final TreeMap<Double, ShotParameter> kShootingMap = new TreeMap<>(
+      Map.ofEntries(
+          entry(2.76, new ShotParameter(105, 0, 0)),
+          entry(3.2, new ShotParameter(120, 0.455, 0)),
+          entry(3.6, new ShotParameter(123, 0.475, 0))));
 
   // 5 ft front bumper: 60 0.8
 
@@ -86,161 +90,166 @@ public final class Constants {
 
   public static final double stickDeadband = 0.1;
 
-    public static final class Swerve {
-        public static final int pigeonID = 9;
-        public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
+  public static final class Swerve {
+    public static final int pigeonID = 9;
+    public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
-        public static final COTSFalconSwerveConstants chosenModule =  //TODO: This must be tuned to specific robot
-            COTSFalconSwerveConstants.SDSMK3(COTSFalconSwerveConstants.driveGearRatios.SDSMK3_Fast);
+    public static final COTSFalconSwerveConstants chosenModule = // TODO: This must be tuned to specific robot
+        COTSFalconSwerveConstants.SDSMK3(COTSFalconSwerveConstants.driveGearRatios.SDSMK3_Fast);
 
-        /* Drivetrain Constants */
-        public static final double trackWidth = 0.508;
-        public static final double wheelBase = 0.635;
-        public static final double wheelCircumference = chosenModule.wheelCircumference;
+    /* Drivetrain Constants */
+    public static final double trackWidth = 0.508;
+    public static final double wheelBase = 0.635;
+    public static final double wheelCircumference = chosenModule.wheelCircumference;
 
-        /* Swerve Kinematics 
-         * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve */
-         public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
-            new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-            new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
+    /*
+     * Swerve Kinematics
+     * No need to ever change this unless you are not doing a traditional
+     * rectangular/square 4 module swerve
+     */
+    public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+        new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
+        new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+        new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+        new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
 
-        /* Module Gear Ratios */
-        public static final double driveGearRatio = chosenModule.driveGearRatio;
-        public static final double angleGearRatio = chosenModule.angleGearRatio;
+    /* Module Gear Ratios */
+    public static final double driveGearRatio = chosenModule.driveGearRatio;
+    public static final double angleGearRatio = chosenModule.angleGearRatio;
 
-        /* Motor Inverts */
-        public static final boolean angleMotorInvert = chosenModule.angleMotorInvert;
+    /* Motor Inverts */
+    public static final boolean angleMotorInvert = chosenModule.angleMotorInvert;
 
-        /* Angle Encoder Invert */
-        public static final boolean canCoderInvert = chosenModule.canCoderInvert;
+    /* Angle Encoder Invert */
+    public static final boolean canCoderInvert = chosenModule.canCoderInvert;
 
-        /* Swerve Current Limiting */
-        public static final int angleContinuousCurrentLimit = 25;
-        public static final int anglePeakCurrentLimit = 40;
-        public static final double anglePeakCurrentDuration = 0.1;
-        public static final boolean angleEnableCurrentLimit = true;
+    /* Swerve Current Limiting */
+    public static final int angleContinuousCurrentLimit = 25;
+    public static final int anglePeakCurrentLimit = 40;
+    public static final double anglePeakCurrentDuration = 0.1;
+    public static final boolean angleEnableCurrentLimit = true;
 
-        public static final int driveContinuousCurrentLimit = 25;
-        public static final int drivePeakCurrentLimit = 40;
-        public static final double drivePeakCurrentDuration = 0.1;
-        public static final boolean driveEnableCurrentLimit = true;
+    public static final int driveContinuousCurrentLimit = 25;
+    public static final int drivePeakCurrentLimit = 40;
+    public static final double drivePeakCurrentDuration = 0.1;
+    public static final boolean driveEnableCurrentLimit = true;
 
-        /* These values are used by the drive falcon to ramp in open loop and closed loop driving.
-         * We found a small open loop ramp (0.25) helps with tread wear, tipping, etc */
-        public static final double openLoopRamp = 0.25;
-        public static final double closedLoopRamp = 0.0;
+    /*
+     * These values are used by the drive falcon to ramp in open loop and closed
+     * loop driving.
+     * We found a small open loop ramp (0.25) helps with tread wear, tipping, etc
+     */
+    public static final double openLoopRamp = 0.25;
+    public static final double closedLoopRamp = 0.0;
 
-        /* Angle Motor PID Values */
-        public static final double angleKP = chosenModule.angleKP;
-        public static final double angleKI = chosenModule.angleKI;
-        public static final double angleKD = chosenModule.angleKD;
-        public static final double angleKF = chosenModule.angleKF;
+    /* Angle Motor PID Values */
+    public static final double angleKP = chosenModule.angleKP;
+    public static final double angleKI = chosenModule.angleKI;
+    public static final double angleKD = chosenModule.angleKD;
+    public static final double angleKF = chosenModule.angleKF;
 
-        /* Drive Motor PID Values */
-        public static final double driveKP = 0.1; 
-        public static final double driveKI = 0.0;
-        public static final double driveKD = 0.0;
-        public static final double driveKF = 0.0;
+    /* Drive Motor PID Values */
+    public static final double driveKP = 0.1;
+    public static final double driveKI = 0.0;
+    public static final double driveKD = 0.0;
+    public static final double driveKF = 0.0;
 
-        /* Drive Motor Characterization Values 
-         * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
-        public static final double driveKS = (0.32 / 12); //TODO: This must be tuned to specific robot
-        public static final double driveKV = (1.51 / 12);
-        public static final double driveKA = (0.27 / 12);
+    /*
+     * Drive Motor Characterization Values
+     * Divide SYSID values by 12 to convert from volts to percent output for CTRE
+     */
+    public static final double driveKS = (0.32 / 12); // TODO: This must be tuned to specific robot
+    public static final double driveKV = (1.51 / 12);
+    public static final double driveKA = (0.27 / 12);
 
-        /* Swerve Profiling Values */
-        /** Meters per Second */
-        public static final double maxSpeed = 3; //TODO: This must be tuned to specific robot
-        /** Radians per Second */
-        public static final double maxAngularVelocity = 4; //TODO: This must be tuned to specific robot
+    /* Swerve Profiling Values */
+    /** Meters per Second */
+    public static final double maxSpeed = 3; // TODO: This must be tuned to specific robot
+    /** Radians per Second */
+    public static final double maxAngularVelocity = 4; // TODO: This must be tuned to specific robot
 
-        /* Neutral Modes */
-        public static final NeutralMode angleNeutralMode = NeutralMode.Brake;
-        public static final NeutralMode driveNeutralMode = NeutralMode.Brake;
+    /* Neutral Modes */
+    public static final NeutralMode angleNeutralMode = NeutralMode.Brake;
+    public static final NeutralMode driveNeutralMode = NeutralMode.Brake;
 
-        /* Module Specific Constants */
-        /* Front Left Module - Module 0 */
-        public static final class Mod0 { //TODO: This must be tuned to specific robot
-            public static final int driveMotorID = 5;
-            public static final int angleMotorID = 6;
-            public static final int canCoderID = 12;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(54.16);
-            public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, false);
-        }
-
-        /* Front Right Module - Module 1 */
-        public static final class Mod1 { //TODO: This must be tuned to specific robot
-            public static final int driveMotorID = 7;
-            public static final int angleMotorID = 8;
-            public static final int canCoderID = 13;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-39.98);
-            public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, true);
-        }
-        
-        /* Back Left Module - Module 2 */
-        public static final class Mod2 { //TODO: This must be tuned to specific robot
-            public static final int driveMotorID = 3;
-            public static final int angleMotorID = 4;
-            public static final int canCoderID = 11;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(197.46);
-            public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, false);
-        }
-
-        /* Back Right Module - Module 3 */
-        public static final class Mod3 { //TODO: This must be tuned to specific robot
-            public static final int driveMotorID = 1;
-            public static final int angleMotorID = 2;
-            public static final int canCoderID = 10;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees(172.87);
-            public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, true);
-        }
+    /* Module Specific Constants */
+    /* Front Left Module - Module 0 */
+    public static final class Mod0 { // TODO: This must be tuned to specific robot
+      public static final int driveMotorID = 5;
+      public static final int angleMotorID = 6;
+      public static final int canCoderID = 12;
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(54.16);
+      public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
+          canCoderID, angleOffset, false);
     }
 
-    public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
-        public static final double kMaxSpeedMetersPerSecond = 3;
-        public static final double kMaxAccelerationMetersPerSecondSquared = 3;
-        public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
-        public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
-    
-        public static final double kPAutoXController = 5;
-        public static final double kIAutoXController = 0.05;
-        public static final double kDAutoXController = 0.2;
-        public static final double kPAutoYController = 5;
-        public static final double kIAutoYController = 0.05;
-        public static final double kDAutoYController = 0.2;
-
-        public static final double kPAutoThetaController = 10;
-        public static final double kIAutoThetaController = 0.1;
-        public static final double kDAutoThetaController = 0.1;
-    
-        /* Constraint for the motion profilied robot angle controller */
-        public static final SR_TrapezoidProfile.Constraints kThetaControllerConstraints =
-            new SR_TrapezoidProfile.Constraints(
-                kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+    /* Front Right Module - Module 1 */
+    public static final class Mod1 { // TODO: This must be tuned to specific robot
+      public static final int driveMotorID = 7;
+      public static final int angleMotorID = 8;
+      public static final int canCoderID = 13;
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-39.98);
+      public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
+          canCoderID, angleOffset, true);
     }
+
+    /* Back Left Module - Module 2 */
+    public static final class Mod2 { // TODO: This must be tuned to specific robot
+      public static final int driveMotorID = 3;
+      public static final int angleMotorID = 4;
+      public static final int canCoderID = 11;
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(197.46);
+      public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
+          canCoderID, angleOffset, false);
+    }
+
+    /* Back Right Module - Module 3 */
+    public static final class Mod3 { // TODO: This must be tuned to specific robot
+      public static final int driveMotorID = 1;
+      public static final int angleMotorID = 2;
+      public static final int canCoderID = 10;
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(172.87);
+      public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
+          canCoderID, angleOffset, true);
+    }
+  }
+
+  public static final class AutoConstants { // TODO: The below constants are used in the example auto, and must be tuned
+                                            // to specific robot
+    public static final double kMaxSpeedMetersPerSecond = 3;
+    public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+    public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
+    public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
+
+    public static final double kPAutoXController = 5;
+    public static final double kIAutoXController = 0.05;
+    public static final double kDAutoXController = 0.2;
+    public static final double kPAutoYController = 5;
+    public static final double kIAutoYController = 0.05;
+    public static final double kDAutoYController = 0.2;
+
+    public static final double kPAutoThetaController = 10;
+    public static final double kIAutoThetaController = 0.1;
+    public static final double kDAutoThetaController = 0.1;
+
+    /* Constraint for the motion profilied robot angle controller */
+    public static final SR_TrapezoidProfile.Constraints kThetaControllerConstraints = new SR_TrapezoidProfile.Constraints(
+        kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+  }
 
   public static final class FieldConstants {
     // ALL CONSTANTS IN METERS
 
-    public static final double kVisionTargetHeightLower =
-        Units.inchesToMeters(8 * 12 + 5.625); // Bottom of tape
+    public static final double kVisionTargetHeightLower = Units.inchesToMeters(8 * 12 + 5.625); // Bottom of tape
 
-    public static final double kVisionTargetHeightUpper =
-        kVisionTargetHeightLower + Units.inchesToMeters(2);
+    public static final double kVisionTargetHeightUpper = kVisionTargetHeightLower + Units.inchesToMeters(2);
 
     public static final double kVisionTargetRadius = Units.inchesToMeters(4.0 * 12.0 + 5.375) / 2;
     // All coordinates start at blue terminal corner (0,0)
     // Driver station to driver station is x
 
     public static final Translation2d kHubCenterTranslation = new Translation2d(8.2296, 4.1148);
-    public static final Pose2d kHubCenterPosition =
-        new Pose2d(kHubCenterTranslation, new Rotation2d(0));
+    public static final Pose2d kHubCenterPosition = new Pose2d(kHubCenterTranslation, new Rotation2d(0));
 
     public static final double kRobotBumperLengthMeters = 0.97;
     public static final double kRobotBumperWidthMeters = 0.84;
@@ -251,8 +260,8 @@ public final class Constants {
 
     public static final double kVisionNominalFramerate = 45;
 
-	public static final double kTargetHeightMeters = 1.6;
-	public static final double kGoalRangeMeters = 1.5;
+    public static final double kTargetHeightMeters = 1.6;
+    public static final double kGoalRangeMeters = 1.5;
 
     public static final double kLensHeightMeters = 0.97;
     public static final double kLensPitchRadians = Units.degreesToRadians(30);
@@ -270,7 +279,8 @@ public final class Constants {
     // height of camera FOV (angle)
     public static final Rotation2d kCameraFOVH = Rotation2d.fromDegrees(48.98);
 
-    // How much do the height and width of the camera vieport change for every meter out from the
+    // How much do the height and width of the camera vieport change for every meter
+    // out from the
     // camera?
     public static final double kCameraViewportRatioW = 2 * kCameraFOVW.times(0.5).getTan();
     public static final double kCameraViewportRatioH = 2 * kCameraFOVH.times(0.5).getTan();
@@ -284,22 +294,22 @@ public final class Constants {
     public static final double kExtraLatencySecs = 0;
 
     // idle behavior
-    public static final double kTargetGraceSecs =
-        0.5; // how long after target loss to wait for reaquire before turning to blink mode
+    public static final double kTargetGraceSecs = 0.5; // how long after target loss to wait for reaquire before turning
+                                                       // to blink mode
     public static final double kBlinkPeriodSecs = 3.0;
     public static final double kBlinkLengthSecs = 0.5;
 
-    public static final Transform2d kRobotToCameraMeters =
-        new Transform2d(
-            new Translation2d(0.321818, 0), // in meters
-            new Rotation2d());
+    public static final Transform2d kRobotToCameraMeters = new Transform2d(
+        new Translation2d(0.321818, 0), // in meters
+        new Rotation2d());
 
     // Vision pose estimation constants
-    public static final double kVisionWeightPerSec =
-        0.85; // After one second, what % of pose average should be vision (4% in weighted avg)
+    public static final double kVisionWeightPerSec = 0.85; // After one second, what % of pose average should be vision
+                                                           // (4% in weighted avg)
 
-    public static final double kVisionMaxAngularVelocityRadians =
-        Units.degreesToRadians(8.0); // Max angular velocity before vision data is rejected
+    public static final double kVisionMaxAngularVelocityRadians = Units.degreesToRadians(8.0); // Max angular velocity
+                                                                                               // before vision data is
+                                                                                               // rejected
   }
 
   public static final class IntakeConstants {
@@ -317,8 +327,7 @@ public final class Constants {
 
     public static final double kIntakeGearRatio = 2; // motor turns : output/full hood turns
 
-    public static final double kIntakeFreeSpeedRotationsPerSecond =
-        kNeoFreeSpeedRotationsPerSecond / kIntakeGearRatio;
+    public static final double kIntakeFreeSpeedRotationsPerSecond = kNeoFreeSpeedRotationsPerSecond / kIntakeGearRatio;
 
     public static final double kIntakeTopWheelDiameterMeters = 0.1016; // 4 in
     public static final double kIntakeBottomWheelDiameterMeters = 0.1524; // 6 in
@@ -348,21 +357,18 @@ public final class Constants {
     public static final int kIntakeArmImmediateCurrentLimitAmps = 35;
 
     public static final double kIntakeArmGearRatio = 125.0;
-    public static final double kIntakeArmFreeSpeedRadiansPerSecond =
-        kNeoFreeSpeedRotationsPerSecond / kIntakeArmGearRatio * (2 * Math.PI);
-    public static final double kIntakeArmRadiansPerMotorRev =
-        1.0 / kIntakeArmGearRatio * 2 * Math.PI;
+    public static final double kIntakeArmFreeSpeedRadiansPerSecond = kNeoFreeSpeedRotationsPerSecond
+        / kIntakeArmGearRatio * (2 * Math.PI);
+    public static final double kIntakeArmRadiansPerMotorRev = 1.0 / kIntakeArmGearRatio * 2 * Math.PI;
 
-    public static final double kIntakeArmBottomPositionRadians =
-        IDManager.getInstance().select(-0.204, -0.2618); // from horizontal
-    public static final double kIntakeArmTopPositionRadians =
-        IDManager.getInstance().select(2.019, 2.0071); // change later
-    public static final double kIntakeArmTipPositionRadians =
-        IDManager.getInstance().select(1.25, 1.6);
+    public static final double kIntakeArmBottomPositionRadians = IDManager.getInstance().select(-0.204, -0.2618); // from
+                                                                                                                  // horizontal
+    public static final double kIntakeArmTopPositionRadians = IDManager.getInstance().select(2.019, 2.0071); // change
+                                                                                                             // later
+    public static final double kIntakeArmTipPositionRadians = IDManager.getInstance().select(1.25, 1.6);
 
-    public static final double kIntakeArmEncoderOffset =
-        IDManager.getInstance()
-            .select(3.28 + 0.038 - 0.2618 - 0.702 - 0.2418 - 0.03 - 0.13 + 0.0861, 5.44 - 0.2618);
+    public static final double kIntakeArmEncoderOffset = IDManager.getInstance()
+        .select(3.28 + 0.038 - 0.2618 - 0.702 - 0.2418 - 0.03 - 0.13 + 0.0861, 5.44 - 0.2618);
 
     // Intake Arm characterization constants
     public static final double kSIntakeArmVolts = 0.5;
@@ -373,18 +379,17 @@ public final class Constants {
     public static final double kIntakeArmMaxSpeedRadiansPerSecond = 1;
     public static final double kIntakeArmMaxAccelerationRadiansPerSecondSquared = 0.5;
     // new ArmFeedforward(
-    //         kSIntakeArmVolts,
-    //         kGIntakeArmVolts,
-    //         kVIntakeArmVoltsSecondsPerRadian,
-    //         kAIntakeArmVoltsSecondsSquaredPerRadian)
-    //     .maxAchievableAcceleration(
-    //         kNominalVoltage,
-    //         kIntakeArmBottomPositionRadians,
-    //         kIntakeArmMaxSpeedRadiansPerSecond);
+    // kSIntakeArmVolts,
+    // kGIntakeArmVolts,
+    // kVIntakeArmVoltsSecondsPerRadian,
+    // kAIntakeArmVoltsSecondsSquaredPerRadian)
+    // .maxAchievableAcceleration(
+    // kNominalVoltage,
+    // kIntakeArmBottomPositionRadians,
+    // kIntakeArmMaxSpeedRadiansPerSecond);
 
-    public static final SR_TrapezoidProfile.Constraints kIntakeArmMotionProfileConstraints =
-        new SR_TrapezoidProfile.Constraints(
-            kIntakeArmMaxSpeedRadiansPerSecond, kIntakeArmMaxAccelerationRadiansPerSecondSquared);
+    public static final SR_TrapezoidProfile.Constraints kIntakeArmMotionProfileConstraints = new SR_TrapezoidProfile.Constraints(
+        kIntakeArmMaxSpeedRadiansPerSecond, kIntakeArmMaxAccelerationRadiansPerSecondSquared);
 
     // Intake Arm PID constants
     public static final double kPIntakeArmVoltsPerRadian = 10;
@@ -407,16 +412,15 @@ public final class Constants {
 
     public static final double kIndexerGearRatio = 4; // motor turns : output/full hood turns
 
-    public static final double kIndexerFreeSpeedRotationsPerSecond =
-        kNeoFreeSpeedRotationsPerSecond / kIndexerGearRatio;
+    public static final double kIndexerFreeSpeedRotationsPerSecond = kNeoFreeSpeedRotationsPerSecond
+        / kIndexerGearRatio;
 
     public static final double kIndexerEntryWheelDiameterMeters = 0.0508; // 2 inches
 
-    public static final double kIndexerIntakeSpeedRatio =
-        IntakeConstants.kIntakeTopWheelDiameterMeters / kIndexerEntryWheelDiameterMeters;
+    public static final double kIndexerIntakeSpeedRatio = IntakeConstants.kIntakeTopWheelDiameterMeters
+        / kIndexerEntryWheelDiameterMeters;
 
-    public static final double kIndexerDefaultSpeedRotationsPerSecond =
-        kIndexerFreeSpeedRotationsPerSecond * 0.9;
+    public static final double kIndexerDefaultSpeedRotationsPerSecond = kIndexerFreeSpeedRotationsPerSecond * 0.9;
 
     public static final double kSIndexerVolts = 0.69534;
     public static final double kVIndexerVoltSecondsPerMeter = 0.5;
@@ -440,20 +444,18 @@ public final class Constants {
 
     public static final double kFeederGearRatio = 1; // motor turns : output/full hood turns
 
-    public static final double kFeederFreeSpeedRotationsPerSecond =
-        kNeo550FreeSpeedRotationsPerSecond / kFeederGearRatio;
+    public static final double kFeederFreeSpeedRotationsPerSecond = kNeo550FreeSpeedRotationsPerSecond
+        / kFeederGearRatio;
 
-    public static final double kFeederDefaultSpeedRotationsPerSecond =
-        kFeederFreeSpeedRotationsPerSecond * 0.75;
+    public static final double kFeederDefaultSpeedRotationsPerSecond = kFeederFreeSpeedRotationsPerSecond * 0.75;
 
     public static final double kFeederPulleyCircumferenceMeters = 0.0191008 * Math.PI;
 
-    public static final double kFeederSurfaceFreeSpeedMetersPerSecond =
-        kFeederFreeSpeedRotationsPerSecond * kFeederPulleyCircumferenceMeters;
+    public static final double kFeederSurfaceFreeSpeedMetersPerSecond = kFeederFreeSpeedRotationsPerSecond
+        * kFeederPulleyCircumferenceMeters;
 
-    public static final double kFeederShooterSurfaceSpeedRatio =
-        kFeederSurfaceFreeSpeedMetersPerSecond
-            / ShooterConstants.kShooterSurfaceFreeSpeedMetersPerSecond;
+    public static final double kFeederShooterSurfaceSpeedRatio = kFeederSurfaceFreeSpeedMetersPerSecond
+        / ShooterConstants.kShooterSurfaceFreeSpeedMetersPerSecond;
 
     public static final double kSFeederVolts = 0.56782;
     public static final double kVFeederVoltSecondsPerMeter = 0.6591;
@@ -484,18 +486,16 @@ public final class Constants {
     public static final double kAHoodVoltSecondsSquaredPerRadian = 0.12369;
 
     public static final double kHoodMaxSpeedRadiansPerSecond = 2 * Math.PI;
-    public static final double kHoodMaxAccelerationRadiansPerSecondSquared =
-        new ArmFeedforward(
-                kSHoodVolts,
-                kGHoodVolts,
-                kVHoodVoltSecondsPerRadian,
-                kAHoodVoltSecondsSquaredPerRadian)
-            .maxAchievableAcceleration(
-                kNominalVoltage, kHoodBottomPositionRadians, kHoodBottomPositionRadians);
+    public static final double kHoodMaxAccelerationRadiansPerSecondSquared = new ArmFeedforward(
+        kSHoodVolts,
+        kGHoodVolts,
+        kVHoodVoltSecondsPerRadian,
+        kAHoodVoltSecondsSquaredPerRadian)
+        .maxAchievableAcceleration(
+            kNominalVoltage, kHoodBottomPositionRadians, kHoodBottomPositionRadians);
 
-    public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints =
-        new SR_TrapezoidProfile.Constraints(
-            kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
+    public static final SR_TrapezoidProfile.Constraints kHoodMotionProfileConstraints = new SR_TrapezoidProfile.Constraints(
+        kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
     // Hood PID constants
     public static final double kPHood = 50;
     public static final double kIHood = 3;
@@ -516,12 +516,10 @@ public final class Constants {
 
     public static final double kKickerSupplyCurrentLimitAmps = 40;
     public static final double kKickerSupplyCurrentThresholdAmps = 45;
-    public static final double kKickerSupplyCurrentThresholdTimeSecs =
-        kShooterSupplyCurrentLimitAmps;
+    public static final double kKickerSupplyCurrentThresholdTimeSecs = kShooterSupplyCurrentLimitAmps;
     public static final double kKickerStatorCurrentLimitAmps = 60;
     public static final double kKickerStatorCurrentThresholdAmps = 65;
-    public static final double kKickerStatorCurrentThresholdTimeSecs =
-        kShooterStatorCurrentThresholdTimeSecs;
+    public static final double kKickerStatorCurrentThresholdTimeSecs = kShooterStatorCurrentThresholdTimeSecs;
 
     public static final double kShooterLoopTimeSeconds = 0.001;
     public static final double kKickerLoopTimeSeconds = kShooterLoopTimeSeconds;
@@ -529,82 +527,73 @@ public final class Constants {
     public static final double kShooterGearRatio = 1;
     public static final double kKickerGearRatio = 0.5;
 
-    public static final double kShooterCircumferenceMeters =
-        0.1524 * Math.PI; // 6 in diameter wheel
+    public static final double kShooterCircumferenceMeters = 0.1524 * Math.PI; // 6 in diameter wheel
     public static final double kKickerCircumferenceMeters = 0.0508 * Math.PI; // 2 in diameter wheel
 
-    public static final double kShooterFreeSpeedRotationsPerSecond =
-        kFalconFreeSpeedRotationsPerSecond / kShooterGearRatio;
-    public static final double kKickerFreeSpeedRotationsPerSecond =
-        kFalconFreeSpeedRotationsPerSecond / kKickerGearRatio;
+    public static final double kShooterFreeSpeedRotationsPerSecond = kFalconFreeSpeedRotationsPerSecond
+        / kShooterGearRatio;
+    public static final double kKickerFreeSpeedRotationsPerSecond = kFalconFreeSpeedRotationsPerSecond
+        / kKickerGearRatio;
 
     public static final double kShooterMaxSpeedRotationsPerSecond = 68; // empirical estimate
     public static final double kKickerMaxSpeedRotationsPerSecond = 180; // empirical estimate
 
-    public static final double kShooterSurfaceFreeSpeedMetersPerSecond =
-        kShooterFreeSpeedRotationsPerSecond * kShooterCircumferenceMeters;
-    public static final double kKickerSurfaceFreeSpeedMetersPerSecond =
-        kKickerFreeSpeedRotationsPerSecond * kKickerCircumferenceMeters;
+    public static final double kShooterSurfaceFreeSpeedMetersPerSecond = kShooterFreeSpeedRotationsPerSecond
+        * kShooterCircumferenceMeters;
+    public static final double kKickerSurfaceFreeSpeedMetersPerSecond = kKickerFreeSpeedRotationsPerSecond
+        * kKickerCircumferenceMeters;
 
     public static final double kSShooterVolts = 0.25;
     public static final double kVShooterVoltSecondsPerRotation = 0.133;
-    public static final double kAShooterVoltSecondsSquaredPerRotation =
-        IDManager.getInstance().select(0.05, 0.005);
+    public static final double kAShooterVoltSecondsSquaredPerRotation = IDManager.getInstance().select(0.05, 0.005);
 
     public static final double kSKickerVolts = 0.5;
     public static final double kVKickerVoltSecondsPerRotation = 0.1;
     public static final double kAKickerVoltSecondsSquaredPerRotation = 0.0019767;
 
-    public static final double kFShooterOutputUnit100MsPerSensorUnit =
-        kVShooterVoltSecondsPerRotation
-            * kFalconOutputUnitsPerVolt
-            / kShooterGearRatio
-            / kSecondsPer100Ms
-            / kFalconSensorUnitsPerRotation;
-    public static final double kFKickerOutputUnit100MsPerSensorUnit =
-        kVKickerVoltSecondsPerRotation
-            / kKickerGearRatio
-            * kFalconOutputUnitsPerVolt
-            / kSecondsPer100Ms
-            / kFalconSensorUnitsPerRotation;
+    public static final double kFShooterOutputUnit100MsPerSensorUnit = kVShooterVoltSecondsPerRotation
+        * kFalconOutputUnitsPerVolt
+        / kShooterGearRatio
+        / kSecondsPer100Ms
+        / kFalconSensorUnitsPerRotation;
+    public static final double kFKickerOutputUnit100MsPerSensorUnit = kVKickerVoltSecondsPerRotation
+        / kKickerGearRatio
+        * kFalconOutputUnitsPerVolt
+        / kSecondsPer100Ms
+        / kFalconSensorUnitsPerRotation;
 
     public static final double kPShooterVoltSecondsPerRotation = 0.01; // 0.5
-    public static final double kPShooterOutputUnit100MsPerSensorUnit =
-        kPShooterVoltSecondsPerRotation
-            * kFalconOutputUnitsPerVolt
-            / kShooterGearRatio
-            / kSecondsPer100Ms
-            / kFalconSensorUnitsPerRotation;
+    public static final double kPShooterOutputUnit100MsPerSensorUnit = kPShooterVoltSecondsPerRotation
+        * kFalconOutputUnitsPerVolt
+        / kShooterGearRatio
+        / kSecondsPer100Ms
+        / kFalconSensorUnitsPerRotation;
 
     public static final double kPKickerVoltSecondsPerRotation = 0.1; // 0.5
-    public static final double kPKickerOutputUnit100MsPerSensorUnit =
-        kPKickerVoltSecondsPerRotation
-            / kKickerGearRatio
-            * kFalconOutputUnitsPerVolt
-            / kSecondsPer100Ms
-            / kFalconSensorUnitsPerRotation;
+    public static final double kPKickerOutputUnit100MsPerSensorUnit = kPKickerVoltSecondsPerRotation
+        / kKickerGearRatio
+        * kFalconOutputUnitsPerVolt
+        / kSecondsPer100Ms
+        / kFalconSensorUnitsPerRotation;
 
     public static final double kShooterControlVelocityToleranceRotationsPerSecond = 1;
-    public static final double kShooterControlVelocityToleranceSensorUnitsPer100Ms =
-        kShooterControlVelocityToleranceRotationsPerSecond
-            * kSecondsPer100Ms
-            * kFalconSensorUnitsPerRotation;
+    public static final double kShooterControlVelocityToleranceSensorUnitsPer100Ms = kShooterControlVelocityToleranceRotationsPerSecond
+        * kSecondsPer100Ms
+        * kFalconSensorUnitsPerRotation;
 
-    public static final double kKickerControlVelocityToleranceRotationsPerSecond =
-        kShooterControlVelocityToleranceRotationsPerSecond
-            * (kKickerFreeSpeedRotationsPerSecond / kShooterFreeSpeedRotationsPerSecond);
-    public static final double kKickerControlVelocityToleranceSensorUnitsPer100Ms =
-        kKickerControlVelocityToleranceRotationsPerSecond
-            * kSecondsPer100Ms
-            * kFalconSensorUnitsPerRotation;
+    public static final double kKickerControlVelocityToleranceRotationsPerSecond = kShooterControlVelocityToleranceRotationsPerSecond
+        * (kKickerFreeSpeedRotationsPerSecond / kShooterFreeSpeedRotationsPerSecond);
+    public static final double kKickerControlVelocityToleranceSensorUnitsPer100Ms = kKickerControlVelocityToleranceRotationsPerSecond
+        * kSecondsPer100Ms
+        * kFalconSensorUnitsPerRotation;
 
     public static final double kShooterFeedforwardScale = 0.86;
     public static final double kKickerFeedforwardScale = 0.88;
 
     public static final double kShooterFeedVelocityTolerance = 3;
 
-    public static final double kDefaultTangentialVelocityRatio =
-        1.0 / 3.0; // kicker tangential velocity / shooter tangential velocity
+    public static final double kDefaultTangentialVelocityRatio = 1.0 / 3.0; // kicker tangential velocity / shooter
+                                                                            // tangential velocity
   }
 
   public static final class ClimbElevatorConstants {
@@ -637,41 +626,33 @@ public final class Constants {
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
 
     public static final double kElevatorGearRatio = 32.67; // motor turns/pulley turns
-    public static final double kElevatorDistancePerMotorRevMeters =
-        kSprocketCircumferenceMeters / kElevatorGearRatio;
+    public static final double kElevatorDistancePerMotorRevMeters = kSprocketCircumferenceMeters / kElevatorGearRatio;
 
-    public static final double kElevatorFreeSpeedMetersPerSecond =
-        kFalconFreeSpeedRotationsPerSecond / kElevatorGearRatio * kSprocketCircumferenceMeters;
+    public static final double kElevatorFreeSpeedMetersPerSecond = kFalconFreeSpeedRotationsPerSecond
+        / kElevatorGearRatio * kSprocketCircumferenceMeters;
 
-    public static final double kSlideDistancePerPulseMeters =
-        kElevatorDistancePerMotorRevMeters / kFalconSensorUnitsPerRotation;
+    public static final double kSlideDistancePerPulseMeters = kElevatorDistancePerMotorRevMeters
+        / kFalconSensorUnitsPerRotation;
 
     // Slide characterization constants: UNLOADED (not carrying robot)
-    public static final double ksElevatorUnloadedVolts =
-        IDManager.getInstance().select(0.62614, 0.70015);
-    public static final double kgElevatorUnloadedVolts =
-        IDManager.getInstance().select(0.0906651, 0.010378);
-    public static final double kvElevatorUnloadedVoltSecondsPerMeter =
-        IDManager.getInstance().select(33.80, 30.0);
-    public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.01, 0.01);
+    public static final double ksElevatorUnloadedVolts = IDManager.getInstance().select(0.62614, 0.70015);
+    public static final double kgElevatorUnloadedVolts = IDManager.getInstance().select(0.0906651, 0.010378);
+    public static final double kvElevatorUnloadedVoltSecondsPerMeter = IDManager.getInstance().select(33.80, 30.0);
+    public static final double kaElevatorUnloadedVoltSecondsSquaredPerMeter = IDManager.getInstance().select(0.01,
+        0.01);
 
     // Slide characterization constants: LOADED ( carrying robot)
-    public static final double ksElevatorLoadedVolts =
-        IDManager.getInstance().select(0.64858, 0.44256);
-    public static final double kgElevatorLoadedVolts =
-        IDManager.getInstance()
-            .select(
-                -0.7,
-                -0.50); // this is negative because gravity fights the downward motion when loaded
+    public static final double ksElevatorLoadedVolts = IDManager.getInstance().select(0.64858, 0.44256);
+    public static final double kgElevatorLoadedVolts = IDManager.getInstance()
+        .select(
+            -0.7,
+            -0.50); // this is negative because gravity fights the downward motion when loaded
     // --
     // retracting the elevator moves the robot up.
-    public static final double kvElevatorLoadedVoltSecondsPerMeter =
-        IDManager.getInstance().select(42.0, 30.0);
-    public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter =
-        IDManager.getInstance()
-            .select(
-                0.18, 0.18); // these are recalc gains -- the ka from sysid was lost in the noise
+    public static final double kvElevatorLoadedVoltSecondsPerMeter = IDManager.getInstance().select(42.0, 30.0);
+    public static final double kaElevatorLoadedVoltSecondsSquaredPerMeter = IDManager.getInstance()
+        .select(
+            0.18, 0.18); // these are recalc gains -- the ka from sysid was lost in the noise
 
     public static final double kPElevatorUnloadedVoltsPerMeter = 100;
     public static final double kDElevatorUnloadedVoltSecondsPerMeter = 0.05;
@@ -682,23 +663,20 @@ public final class Constants {
     public static final double kElevatorPositionToleranceMeters = 0.008;
     public static final double kElevatorVelocityToleranceMetersPerSecond = 0.01;
 
-    public static final double kElevatorMaxSpeedMetersPerSecond =
-        kElevatorFreeSpeedMetersPerSecond * 0.95;
+    public static final double kElevatorMaxSpeedMetersPerSecond = kElevatorFreeSpeedMetersPerSecond * 0.95;
     // Find maximum simultaneously achievable acceleration
     public static final double kElevatorMaxAccelerationMetersPerSecondSquaredUnloaded = 0.8;
 
     public static final double kSlideMaxAccelerationMetersPerSecondSquaredLoaded = 0.5;
 
     // Constraint for the motion profilied elevator controller (unloaded mode)
-    public static final SR_TrapezoidProfile.Constraints kElevatorControllerConstraintsUnloaded =
-        new SR_TrapezoidProfile.Constraints(
-            kElevatorMaxSpeedMetersPerSecond,
-            kElevatorMaxAccelerationMetersPerSecondSquaredUnloaded);
+    public static final SR_TrapezoidProfile.Constraints kElevatorControllerConstraintsUnloaded = new SR_TrapezoidProfile.Constraints(
+        kElevatorMaxSpeedMetersPerSecond,
+        kElevatorMaxAccelerationMetersPerSecondSquaredUnloaded);
 
     // Constraint for the motion profilied elevator controller (loaded mode)
-    public static final SR_TrapezoidProfile.Constraints kElevatorControllerConstraintsLoaded =
-        new SR_TrapezoidProfile.Constraints(
-            kElevatorMaxSpeedMetersPerSecond, kSlideMaxAccelerationMetersPerSecondSquaredLoaded);
+    public static final SR_TrapezoidProfile.Constraints kElevatorControllerConstraintsLoaded = new SR_TrapezoidProfile.Constraints(
+        kElevatorMaxSpeedMetersPerSecond, kSlideMaxAccelerationMetersPerSecondSquaredLoaded);
   }
 
   public static final class ClimbArmConstants {
@@ -719,8 +697,7 @@ public final class Constants {
 
     public static final double kArmGearRatio = 57.6 * (16.0 / 22.0); // motor turns/pinion turns
     public static final double kArmRotationsPerMotorRev = 1 / kArmGearRatio;
-    public static final double kArmRotationsPerPulse =
-        kArmRotationsPerMotorRev / kFalconSensorUnitsPerRotation;
+    public static final double kArmRotationsPerPulse = kArmRotationsPerMotorRev / kFalconSensorUnitsPerRotation;
 
     public static final double kSprocketCircumferenceMeters = 0.0323342 * Math.PI;
 
@@ -730,34 +707,29 @@ public final class Constants {
     public static final double kGravityMetersPerSecondSquared = 9.81;
 
     // arm characteristics used in translation mode
-    public static final double kArmDistancePerMotorRevMeters =
-        kSprocketCircumferenceMeters / kArmGearRatio;
+    public static final double kArmDistancePerMotorRevMeters = kSprocketCircumferenceMeters / kArmGearRatio;
     // public static final double kArmRotationToleranceRadians = 0.05;
 
-    public static final double kArmFreeSpeedMetersPerSecond =
-        kFalconFreeSpeedRotationsPerSecond / kArmGearRatio * kSprocketCircumferenceMeters;
+    public static final double kArmFreeSpeedMetersPerSecond = kFalconFreeSpeedRotationsPerSecond / kArmGearRatio
+        * kSprocketCircumferenceMeters;
 
     public static final double kArmRotationTolerance = 0.01;
     // ARM TRANSLATION CONSTANTS
-    public static final double ksArmTranslationVolts =
-        IDManager.getInstance().select(0.47533, 0.55953);
-    public static final double kgArmTranslationVolts =
-        IDManager.getInstance().select(0.25818, 0.18092);
-    public static final double kvArmTranslationVoltSecondsPerMeter =
-        IDManager.getInstance().select(63.445 * kArmGearingChange, 62.802);
-    public static final double kaArmTranslationVoltSecondsSquaredPerMeter =
-        IDManager.getInstance().select(0.07 * kArmGearingChange, 0.04);
+    public static final double ksArmTranslationVolts = IDManager.getInstance().select(0.47533, 0.55953);
+    public static final double kgArmTranslationVolts = IDManager.getInstance().select(0.25818, 0.18092);
+    public static final double kvArmTranslationVoltSecondsPerMeter = IDManager.getInstance()
+        .select(63.445 * kArmGearingChange, 62.802);
+    public static final double kaArmTranslationVoltSecondsSquaredPerMeter = IDManager.getInstance()
+        .select(0.07 * kArmGearingChange, 0.04);
 
-    public static final double kArmMaxSpeedTranslationMetersPerSecond =
-        kArmFreeSpeedMetersPerSecond * 0.9 / kArmGearingChange;
-    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared =
-        10 * kArmGearingChange;
+    public static final double kArmMaxSpeedTranslationMetersPerSecond = kArmFreeSpeedMetersPerSecond * 0.9
+        / kArmGearingChange;
+    public static final double kArmMaxAccelerationTranslationMetersPerSecondSquared = 10 * kArmGearingChange;
 
     // Constraint for the motion profilied arm rotation controller
-    public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsTranslation =
-        new SR_TrapezoidProfile.Constraints(
-            kArmMaxSpeedTranslationMetersPerSecond,
-            kArmMaxAccelerationTranslationMetersPerSecondSquared);
+    public static final SR_TrapezoidProfile.Constraints kArmControllerConstraintsTranslation = new SR_TrapezoidProfile.Constraints(
+        kArmMaxSpeedTranslationMetersPerSecond,
+        kArmMaxAccelerationTranslationMetersPerSecondSquared);
 
     public static final double kPArmTranslationVoltsPerMeter = 400 * kArmGearingChange;
     public static final double kDArmTranslationVoltSecondsPerMeter = 0.275 * kArmGearingChange;
@@ -769,7 +741,6 @@ public final class Constants {
     public static final double kaArmUnloadedVoltSecondsSquaredPerMeter = 0.01 * kArmGearingChange;
 
     public static final double kArmTranslationToleranceMeters = 0.02;
-    public static final double kArmTranslationVelocityToleranceMetersPerSecond =
-        0.05 / kArmGearingChange;
+    public static final double kArmTranslationVelocityToleranceMetersPerSecond = 0.05 / kArmGearingChange;
   }
 }
