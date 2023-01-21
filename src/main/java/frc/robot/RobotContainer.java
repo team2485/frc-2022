@@ -33,6 +33,7 @@ import frc.robot.subsystems.climb.ClimbStateMachine.ClimbState;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.TargetVision;
 import io.github.oblarg.oblog.annotations.*;
+import frc.robot.simulation.SwerveSim;
 
 public class RobotContainer {
   private final WL_CommandXboxController m_driver = new WL_CommandXboxController(kDriverPort);
@@ -52,6 +53,8 @@ public class RobotContainer {
   public final Hood m_hood = new Hood();
 
   TargetVision m_camera = new TargetVision();
+
+  public final SwerveSim m_swerveSim = new SwerveSim(m_drivetrain);
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
@@ -687,5 +690,15 @@ public class RobotContainer {
   public void disabledInit() {
     // m_drivetrain.drive(0, 0, 0, false);
     m_feeder.setVoltage(0);
+  }
+
+  public void simulationInit()
+  {
+    m_swerveSim.initSim();
+  }
+
+  public void simulationPeriodic()
+  {
+    m_swerveSim.simulationPeriodic();
   }
 }

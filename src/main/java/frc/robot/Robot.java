@@ -151,4 +151,14 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
     // m_robotContainer.testPeriodic();
   }
+
+  @Override
+  public void simulationInit() {
+    m_robotContainer.simulationInit();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    m_robotContainer.simulationPeriodic();
+  }
 }
