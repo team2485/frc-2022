@@ -309,6 +309,18 @@ public final class Constants {
 
     public static final double kVisionMaxAngularVelocityRadians = Units.degreesToRadians(8.0); // Max angular velocity
                                                                                                // before vision data is
+    //units are in millimeters
+    public static final double kBlueSideAbsoluteXPos = 7.24309575;
+    public static final double kBlueDriverAbsoluteXPos = 7.90832175;
+    //left side is the side with the charge station
+    //reminder that x is the forward vector and y is the right one
+    public static final double kBlueLeftAbsoluteYPos = 2.80323925;
+    public static final double kBlueMiddleAbsoluteYPos = 1.12683925;
+    public static final double kBlueRightAbsoluteYPos = -.54956075;
+    public static final double kBlueDriverAbsoluteYPos = -2.8749625;
+    //reminder that z is the up vector
+    public static final double kBlueSideAbsoluteZPos = .4627245;
+    public static final double kBlueDriverAbsoluteZPos = .696325;
                                                                                                // rejected
   }
 
