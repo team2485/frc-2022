@@ -8,7 +8,9 @@ import static java.util.Map.entry;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -320,14 +322,18 @@ public final class Constants {
     public static final double kBlueDriverAbsoluteXPos = 7.90832175;
     //left side is the side with the charge station
     //reminder that x is the forward vector and y is the right one
-    public static final double kBlueLeftAbsoluteYPos = 2.80323925;
-    public static final double kBlueMiddleAbsoluteYPos = 1.12683925;
-    public static final double kBlueRightAbsoluteYPos = -.54956075;
-    public static final double kBlueDriverAbsoluteYPos = -2.8749625;
+    public static final double kBlueLeftAbsoluteYPos = 2.80323925 + 1.3335;
+    public static final double kBlueMiddleAbsoluteYPos = 1.12683925 + 1.3335;
+    public static final double kBlueRightAbsoluteYPos = -.54956075 + 1.3335;
+    public static final double kBlueDriverAbsoluteYPos = -2.8749625 + 1.3335;
     //reminder that z is the up vector
     public static final double kBlueSideAbsoluteZPos = .4627245;
     public static final double kBlueDriverAbsoluteZPos = .696325;
-                                                                                               // rejected
+
+    public static final Pose3d kBlueLeftTagAbolutePos = new Pose3d(kBlueSideAbsoluteXPos, kBlueLeftAbsoluteYPos, kBlueSideAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180)));
+    public static final Pose3d kBlueMiddleTagAbolutePos = new Pose3d(kBlueSideAbsoluteXPos, kBlueMiddleAbsoluteYPos, kBlueSideAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180)));
+    public static final Pose3d kBlueRightTagAbolutePos = new Pose3d(kBlueSideAbsoluteXPos, kBlueRightAbsoluteYPos, kBlueSideAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180)));
+    public static final Pose3d kBlueDriverTagAbolutePos = new Pose3d(kBlueDriverAbsoluteXPos, kBlueDriverAbsoluteYPos, kBlueDriverAbsoluteZPos, new Rotation3d(0, 0, Units.degreesToRadians(180)));
   }
 
   public static final class IntakeConstants {
