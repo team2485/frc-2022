@@ -35,10 +35,7 @@ public class FollowTag extends CommandBase {
   public void execute() {
     if (m_targetVision.hasTarget()) {
       this.hasTarget = true;
-
-      double range = PhotonUtils.calculateDistanceToTargetMeters(VisionConstants.kLensHeightMeters, VisionConstants.kTargetHeightMeters, VisionConstants.kLensPitchRadians, Units.degreesToRadians(m_targetVision.getPitchVal()));
-
-      m_drivetrain.drive(new Translation2d(-linearVisionController.calculate(range, VisionConstants.kGoalRangeMeters), 0), -rotationVisionController.calculate(m_targetVision.getYawVal(), 0), false, true);
+      m_drivetrain.drive(new Translation2d(-linearVisionController.calculate(m_targetVision.getRange(), VisionConstants.kGoalRangeMeters), 0), -rotationVisionController.calculate(m_targetVision.getYawVal(), 0), false, true);
     } else {
       this.hasTarget = false;
       m_drivetrain.drive(new Translation2d(0, 0), 0, false, false);

@@ -17,7 +17,7 @@ public class TargetVision extends SubsystemBase {
 
     public TargetVision() {
         this.m_camera = new PhotonCamera(VisionConstants.kCameraName);
-        this.m_camera.setPipelineIndex(0); // TODO
+        this.m_camera.setPipelineIndex(0);
     }
 
     @Override

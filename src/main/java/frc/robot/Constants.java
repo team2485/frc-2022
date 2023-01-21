@@ -251,14 +251,14 @@ public final class Constants {
 
     public static final double kVisionNominalFramerate = 45;
 
-	public static final double kTargetHeightMeters = 1.5;
-	public static final double kGoalRangeMeters = 3;
+	public static final double kTargetHeightMeters = 1.6;
+	public static final double kGoalRangeMeters = 1.5;
 
     public static final double kLensHeightMeters = 0.97;
     public static final double kLensPitchRadians = Units.degreesToRadians(30);
     public static final Rotation2d kCameraPitch = new Rotation2d(kLensPitchRadians);
 
-    public static final double kVisionLinearP = 0.1;
+    public static final double kVisionLinearP = 0.7;
     public static final double kVisionLinearD = 0.0;
 
     public static final double kVisionAngularP = 0.1;
