@@ -308,7 +308,13 @@ public final class Constants {
                                                            // (4% in weighted avg)
 
     public static final double kVisionMaxAngularVelocityRadians = Units.degreesToRadians(8.0); // Max angular velocity
-                                                                                               // before vision data is
+    
+    public static final int kBlueLeftTagID = 8;
+    public static final int kBlueMiddleTagID = 7;
+    public static final int kBlueRightTagID = 6;
+    public static final int kBlueDriverTagID = 5;
+    
+    // before vision data is
     //units are in millimeters
     public static final double kBlueSideAbsoluteXPos = 7.24309575;
     public static final double kBlueDriverAbsoluteXPos = 7.90832175;
