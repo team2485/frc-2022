@@ -128,11 +128,14 @@ public class Robot extends TimedRobot {
     // m_robotContainer.configureDriveCoastMode();
 
     m_compressor.disable();
+
+    m_robotContainer.simulationInit();
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    m_robotContainer.simulationPeriodic();
   }
 
   @Override

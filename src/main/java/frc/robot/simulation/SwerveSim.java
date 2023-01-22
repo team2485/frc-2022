@@ -12,7 +12,7 @@ import frc.robot.subsystems.drive.Drivetrain;
 
 /** Add your docs here. */
 public class SwerveSim {
-    private Field2d m_field2d;
+    private Field2d m_field2d = new Field2d();
     public final Drivetrain m_drivetrain;
 
     public SwerveSim(Drivetrain m_drivetrain) {
