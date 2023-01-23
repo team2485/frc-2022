@@ -12,8 +12,8 @@ import frc.robot.subsystems.drive.Drivetrain;
 
 /** Add your docs here. */
 public class SwerveSim {
-  private Field2d m_field2d = new Field2d();
-  public final Drivetrain m_drivetrain;
+  private final Field2d m_field2d = new Field2d();
+  private final Drivetrain m_drivetrain;
 
   public SwerveSim(Drivetrain m_drivetrain) {
     this.m_drivetrain = m_drivetrain;
@@ -27,8 +27,37 @@ public class SwerveSim {
     // m_drivetrain.resetOdometry();
 
     // may need this
-    // m_field2d.getObject("trajecotry").setPose(new Pose2d());
+    m_field2d.getObject("trajecotry").setPose(new Pose2d());
   }
+
+  // public void updateOdometry() {
+  // m_poseEstimator.update(
+  // m_gyro.getRotation2d(), m_leftEncoder.getDistance(),
+  // m_rightEncoder.getDistance());
+
+  // // Also apply vision measurements. We use 0.3 seconds in the past as an
+  // example
+  // // -- on
+  // // a real robot, this must be calculated based either on latency or
+  // timestamps.
+  // Optional<EstimatedRobotPose> result =
+  // pcw.getEstimatedGlobalPose(m_poseEstimator.getEstimatedPosition());
+
+  // if (result.isPresent()) {
+  // EstimatedRobotPose camPose = result.get();
+  // m_poseEstimator.addVisionMeasurement(
+  // camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+  // m_fieldSim.getObject("Cam Est
+  // Pos").setPose(camPose.estimatedPose.toPose2d());
+  // } else {
+  // // move it way off the screen to make it disappear
+  // m_fieldSim.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new
+  // Rotation2d()));
+  // }
+
+  // m_fieldSim.getObject("Actual Pos").setPose(m_drivetrainSimulator.getPose());
+  // m_fieldSim.setRobotPose(m_poseEstimator.getEstimatedPosition());
+  // }
 
   public void simulationPeriodic() {
     m_field2d.setRobotPose(m_drivetrain.getPose());

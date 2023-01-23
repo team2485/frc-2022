@@ -1,4 +1,4 @@
-package frc.util;
+package frc.util.photonVision;
 
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.BooleanPublisher;

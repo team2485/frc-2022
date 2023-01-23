@@ -7,13 +7,11 @@ package frc.robot;
 import static frc.robot.Constants.*;
 import static frc.robot.Constants.OIConstants.*;
 
+import java.io.IOException;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
-import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
-
 import frc.WarlordsLib.WL_CommandXboxController;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
@@ -33,7 +31,6 @@ import frc.robot.subsystems.climb.ClimbStateMachine.ClimbState;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.TargetVision;
 import io.github.oblarg.oblog.annotations.*;
-import frc.robot.simulation.SwerveSim;
 
 public class RobotContainer {
   private final WL_CommandXboxController m_driver = new WL_CommandXboxController(kDriverPort);
@@ -51,10 +48,7 @@ public class RobotContainer {
   public final Drivetrain m_drivetrain = new Drivetrain();
 
   public final Hood m_hood = new Hood();
-
   TargetVision m_camera = new TargetVision();
-
-  public final SwerveSim m_swerveSim = new SwerveSim(m_drivetrain);
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
@@ -692,13 +686,11 @@ public class RobotContainer {
     m_feeder.setVoltage(0);
   }
 
-  public void simulationInit()
-  {
-    m_swerveSim.initSim();
+  public void simulationInit() {
+    // TODO: call initsim from targetvision
   }
 
-  public void simulationPeriodic()
-  {
-    m_swerveSim.simulationPeriodic();
+  public void simulationPeriodic() {
+    // TODO: call simperiodic from targetvision
   }
 }

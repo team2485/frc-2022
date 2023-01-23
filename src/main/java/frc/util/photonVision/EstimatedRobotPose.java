@@ -1,4 +1,4 @@
-package frc.util;
+package frc.util.photonVision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 

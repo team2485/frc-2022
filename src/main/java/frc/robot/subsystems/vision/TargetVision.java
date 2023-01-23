@@ -1,6 +1,5 @@
 package frc.robot.subsystems.vision;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import org.photonvision.PhotonUtils;
@@ -13,14 +12,14 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
-import frc.util.EstimatedRobotPose;
-import frc.util.PhotonCamera;
-import frc.util.PhotonPoseEstimator;
-import frc.util.PhotonPoseEstimator.PoseStrategy;
+import frc.util.photonVision.EstimatedRobotPose;
+import frc.util.photonVision.PhotonCamera;
+import frc.util.photonVision.PhotonPoseEstimator;
+import frc.util.photonVision.PhotonPoseEstimator.PoseStrategy;
 
 public class TargetVision extends SubsystemBase {
   private PhotonCamera m_camera;
-  private PhotonPoseEstimator photonPoseEstimator;
+  private PhotonPoseEstimator m_photonPoseEstimator;
 
   private double yawVal = 0, pitchVal = 0, skewVal = 0, areaVal = 0;
   private boolean hasTarget = false;
@@ -28,13 +27,17 @@ public class TargetVision extends SubsystemBase {
 
   private AprilTagFieldLayout aprilTagFieldLayout;
 
-  public TargetVision() throws IOException {
+  public TargetVision() {
     this.m_camera = new PhotonCamera(VisionConstants.kCameraName);
     this.m_camera.setPipelineIndex(0);
 
-    aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2022RapidReact.m_resourceFile);
+    try {
+      aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2022RapidReact.m_resourceFile);
+    } catch (Exception e) {
+    }
 
-    photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_camera,
+    m_photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
+        m_camera,
         VisionConstants.kCameraToRobot);
   }
 
@@ -64,11 +67,6 @@ public class TargetVision extends SubsystemBase {
         m_camera.setDriverMode(false);
       }
     }
-  }
-
-  @Override
-  public void simulationPeriodic() {
-
   }
 
   public double getYawVal() {
@@ -129,7 +127,7 @@ public class TargetVision extends SubsystemBase {
    *         firmly on the ground
    */
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-    photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-    return photonPoseEstimator.update();
+    m_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+    return m_photonPoseEstimator.update();
   }
 }

@@ -1,4 +1,4 @@
-package frc.util;
+package frc.util.photonVision;
 
 import java.util.ArrayList;
 import java.util.List;
