@@ -1,17 +1,26 @@
 package frc.robot.subsystems.vision;
 
-import org.photonvision.PhotonCamera;
+import java.io.IOException;
+import java.util.Optional;
+
 import org.photonvision.PhotonUtils;
 import org.photonvision.common.hardware.VisionLEDMode;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
+import frc.util.EstimatedRobotPose;
+import frc.util.PhotonCamera;
+import frc.util.PhotonPoseEstimator;
+import frc.util.PhotonPoseEstimator.PoseStrategy;
 
 public class TargetVision extends SubsystemBase {
   private PhotonCamera m_camera;
+  private PhotonPoseEstimator photonPoseEstimator;
 
   private double yawVal = 0, pitchVal = 0, skewVal = 0, areaVal = 0;
   private boolean hasTarget = false;
@@ -19,14 +28,14 @@ public class TargetVision extends SubsystemBase {
 
   private AprilTagFieldLayout aprilTagFieldLayout;
 
-  public TargetVision() {
-    try {
-      aprilTagFieldLayout = new AprilTagFieldLayout("./src/main/java/frc/util/fieldmap.json");
-    } catch (Exception e) {
-    }
-
+  public TargetVision() throws IOException {
     this.m_camera = new PhotonCamera(VisionConstants.kCameraName);
     this.m_camera.setPipelineIndex(0);
+
+    aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2022RapidReact.m_resourceFile);
+
+    photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_camera,
+        VisionConstants.kCameraToRobot);
   }
 
   @Override
@@ -110,5 +119,17 @@ public class TargetVision extends SubsystemBase {
         VisionConstants.kTargetHeightMeters, VisionConstants.kLensPitchRadians, Units.degreesToRadians(getPitchVal()));
     SmartDashboard.putNumber("Camera Distance", range);
     return range;
+  }
+
+  /**
+   * @param estimatedRobotPose The current best guess at robot pose
+   * @return A pair of the fused camera observations to a single Pose2d on the
+   *         field, and the time
+   *         of the observation. Assumes a planar field and the robot is always
+   *         firmly on the ground
+   */
+  public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+    photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+    return photonPoseEstimator.update();
   }
 }
