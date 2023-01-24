@@ -27,7 +27,7 @@ public class SwerveSim {
     // m_drivetrain.resetOdometry();
 
     // may need this
-    m_field2d.getObject("trajecotry").setPose(new Pose2d());
+    m_field2d.getObject("trajectory").setPose(new Pose2d());
   }
 
   // public void updateOdometry() {

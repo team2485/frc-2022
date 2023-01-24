@@ -687,10 +687,10 @@ public class RobotContainer {
   }
 
   public void simulationInit() {
-    // TODO: call initsim from targetvision
+    m_drivetrain.simulationInit();
   }
 
   public void simulationPeriodic() {
-    // TODO: call simperiodic from targetvision
+    m_drivetrain.simulationPeriodic();
   }
 }

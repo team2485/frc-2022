@@ -28,12 +28,9 @@ public class Drivetrain extends SubsystemBase {
   public SwerveModule[] mSwerveMods;
   public WPI_Pigeon2 gyro;
 
-  private final TargetVision m_camera = new TargetVision();
-  private final SwerveDrivePoseEstimator m_poseEstimator = new SwerveDrivePoseEstimator(Swerve.swerveKinematics,
-      gyro.getRotation2d(), getModulePositions(), new Pose2d(0, 0, new Rotation2d(0)), VecBuilder.fill(0.1, 0.1, 0.1),
-      VecBuilder.fill(0.1, 0.1, 0.1));
-
-  private final Field2d m_fieldSim = new Field2d();
+  private final TargetVision m_camera;
+  private final SwerveDrivePoseEstimator m_poseEstimator;
+  private final Field2d m_fieldSim;
 
   public Drivetrain() {
     gyro = new WPI_Pigeon2(Constants.Swerve.pigeonID);
@@ -48,6 +45,13 @@ public class Drivetrain extends SubsystemBase {
     };
 
     swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
+    
+    m_camera = new TargetVision();
+    m_poseEstimator = new SwerveDrivePoseEstimator(Swerve.swerveKinematics,
+      gyro.getRotation2d(), getModulePositions(), new Pose2d(0, 0, new Rotation2d(0)), VecBuilder.fill(0.1, 0.1, 0.1),
+      VecBuilder.fill(0.1, 0.1, 0.1));
+    m_fieldSim = new Field2d();
+
 
     SmartDashboard.putData("Field", m_fieldSim);
   }
@@ -131,11 +135,15 @@ public class Drivetrain extends SubsystemBase {
     Pose2d startPos = new Pose2d(0, 0, new Rotation2d(0));
     m_fieldSim.setRobotPose(startPos);
     resetOdometry(m_fieldSim.getRobotPose(), startPos.getRotation());
-    m_fieldSim.getObject("trajectory").setPose(new Pose2d());
+    // m_fieldSim.getObject("trajectory").setPose(new Pose2d());
   }
 
   public void simulationPeriodic() {
-    m_fieldSim.setRobotPose(getPose());
+    if (m_camera.hasTarget()) {
+      updateOdometry();
+    } else {
+      m_fieldSim.setRobotPose(getPose());
+    }
   }
 
   public void updateOdometry() {
