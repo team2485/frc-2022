@@ -319,8 +319,11 @@ public final class Constants {
 
     // before vision data is
     // units are in meters
-    public static final double kBlueSideAbsoluteXPos = 7.24309575;
-    public static final double kBlueDriverAbsoluteXPos = 7.90832175;
+    public static final double kRedSideAbsoluteXPos = 7.24309575;
+    public static final double kRedDriverAbsoluteXPos = 7.90832175;
+
+    public static final double kBlueSideAbsoluteXPos = -7.24309575;
+    public static final double kBlueDriverAbsoluteXPos = -7.90832175;
     // left side is the side with the charge station
     // reminder that x is the forward vector and y is the right one
     public static final double kBlueLeftAbsoluteYPos = 2.80323925 + 1.3335;
@@ -328,20 +331,20 @@ public final class Constants {
     public static final double kBlueRightAbsoluteYPos = -.54956075 + 1.3335;
     public static final double kBlueDriverAbsoluteYPos = -2.8749625 + 1.3335;
     // reminder that z is the up vector
-    public static final double kBlueSideAbsoluteZPos = .4627245;
-    public static final double kBlueDriverAbsoluteZPos = .696325;
+    public static final double kScoringAbsoluteZPos = .4627245;
+    public static final double kDriverAbsoluteZPos = .696325;
 
     public static final Pose3d kBlueLeftTagAbsolutePos = new Pose3d(
-        new Translation3d(kBlueSideAbsoluteXPos, kBlueLeftAbsoluteYPos, kBlueSideAbsoluteZPos),
+        new Translation3d(kBlueSideAbsoluteXPos, kBlueLeftAbsoluteYPos, kScoringAbsoluteZPos),
         new Rotation3d(0.0, 0.0, Units.degreesToRadians(180)));
     public static final Pose3d kBlueMiddleTagAbsolutePos = new Pose3d(
-        new Translation3d(kBlueSideAbsoluteXPos, kBlueMiddleAbsoluteYPos, kBlueSideAbsoluteZPos),
+        new Translation3d(kBlueSideAbsoluteXPos, kBlueMiddleAbsoluteYPos, kScoringAbsoluteZPos),
         new Rotation3d(0.0, 0.0, Units.degreesToRadians(180)));
     public static final Pose3d kBlueRightTagAbsolutePos = new Pose3d(
-        new Translation3d(kBlueSideAbsoluteXPos, kBlueRightAbsoluteYPos, kBlueSideAbsoluteZPos),
+        new Translation3d(kBlueSideAbsoluteXPos, kBlueRightAbsoluteYPos, kScoringAbsoluteZPos),
         new Rotation3d(0.0, 0.0, Units.degreesToRadians(180)));
     public static final Pose3d kBlueDriverTagAbsolutePos = new Pose3d(
-        new Translation3d(kBlueDriverAbsoluteXPos, kBlueDriverAbsoluteYPos, kBlueDriverAbsoluteZPos),
+        new Translation3d(kBlueDriverAbsoluteXPos, kBlueDriverAbsoluteYPos, kDriverAbsoluteZPos),
         new Rotation3d(0.0, 0.0, Units.degreesToRadians(180)));
   }
 
