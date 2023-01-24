@@ -273,7 +273,7 @@ public final class Constants {
     public static final double kVisionLinearP = 0.7;
     public static final double kVisionLinearD = 0.0;
 
-    public static final double kVisionAngularP = 0.07;
+    public static final double kVisionAngularP = 0.09;
     public static final double kVisionAngularD = 0.0;
 
     // width of camera FOV (angle)
