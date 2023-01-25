@@ -24,12 +24,15 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoCommandBuilder;
+import frc.robot.commands.vision.AlignToTag;
 import frc.robot.commands.vision.FollowTag;
 import frc.robot.subsystems.cargoHandling.*;
 import frc.robot.subsystems.climb.*;
 import frc.robot.subsystems.climb.ClimbStateMachine.ClimbState;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.TargetVision;
+import frc.util.photonVision.PhotonCamera;
+import frc.util.photonVision.PoseEstimation;
 import io.github.oblarg.oblog.annotations.*;
 
 public class RobotContainer {
@@ -48,7 +51,9 @@ public class RobotContainer {
   public final Drivetrain m_drivetrain = new Drivetrain();
 
   public final Hood m_hood = new Hood();
-  TargetVision m_camera = new TargetVision();
+  PhotonCamera m_camera = new PhotonCamera(VisionConstants.kCameraName);
+
+  private final PoseEstimation m_poseEstimator = new PoseEstimation(m_camera, m_drivetrain);
 
   public final ClimbElevator m_climbElevator = new ClimbElevator();
   public final ClimbArm m_climbArm = new ClimbArm();
@@ -203,7 +208,8 @@ public class RobotContainer {
     // m_drivetrain));
 
     m_driver.x().onTrue(new InstantCommand(m_drivetrain::zeroGyro));
-    m_driver.a().toggleOnTrue(new FollowTag(m_camera, m_drivetrain, m_driver));
+    // m_driver.a().toggleOnTrue(new FollowTag(m_camera, m_drivetrain, m_driver));
+    m_driver.a().toggleOnTrue(new AlignToTag(m_camera, m_drivetrain, m_poseEstimator::getCurrentPose));
   }
 
   private void configureCargoHandlingCommands() {

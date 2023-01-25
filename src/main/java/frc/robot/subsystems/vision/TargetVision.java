@@ -9,7 +9,6 @@ import org.photonvision.common.hardware.VisionLEDMode;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -38,20 +37,29 @@ public class TargetVision extends SubsystemBase {
 
     List<AprilTag> aprilTags = new ArrayList<>();
 
-    //instantiate april tag field positions
-    aprilTags.add(new AprilTag(1, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, -2.93659, VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    aprilTags.add(new AprilTag(2, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, -1.26019, VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    aprilTags.add(new AprilTag(3, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, .41621, VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    aprilTags.add(new AprilTag(4, new Pose3d(VisionConstants.kRedDriverAbsoluteXPos, 2.74161, VisionConstants.kDriverAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    aprilTags.add(new AprilTag(5, new Pose3d(VisionConstants.kBlueDriverAbsoluteXPos, 2.74161, VisionConstants.kDriverAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    aprilTags.add(new AprilTag(6, new Pose3d(VisionConstants.kBlueSideAbsoluteXPos, .41621, VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    aprilTags.add(new AprilTag(7, new Pose3d(VisionConstants.kBlueSideAbsoluteXPos, -1.25019, VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    aprilTags.add(new AprilTag(8, new Pose3d(VisionConstants.kBlueSideAbsoluteXPos, -2.93659, VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
+    // instantiate april tag field positions
+    aprilTags.add(new AprilTag(1, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, -2.93659,
+        VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
+    aprilTags.add(new AprilTag(2, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, -1.26019,
+        VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
+    aprilTags.add(new AprilTag(3, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, .41621,
+        VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
+    aprilTags.add(new AprilTag(4, new Pose3d(VisionConstants.kRedDriverAbsoluteXPos, 2.74161,
+        VisionConstants.kDriverAbsoluteZPos, new Rotation3d(0, 0, 180))));
+    aprilTags.add(new AprilTag(5, new Pose3d(VisionConstants.kBlueDriverAbsoluteXPos, 2.74161,
+        VisionConstants.kDriverAbsoluteZPos, new Rotation3d(0, 0, 180))));
+    aprilTags.add(new AprilTag(6, new Pose3d(VisionConstants.kBlueSideAbsoluteXPos, .41621,
+        VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
+    aprilTags.add(new AprilTag(7, new Pose3d(VisionConstants.kBlueSideAbsoluteXPos, -1.25019,
+        VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
+    aprilTags.add(new AprilTag(8, new Pose3d(VisionConstants.kBlueSideAbsoluteXPos, -2.93659,
+        VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
 
     aprilTagFieldLayout = new AprilTagFieldLayout(aprilTags, 0, 0);
 
     // try {
-    //   aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2022RapidReact.m_resourceFile);
+    // aprilTagFieldLayout = new
+    // AprilTagFieldLayout(AprilTagFields.k2022RapidReact.m_resourceFile);
     // } catch (Exception e) {
     // }
 
