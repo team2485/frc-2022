@@ -59,7 +59,7 @@ public class PoseEstimation extends SubsystemBase {
     List<AprilTag> aprilTags = new ArrayList<>();
 
     // instantiate april tag field positions
-    aprilTags.add(new AprilTag(1, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, -2.93659,
+    aprilTags.add(new AprilTag(0, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, -2.93659,
         VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
     aprilTags.add(new AprilTag(2, new Pose3d(VisionConstants.kRedSideAbsoluteXPos, -1.26019,
         VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
@@ -76,7 +76,7 @@ public class PoseEstimation extends SubsystemBase {
     aprilTags.add(new AprilTag(8, new Pose3d(VisionConstants.kBlueSideAbsoluteXPos, -2.93659,
         VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
 
-    aprilTagFieldLayout = new AprilTagFieldLayout(aprilTags, 0, 0);
+    aprilTagFieldLayout = new AprilTagFieldLayout(aprilTags, Units.inchesToMeters(319), Units.inchesToMeters(649));
 
     tab.addString("Pose (X, Y)", this::getFormattedPose).withPosition(0, 4);
     tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);

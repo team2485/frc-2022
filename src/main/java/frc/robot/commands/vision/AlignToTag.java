@@ -8,6 +8,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.drive.Drivetrain;
@@ -19,13 +22,15 @@ public class AlignToTag extends CommandBase {
   private final Drivetrain m_drivetrain;
   private final Supplier<Pose2d> m_poseProvider;
 
-  private final ProfiledPIDController m_XController = new ProfiledPIDController(4, 0, 0, VisionConstants.kXConstraints);
-  private final ProfiledPIDController m_YController = new ProfiledPIDController(4, 0, 0, VisionConstants.kYConstraints);
-  private final ProfiledPIDController m_OmegaController = new ProfiledPIDController(2, 0, 0,
+  private final ProfiledPIDController m_XController = new ProfiledPIDController(1, 0, 0, VisionConstants.kXConstraints);
+  private final ProfiledPIDController m_YController = new ProfiledPIDController(1, 0, 0, VisionConstants.kYConstraints);
+  private final ProfiledPIDController m_OmegaController = new ProfiledPIDController(.5, 0, 0,
       VisionConstants.kOmegaConstraints);
 
   private Pose2d goalPose;
   private PhotonTrackedTarget lastTarget;
+
+  ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
   public AlignToTag(PhotonCamera camera, Drivetrain drivetrain, Supplier<Pose2d> poseProvider) {
     this.m_camera = camera;
@@ -87,17 +92,20 @@ public class AlignToTag extends CommandBase {
     if (m_XController.atGoal()) {
       xSpeed = 0;
     }
+    SmartDashboard.putNumber("x speed", xSpeed);
 
     var ySpeed = m_YController.calculate(robotPose.getY());
     if (m_YController.atGoal()) {
       ySpeed = 0;
     }
+    SmartDashboard.putNumber("y speed", ySpeed);
 
     var omegaSpeed = m_OmegaController.calculate(robotPose.getRotation().getRadians());
     if (m_OmegaController.atGoal()) {
       omegaSpeed = 0;
     }
+    SmartDashboard.putNumber("omega speed", omegaSpeed);
 
-    m_drivetrain.drive(new Translation2d(xSpeed, ySpeed), omegaSpeed, false, false);
+    m_drivetrain.drive(new Translation2d(xSpeed, ySpeed), omegaSpeed, true, false);
   }
 }
