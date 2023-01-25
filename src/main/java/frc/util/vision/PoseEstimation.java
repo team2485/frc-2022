@@ -1,23 +1,24 @@
 package frc.util.vision;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonTrackedTarget;
-import org.photonvision.targeting.PhotonPipelineResult;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -29,111 +30,93 @@ import frc.robot.subsystems.drive.Drivetrain;
 public class PoseEstimation extends SubsystemBase {
   private final PhotonCamera m_camera;
   private final Drivetrain m_drivetrain;
-
-  // private AprilTagFieldLayout aprilTagFieldLayout;
-
-  private static final List<Pose2d> targetPoses = Collections.unmodifiableList(List.of(
-      new Pose2d(Units.inchesToMeters(84), Units.inchesToMeters(39.4375), Rotation2d.fromDegrees(180)),
-      new Pose2d(Units.inchesToMeters(84), 0.0, Rotation2d.fromDegrees(180))));
+  private final AprilTagFieldLayout aprilTagFieldLayout;
 
   // Kalman Filter Configuration. These can be "tuned-to-taste" based on how much
   // you trust your various sensors. Smaller numbers will cause the filter to
   // "trust" the estimate from that particular component more than the others.
   // This in turn means the particualr component will have a stronger influence
   // on the final pose estimate.
+
+  /**
+   * Standard deviations of model states. Increase these numbers to trust your
+   * model's state estimates less. This
+   * matrix is in the form [x, y, theta]ᵀ, with units in meters and radians, then
+   * meters.
+   */
   private static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(5));
-  // private static final Matrix<N1, N1> localMeasurementStdDevs =
-  // VecBuilder.fill(Units.degreesToRadians(0.01));
+
+  /**
+   * Standard deviations of the vision measurements. Increase these numbers to
+   * trust global measurements from vision
+   * less. This matrix is in the form [x, y, theta]ᵀ, with units in meters and
+   * radians.
+   */
   private static final Matrix<N3, N1> visionMeasurementStdDevs = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(5));
+
   private final SwerveDrivePoseEstimator m_poseEstimator;
 
   private final Field2d field2d = new Field2d();
 
-  private PhotonPipelineResult previousPipelineResult = null;
+  private double previousPipelineTimestamp = 0;
 
   public PoseEstimation(PhotonCamera camera, Drivetrain drivetrain) {
     this.m_camera = camera;
     this.m_drivetrain = drivetrain;
+    AprilTagFieldLayout layout;
 
-    ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
+    try {
+      // TODO: update with 2023
+      layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2022RapidReact.m_resourceFile);
+      var alliance = DriverStation.getAlliance();
+      layout.setOrigin(alliance == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
+          : OriginPosition.kRedAllianceWallRightSide);
+    } catch (IOException e) {
+      DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
+      layout = null;
+    }
+
+    this.aprilTagFieldLayout = layout;
+
+    ShuffleboardTab tab = Shuffleboard.getTab("Vision");
 
     m_poseEstimator = new SwerveDrivePoseEstimator(Swerve.swerveKinematics, m_drivetrain.getYaw(),
         m_drivetrain.getModulePositions(), new Pose2d(), stateStdDevs, visionMeasurementStdDevs);
 
-    // List<AprilTag> aprilTags = new ArrayList<>();
-
-    // instantiate april tag field positions
-    // aprilTags.add(new AprilTag(0, new
-    // Pose3d(VisionConstants.kRedSideAbsoluteXPos, -2.93659,
-    // VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    // aprilTags.add(new AprilTag(2, new
-    // Pose3d(VisionConstants.kRedSideAbsoluteXPos, -1.26019,
-    // VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    // aprilTags.add(new AprilTag(3, new
-    // Pose3d(VisionConstants.kRedSideAbsoluteXPos, .41621,
-    // VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    // aprilTags.add(new AprilTag(4, new
-    // Pose3d(VisionConstants.kRedDriverAbsoluteXPos, 2.74161,
-    // VisionConstants.kDriverAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    // aprilTags.add(new AprilTag(5, new
-    // Pose3d(VisionConstants.kBlueDriverAbsoluteXPos, 2.74161,
-    // VisionConstants.kDriverAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    // aprilTags.add(new AprilTag(6, new
-    // Pose3d(VisionConstants.kBlueSideAbsoluteXPos, .41621,
-    // VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    // aprilTags.add(new AprilTag(7, new
-    // Pose3d(VisionConstants.kBlueSideAbsoluteXPos, -1.25019,
-    // VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-    // aprilTags.add(new AprilTag(8, new
-    // Pose3d(VisionConstants.kBlueSideAbsoluteXPos, -2.93659,
-    // VisionConstants.kScoringAbsoluteZPos, new Rotation3d(0, 0, 180))));
-
-    // aprilTagFieldLayout = new AprilTagFieldLayout(aprilTags,
-    // Units.inchesToMeters(319), Units.inchesToMeters(649));
-
-    tab.addString("Pose (X, Y)", this::getFormattedPose).withPosition(0, 4);
-    tab.addNumber("Pose Degrees", () -> getCurrentPose().getRotation().getDegrees()).withPosition(1, 4);
-    tab.add(field2d);
+    tab.addString("Pose", this::getFormattedPose).withPosition(0, 0).withSize(2, 0);
+    tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
   }
 
   @Override
   public void periodic() {
     // update pose estimator with visible targets
     var result = m_camera.getLatestResult();
-    if (!result.equals(previousPipelineResult) && result.hasTargets()) {
-      previousPipelineResult = result;
-      double imageCaptureTime = Timer.getFPGATimestamp() - (result.getLatencyMillis() / 1000d);
+    var resultTimestamp = result.getTimestampSeconds();
+    if (resultTimestamp != previousPipelineTimestamp && result.hasTargets()) {
+      previousPipelineTimestamp = resultTimestamp;
+      var target = result.getBestTarget();
+      var fiducialId = target.getFiducialId();
 
-      for (PhotonTrackedTarget target : result.getTargets()) {
-        var fiducialID = target.getFiducialId();
-        if (fiducialID >= 0 && fiducialID < targetPoses.size()) {
-          var targetPose = targetPoses.get(fiducialID);
+      // get tab pose from field layout
+      Optional<Pose3d> tagPose = aprilTagFieldLayout == null ? Optional.empty()
+          : aprilTagFieldLayout.getTagPose(fiducialId);
+      if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && tagPose.isPresent()) {
+        var targetPose = tagPose.get();
+        Transform3d camToTarget = target.getBestCameraToTarget();
+        Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
-          Transform3d cameraToTarget = target.getBestCameraToTarget();
-          var transform = new Transform2d(
-              cameraToTarget.getTranslation().toTranslation2d(),
-              cameraToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
-
-          // TODO: possible failure point
-          Pose2d camPose = targetPose.transformBy(transform.inverse());
-
-          var visionMeasurement = camPose.transformBy(
-              new Transform2d(VisionConstants.kCameraToRobot.getTranslation().toTranslation2d(), new Rotation2d()));
-
-          m_poseEstimator.addVisionMeasurement(visionMeasurement, imageCaptureTime);
-        }
+        var visionMeasurement = camPose.transformBy(VisionConstants.kCameraToRobot);
+        m_poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
       }
     }
 
-    // update pose estimator with drivetrain sensors
-    m_poseEstimator.updateWithTime(Timer.getFPGATimestamp(), m_drivetrain.getYaw(), m_drivetrain.getModulePositions());
-
+    m_poseEstimator.update(m_drivetrain.getYaw(), m_drivetrain.getModulePositions());
     field2d.setRobotPose(getCurrentPose());
   }
 
   private String getFormattedPose() {
     var pose = getCurrentPose();
-    return String.format("(%.2f, %.2f)", Units.metersToInches(pose.getX()), Units.metersToInches(pose.getY()));
+    return String.format("(%.2f, %.2f) %.2f degrees", pose.getX(), pose.getY(), pose.getRotation().getDegrees());
   }
 
   public Pose2d getCurrentPose() {
@@ -148,7 +131,6 @@ public class PoseEstimation extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    m_drivetrain.zeroGyro();
     m_poseEstimator.resetPosition(m_drivetrain.getYaw(), m_drivetrain.getModulePositions(), newPose);
   }
 
@@ -158,8 +140,6 @@ public class PoseEstimation extends SubsystemBase {
    * what "forward" is for field oriented driving.
    */
   public void resetFieldPosition() {
-    m_drivetrain.zeroGyro();
-    m_poseEstimator.resetPosition(
-        m_drivetrain.getYaw(), m_drivetrain.getModulePositions(), new Pose2d());
+    setCurrentPose(new Pose2d());
   }
 }
