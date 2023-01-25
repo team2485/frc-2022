@@ -11,10 +11,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
@@ -305,6 +307,14 @@ public final class Constants {
     // TODO: ensure validity of measurements
     public static final Transform3d kCameraToRobot = new Transform3d(new Translation3d(-0.42, 0, -0.97),
         new Rotation3d());
+
+    public static final TrapezoidProfile.Constraints kXConstraints = new TrapezoidProfile.Constraints(2, 2);
+    public static final TrapezoidProfile.Constraints kYConstraints = new TrapezoidProfile.Constraints(2, 2);
+    public static final TrapezoidProfile.Constraints kOmegaConstraints = new TrapezoidProfile.Constraints(8, 8);
+
+    public static final int kTagOfInterest = 0;
+    public static final Transform2d kTagToGoal = new Transform2d(new Translation2d(1, 0),
+        Rotation2d.fromDegrees(180.0));
 
     // Vision pose estimation constants
     public static final double kVisionWeightPerSec = 0.85; // After one second, what % of pose average should be vision
