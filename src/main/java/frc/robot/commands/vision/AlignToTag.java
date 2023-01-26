@@ -70,6 +70,7 @@ public class AlignToTag extends CommandBase {
           lastTarget = target;
 
           var camToTarget = target.getBestCameraToTarget();
+          // TODO: check 90 degree offset
           var transform = new Transform2d(camToTarget.getTranslation().toTranslation2d(),
               camToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
 
@@ -93,19 +94,16 @@ public class AlignToTag extends CommandBase {
     if (m_XController.atGoal()) {
       xSpeed = 0;
     }
-    SmartDashboard.putNumber("x speed", xSpeed);
 
     var ySpeed = m_YController.calculate(robotPose.getY());
     if (m_YController.atGoal()) {
       ySpeed = 0;
     }
-    SmartDashboard.putNumber("y speed", ySpeed);
 
     var omegaSpeed = m_OmegaController.calculate(robotPose.getRotation().getRadians());
     if (m_OmegaController.atGoal()) {
       omegaSpeed = 0;
     }
-    SmartDashboard.putNumber("omega speed", omegaSpeed);
 
     m_drivetrain.drive(new Translation2d(xSpeed, ySpeed), omegaSpeed, true, false);
   }
