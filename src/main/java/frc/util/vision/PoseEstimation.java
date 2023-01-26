@@ -67,7 +67,7 @@ public class PoseEstimation extends SubsystemBase {
 
     try {
       // TODO: update with 2023
-      layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2022RapidReact.m_resourceFile);
+      layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
       var alliance = DriverStation.getAlliance();
       layout.setOrigin(alliance == Alliance.Blue ? OriginPosition.kBlueAllianceWallRightSide
           : OriginPosition.kRedAllianceWallRightSide);
