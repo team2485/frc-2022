@@ -23,8 +23,8 @@ public class AlignToTag extends CommandBase {
   private final Drivetrain m_drivetrain;
   private final Supplier<Pose2d> m_poseProvider;
 
-  private final ProfiledPIDController m_XController = new ProfiledPIDController(1, 0, 0, VisionConstants.kXConstraints);
-  private final ProfiledPIDController m_YController = new ProfiledPIDController(1, 0, 0, VisionConstants.kYConstraints);
+  private final ProfiledPIDController m_XController = new ProfiledPIDController(.55, 0, 0, VisionConstants.kXConstraints);
+  private final ProfiledPIDController m_YController = new ProfiledPIDController(.55, 0, 0, VisionConstants.kYConstraints);
   private final ProfiledPIDController m_OmegaController = new ProfiledPIDController(.5, 0, 0,
       VisionConstants.kOmegaConstraints);
 
@@ -72,7 +72,9 @@ public class AlignToTag extends CommandBase {
           var camToTarget = target.getBestCameraToTarget();
           // TODO: check 90 degree offset
           var transform = new Transform2d(camToTarget.getTranslation().toTranslation2d(),
-              camToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
+              camToTarget.getRotation().toRotation2d());
+          // var transform = new Transform2d(camToTarget.getTranslation().toTranslation2d(),
+          //     camToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
 
           var cameraPose = robotPose.transformBy(
               new Transform2d(VisionConstants.kCameraToRobot.getTranslation().toTranslation2d(), new Rotation2d())
@@ -94,17 +96,20 @@ public class AlignToTag extends CommandBase {
     if (m_XController.atGoal()) {
       xSpeed = 0;
     }
+    SmartDashboard.putNumber("xSpeed", xSpeed);
 
     var ySpeed = m_YController.calculate(robotPose.getY());
     if (m_YController.atGoal()) {
       ySpeed = 0;
     }
+    SmartDashboard.putNumber("ySpeed", ySpeed);
 
     var omegaSpeed = m_OmegaController.calculate(robotPose.getRotation().getRadians());
     if (m_OmegaController.atGoal()) {
       omegaSpeed = 0;
     }
+    SmartDashboard.putNumber("omegaSpeed", omegaSpeed);
 
-    m_drivetrain.drive(new Translation2d(xSpeed, ySpeed), omegaSpeed, true, false);
+    m_drivetrain.drive(new Translation2d(-xSpeed, -ySpeed), omegaSpeed, true, true);
   }
 }
