@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,8 +24,10 @@ public class AlignToTag extends CommandBase {
   private final Drivetrain m_drivetrain;
   private final Supplier<Pose2d> m_poseProvider;
 
-  private final ProfiledPIDController m_XController = new ProfiledPIDController(.55, 0, 0, VisionConstants.kXConstraints);
-  private final ProfiledPIDController m_YController = new ProfiledPIDController(.55, 0, 0, VisionConstants.kYConstraints);
+  private final ProfiledPIDController m_XController = new ProfiledPIDController(.55, 0, 0,
+      VisionConstants.kXConstraints);
+  private final ProfiledPIDController m_YController = new ProfiledPIDController(.55, 0, 0,
+      VisionConstants.kYConstraints);
   private final ProfiledPIDController m_OmegaController = new ProfiledPIDController(.5, 0, 0,
       VisionConstants.kOmegaConstraints);
 
@@ -73,8 +76,9 @@ public class AlignToTag extends CommandBase {
           // TODO: check 90 degree offset
           var transform = new Transform2d(camToTarget.getTranslation().toTranslation2d(),
               camToTarget.getRotation().toRotation2d());
-          // var transform = new Transform2d(camToTarget.getTranslation().toTranslation2d(),
-          //     camToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
+          // var transform = new
+          // Transform2d(camToTarget.getTranslation().toTranslation2d(),
+          // camToTarget.getRotation().toRotation2d().minus(Rotation2d.fromDegrees(90)));
 
           var cameraPose = robotPose.transformBy(
               new Transform2d(VisionConstants.kCameraToRobot.getTranslation().toTranslation2d(), new Rotation2d())
@@ -110,6 +114,9 @@ public class AlignToTag extends CommandBase {
     }
     SmartDashboard.putNumber("omegaSpeed", omegaSpeed);
 
+    xSpeed = MathUtil.applyDeadband(xSpeed, 0.2);
+    ySpeed = MathUtil.applyDeadband(ySpeed, 0.2);
+    omegaSpeed = MathUtil.applyDeadband(omegaSpeed, 0.2);
     m_drivetrain.drive(new Translation2d(-xSpeed, -ySpeed), omegaSpeed, true, true);
   }
 }
