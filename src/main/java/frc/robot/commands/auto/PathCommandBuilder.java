@@ -29,6 +29,9 @@ public class PathCommandBuilder {
     // create controller for robot angle
 
     // create command to follow path
+    var thetaController = new SR_ProfiledPIDController(kPAutoThetaController, 0, 0, kThetaControllerConstraints);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
     WL_SwerveControllerCommand pathCommand =
         new WL_SwerveControllerCommand(
             path,
@@ -36,9 +39,9 @@ public class PathCommandBuilder {
             swerveKinematics,
             new SR_PIDController(kPAutoXController, kIAutoXController, kDAutoXController),
             new SR_PIDController(kPAutoYController, kIAutoYController, kDAutoYController),
-            new SR_ProfiledPIDController(kPAutoThetaController, kIAutoThetaController, kDAutoThetaController, kThetaControllerConstraints),
+            thetaController,
             drivetrain::setModuleStates,
-            drivetrain);
+            drivetrain);  
 
     return pathCommand;
   }

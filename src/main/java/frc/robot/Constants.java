@@ -208,14 +208,14 @@ public final class Constants {
         public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
         public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
     
-        public static final double kPAutoXController = 5;
-        public static final double kIAutoXController = 0.05;
-        public static final double kDAutoXController = 0.2;
-        public static final double kPAutoYController = 5;
-        public static final double kIAutoYController = 0.05;
-        public static final double kDAutoYController = 0.2;
+        public static final double kPAutoXController = 4;
+        public static final double kIAutoXController = 0.25;
+        public static final double kDAutoXController = 0;
+        public static final double kPAutoYController = 4;
+        public static final double kIAutoYController = 0.25;
+        public static final double kDAutoYController = 0;
 
-        public static final double kPAutoThetaController = 10;
+        public static final double kPAutoThetaController = -7.5;
         public static final double kIAutoThetaController = 0.1;
         public static final double kDAutoThetaController = 0.1;
     
@@ -488,8 +488,8 @@ public final class Constants {
         new SR_TrapezoidProfile.Constraints(
             kHoodMaxSpeedRadiansPerSecond, kHoodMaxAccelerationRadiansPerSecondSquared);
     // Hood PID constants
-    public static final double kPHood = 50;
-    public static final double kIHood = 3;
+    public static final double kPHood = 40;
+    public static final double kIHood = 5;
     public static final double kDHood = 0;
     public static final double kHoodControllerPositionTolerance = 0.005;
   }

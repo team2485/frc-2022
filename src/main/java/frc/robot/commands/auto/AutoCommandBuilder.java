@@ -17,6 +17,14 @@ import frc.robot.subsystems.drive.Drivetrain;
 
 public class AutoCommandBuilder {
 
+
+    public static Command testAuto(Drivetrain drivetrain) {
+
+        WL_SwerveControllerCommand path = getPathCommand(drivetrain, "Test");
+    
+        return new InstantCommand(drivetrain::zeroGyro).andThen(getResetOdometryCommand(drivetrain, path), path);
+        }
+
   public static Command get5BallAuto(
       Drivetrain drivetrain,
       Intake intake,

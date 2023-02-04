@@ -110,16 +110,10 @@ public class RobotContainer {
     m_climbElevator.setPositionMeters(0);
 
     m_autoChooser.setDefaultOption(
-        "4 Ball Right Side",
-        AutoCommandBuilder.get4BallAuto(
-            m_drivetrain,
-            m_intake,
-            m_intakeArm,
-            m_indexer,
-            m_feeder,
-            m_feedServo,
-            m_shooter,
-            m_hood));
+        "Test",
+        AutoCommandBuilder.testAuto(
+            m_drivetrain));
+
     m_autoChooser.addOption(
         "3 Ball Left Side",
         AutoCommandBuilder.get3BallAutoLeft(
@@ -234,14 +228,18 @@ public class RobotContainer {
     // m_operator
     //     .getJoystickAxisButton(Axis.kRightTrigger, kTriggerThreshold)
     //     .whileActiveOnce(new InstantCommand(() -> m_hood.setAngleRadians(hoodAngle)));
-    m_operator.leftBumper().onTrue(new InstantCommand(() -> m_hood.setAngleRadians(0)));
+    // m_operator.leftBumper().onTrue(new InstantCommand(() -> m_hood.setAngleRadians(0)));
 
     // m_operator.leftPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed--));
     // m_operator.rightPOV().whileActiveOnce(new InstantCommand(() -> flywheelSpeed++));
 
-    m_operator.y().onTrue(CargoHandlingCommandBuilder.setShooterForShot(m_hood, m_shooter));
+    // m_operator.y().onTrue(CargoHandlingCommandBuilder.setShooterForShot(m_hood, m_shooter));
 
-    //  m_operator.y().whenActive(new InstantCommand(()->m_hood.setAngleRadians(0.16)));
+     m_operator.y().onTrue(new InstantCommand(()->m_hood.setAngleRadians(0.25)));
+     m_operator.b().onTrue(new InstantCommand(()->m_hood.setAngleRadians(0.16)));
+
+    m_operator.a().onTrue(new InstantCommand(()->m_hood.setAngleRadians(0)));
+
 
     m_operator
         .rightTrigger()
@@ -264,8 +262,10 @@ public class RobotContainer {
     m_operator
         .leftTrigger()
         // .and(m_climbStateMachine.getClimbStateTrigger((ClimbState.kNotClimbing)))
-        .onTrue(
-            CargoHandlingCommandBuilder.getSetShooterCommand(m_shooter));
+        .whileTrue(new InstantCommand(()->m_shooter.setVelocities()))
+        .onFalse(new InstantCommand(()->m_shooter.zeroShooter())
+        );
+        
 
     m_operator
         .rightBumper()
